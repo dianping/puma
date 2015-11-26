@@ -120,7 +120,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 loadServerId(instanceManager.getUrlByCluster(instanceTask.getInstance()));
 
                 // 读position/file文件
-                BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(getContext().getPumaServerName());
+                BinlogInfo binlogInfo = instanceStorageManager.getBinlogInfo(getContext().getPumaServerName());
 
                 if (binlogInfo == null) {
                     this.currentSrcDbEntity = initSrcDbByServerId(-1);
@@ -510,7 +510,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 .getData()).isTransactionCommit()))) {
 
 
-            binlogInfoHolder.setBinlogInfo(getTaskName(), binlogInfo);
+            instanceStorageManager.setBinlogInfo(getTaskName(), binlogInfo);
         }
     }
 
@@ -853,7 +853,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
     public void initContext() {
         PumaContext context = new PumaContext();
 
-        BinlogInfo binlogInfo = binlogInfoHolder.getBinlogInfo(this.getTaskName());
+        BinlogInfo binlogInfo = instanceStorageManager.getBinlogInfo(this.getTaskName());
 
         if (binlogInfo == null) {
             context.setBinlogStartPos(this.getBinlogInfo().getBinlogPosition());

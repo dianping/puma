@@ -1,8 +1,6 @@
 package com.dianping.puma.server.builder;
 
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-import com.dianping.puma.core.codec.RawEventCodec;
-import com.dianping.puma.core.config.ConfigManager;
 import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.*;
 import com.dianping.puma.core.util.IPUtils;
@@ -16,7 +14,7 @@ import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
-import com.dianping.puma.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.storage.manage.InstanceStorageManager;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
 import com.dianping.puma.taskexecutor.task.DatabaseTask;
@@ -35,15 +33,10 @@ public class DefaultTaskBuilder implements TaskBuilder {
     private final Logger logger = LoggerFactory.getLogger(DefaultTaskBuilder.class);
 
     @Autowired
-    private BinlogInfoHolder binlogInfoHolder;
+    private InstanceStorageManager instanceStorageManager;
 
     @Autowired
     private InstanceManager instanceManager;
-
-    @Autowired
-    private ConfigManager configManager;
-
-    private RawEventCodec rawCodec = new RawEventCodec();
 
     public TaskExecutor build(InstanceTask instanceTask) {
         logger.info("start building puma task executor...\n{}", instanceTask);
@@ -74,7 +67,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
         taskState.setStatus(Status.PREPARING);
         taskExecutor.setTaskState(taskState);
 
-        taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
+        taskExecutor.setInstanceStorageManager(instanceStorageManager);
         taskExecutor.setBinlogStat(new BinlogStat());
 
         // Parser.
@@ -118,13 +111,11 @@ public class DefaultTaskBuilder implements TaskBuilder {
         transactionEventFilter.setName(taskName);
         transactionEventFilter.setBegin(true);
         transactionEventFilter.setCommit(true);
-        if (tableSet != null) {
-            SchemaSet schemaSet = new SchemaSet();
-            for (Table table : tableSet.listSchemaTables()) {
-                schemaSet.add(new Schema(table.getSchemaName()));
-            }
-            transactionEventFilter.setAcceptedSchemas(schemaSet);
+        SchemaSet schemaSet = new SchemaSet();
+        for (Table table : tableSet.listSchemaTables()) {
+            schemaSet.add(new Schema(table.getSchemaName()));
         }
+        transactionEventFilter.setAcceptedSchemas(schemaSet);
         eventFilterList.add(transactionEventFilter);
 
         eventFilterChain.setEventFilters(eventFilterList);

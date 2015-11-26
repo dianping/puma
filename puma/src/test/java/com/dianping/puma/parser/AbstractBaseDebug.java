@@ -22,7 +22,7 @@ import com.dianping.puma.sender.dispatcher.SimpleDispatcherImpl;
 import com.dianping.puma.storage.channel.ChannelFactory;
 import com.dianping.puma.storage.channel.ReadChannel;
 import com.dianping.puma.storage.filesystem.FileSystem;
-import com.dianping.puma.storage.holder.impl.DefaultBinlogInfoHolder;
+import com.dianping.puma.storage.manage.LocalFileInstanceStorageManager;
 import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
 import com.dianping.puma.taskexecutor.task.DatabaseTask;
@@ -67,7 +67,7 @@ public abstract class AbstractBaseDebug {
 
     private static File baseDir = new File(System.getProperty("java.io.tmpdir", "."), "puma");
 
-    private static DefaultBinlogInfoHolder binlogInfoHolder;
+    private static LocalFileInstanceStorageManager localFileInstanceStorageManager;
 
     private final int WAIT_FOR_SYNC_TIME = 2000;
 
@@ -105,7 +105,7 @@ public abstract class AbstractBaseDebug {
         initProperties();
         initDataSource();
         initSchema();
-        initbinlogHolder();
+        initInstanceStorage();
     }
 
     @AfterClass
@@ -280,7 +280,7 @@ public abstract class AbstractBaseDebug {
         taskExecutor.setServerId(taskName.hashCode() + serverName.hashCode());
 
         // Bin log.
-        taskExecutor.setBinlogInfoHolder(binlogInfoHolder);
+        taskExecutor.setInstanceStorageManager(localFileInstanceStorageManager);
         taskExecutor.setBinlogInfo(getLastestBinlog());
         taskExecutor.setBinlogStat(new BinlogStat());
         // data source
@@ -377,9 +377,9 @@ public abstract class AbstractBaseDebug {
         TABLE_NAME = tableName;
     }
 
-    private static void initbinlogHolder() {
-        binlogInfoHolder = new DefaultBinlogInfoHolder();
-        binlogInfoHolder.init();
+    private static void initInstanceStorage() {
+        localFileInstanceStorageManager = new LocalFileInstanceStorageManager();
+        localFileInstanceStorageManager.init();
     }
 
     protected BinlogInfo getLastestBinlog() {

@@ -12,70 +12,69 @@
  */
 package com.dianping.puma.taskexecutor;
 
-import java.util.List;
-
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.LifeCycle;
-import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.core.model.TableSet;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.sender.Sender;
-import com.dianping.puma.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.storage.manage.InstanceStorageManager;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
+
+import java.util.List;
 
 /**
  * @author Leo Liang
- *
  */
 public interface TaskExecutor extends LifeCycle<Exception> {
 
-	boolean isStop();
+    boolean isStop();
 
-	public boolean isMerging();
+    boolean isMerging();
 
-	public void stopUntil(long timestamp);
+    void stopUntil(long timestamp);
 
-	public void cancelStopUntil();
+    void cancelStopUntil();
 
-	public void setContext(PumaContext context);
+    void setContext(PumaContext context);
 
-	public void initContext();
+    void initContext();
 
-	public PumaContext getContext();
+    PumaContext getContext();
 
-	public String getTaskId();
+    String getTaskId();
 
-	public void setTaskId(String taskId);
+    void setTaskId(String taskId);
 
-	public String getTaskName();
+    String getTaskName();
 
-	public void setTaskName(String taskName);
+    void setTaskName(String taskName);
 
-	public String getDefaultBinlogFileName();
+    String getDefaultBinlogFileName();
 
-	public void setDefaultBinlogFileName(String binlogFileName);
+    void setDefaultBinlogFileName(String binlogFileName);
 
-	public Long getDefaultBinlogPosition();
+    Long getDefaultBinlogPosition();
 
-	public void setDefaultBinlogPosition(Long binlogFileName);
+    void setDefaultBinlogPosition(Long binlogFileName);
 
-	public void setBinlogInfoHolder(BinlogInfoHolder holder);
+    void setInstanceStorageManager(InstanceStorageManager holder);
 
-	public List<Sender> getFileSender();
+    List<Sender> getFileSender();
 
-	public DataHandler getDataHandler();
+    DataHandler getDataHandler();
 
-	public void resume() throws Exception;
+    void resume() throws Exception;
 
-	public void pause() throws Exception;
+    void pause() throws Exception;
 
-	public PumaTaskStateEntity getTaskState();
+    PumaTaskStateEntity getTaskState();
 
-	public void setTaskState(PumaTaskStateEntity taskState);
+    void setTaskState(PumaTaskStateEntity taskState);
 
-	public void setInstanceTask(InstanceTask instanceTask);
+    void setInstanceTask(InstanceTask instanceTask);
 
-	public InstanceTask getInstanceTask();
+    InstanceTask getInstanceTask();
 
-	TableSet getTableSet();
+    TableSet getTableSet();
 }

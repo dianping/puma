@@ -3,7 +3,7 @@ package com.dianping.puma.server.container;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.status.SystemStatus;
 import com.dianping.puma.status.SystemStatusManager;
-import com.dianping.puma.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.storage.manage.InstanceStorageManager;
 import com.dianping.puma.taskexecutor.TaskExecutor;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
 import org.slf4j.Logger;
@@ -23,7 +23,7 @@ public class ScheduledTaskMerger implements TaskMerger {
     TaskContainer taskContainer;
 
     @Autowired
-    BinlogInfoHolder binlogInfoHolder;
+    InstanceStorageManager instanceStorageManager;
 
     @Override
     public void merge() {

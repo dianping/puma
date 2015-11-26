@@ -27,7 +27,7 @@ import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.sender.dispatcher.Dispatcher;
-import com.dianping.puma.storage.holder.BinlogInfoHolder;
+import com.dianping.puma.storage.manage.InstanceStorageManager;
 
 /**
  *
@@ -59,7 +59,7 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 
 	private volatile boolean stop = true;
 
-	protected BinlogInfoHolder binlogInfoHolder;
+	protected InstanceStorageManager instanceStorageManager;
 
 	protected PumaTaskStateEntity state;
 
@@ -86,11 +86,11 @@ public abstract class AbstractTaskExecutor implements TaskExecutor {
 	}
 
 	/**
-	 * @param binlogInfoHolder
+	 * @param instanceStorageManager
 	 *           the binlogPositionHolder to set
 	 */
-	public void setBinlogInfoHolder(BinlogInfoHolder binlogInfoHolder) {
-		this.binlogInfoHolder = binlogInfoHolder;
+	public void setInstanceStorageManager(InstanceStorageManager instanceStorageManager) {
+		this.instanceStorageManager = instanceStorageManager;
 	}
 
 	public void setContext(PumaContext context) {

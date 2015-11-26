@@ -6,8 +6,8 @@ import com.dianping.puma.core.registry.RegistryService;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.server.server.TaskServerManager;
-import com.dianping.puma.storage.holder.BinlogInfoHolder;
 import com.dianping.puma.storage.manage.DatabaseStorageManager;
+import com.dianping.puma.storage.manage.InstanceStorageManager;
 import com.dianping.puma.taskexecutor.TaskExecutor;
 import com.dianping.puma.taskexecutor.task.DatabaseTask;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
@@ -33,7 +33,7 @@ public class DefaultTaskContainer implements TaskContainer {
     InstanceManager instanceManager;
 
     @Autowired
-    BinlogInfoHolder binlogInfoHolder;
+    InstanceStorageManager instanceStorageManager;
 
     @Autowired
     DatabaseStorageManager databaseStorageManager;
@@ -271,7 +271,7 @@ public class DefaultTaskContainer implements TaskContainer {
 
         instanceTask.temp2Main();
         String taskName = instanceTask.getTaskName();
-        binlogInfoHolder.rename(oriTaskName, taskName);
+        instanceStorageManager.rename(oriTaskName, taskName);
 
         TaskExecutor newTaskExecutor = taskBuilder.build(instanceTask);
         start(newTaskExecutor);
@@ -340,7 +340,7 @@ public class DefaultTaskContainer implements TaskContainer {
     }
 
     protected void clearTask(String taskName) {
-        binlogInfoHolder.remove(taskName);
+        instanceStorageManager.remove(taskName);
     }
 
     protected int count(String instance) {

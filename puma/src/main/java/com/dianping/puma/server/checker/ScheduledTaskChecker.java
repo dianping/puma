@@ -50,7 +50,7 @@ public class ScheduledTaskChecker implements TaskChecker {
                 = pumaServerTargetService.findByServerHost(taskServerManager.findSelfHost());
 
         Map<String, DatabaseTask> databaseTasks = new HashMap<String, DatabaseTask>();
-        for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
+        for (PumaServerTargetEntity pumaServerTarget : pumaServerTargets) {
             String database = pumaServerTarget.getTargetDb();
             List<String> tables = pumaServerTarget.getTables();
             Date beginTime = pumaServerTarget.getBeginTime();
@@ -65,7 +65,7 @@ public class ScheduledTaskChecker implements TaskChecker {
         Map<String, InstanceTask> instanceTasks = new HashMap<String, InstanceTask>();
 
         Map<String, DatabaseTask> databaseTasks = loadDatabaseTasks();
-        for (Map.Entry<String, DatabaseTask> entry: databaseTasks.entrySet()) {
+        for (Map.Entry<String, DatabaseTask> entry : databaseTasks.entrySet()) {
             String database = entry.getKey();
             DatabaseTask databaseTask = entry.getValue();
 
@@ -76,14 +76,14 @@ public class ScheduledTaskChecker implements TaskChecker {
             }
 
             String slaveTaskName = genSlaveTaskName(instance, database);
-            if (instanceStorageManager.exist(slaveTaskName)) {
+            if (instanceStorageManager.getBinlogInfo(slaveTaskName) != null) {
                 InstanceTask instanceTask = new InstanceTask(false, instance, databaseTask);
                 instanceTasks.put(slaveTaskName, instanceTask);
                 continue;
             }
 
             String masterTaskName = genMasterTaskName(instance, database);
-            if (instanceStorageManager.exist(masterTaskName)) {
+            if (instanceStorageManager.getBinlogInfo(masterTaskName) != null) {
                 InstanceTask instanceTask = instanceTasks.get(masterTaskName);
                 if (instanceTask == null) {
                     instanceTask = new InstanceTask(true, instance, databaseTask);
@@ -99,13 +99,13 @@ public class ScheduledTaskChecker implements TaskChecker {
     }
 
     protected void handleInstanceTask(Map<String, InstanceTask> instanceTasks) {
-        for (InstanceTask instanceTask: instanceTasks.values()) {
+        for (InstanceTask instanceTask : instanceTasks.values()) {
             taskContainer.create(instanceTask);
         }
     }
 
     protected void handleCreatedDatabaseTask(Map<String, DatabaseTask> createdDatabaseTasks) {
-        for (Map.Entry<String, DatabaseTask> entry: createdDatabaseTasks.entrySet()) {
+        for (Map.Entry<String, DatabaseTask> entry : createdDatabaseTasks.entrySet()) {
             DatabaseTask databaseTask = entry.getValue();
             addSource(databaseTask.getDatabase());
             try {
@@ -117,7 +117,7 @@ public class ScheduledTaskChecker implements TaskChecker {
     }
 
     protected void handleRemovedDatabaseTask(Map<String, DatabaseTask> removedDatabaseTasks) {
-        for (Map.Entry<String, DatabaseTask> entry: removedDatabaseTasks.entrySet()) {
+        for (Map.Entry<String, DatabaseTask> entry : removedDatabaseTasks.entrySet()) {
             String database = entry.getKey();
             removeSource(database);
             try {
@@ -129,7 +129,7 @@ public class ScheduledTaskChecker implements TaskChecker {
     }
 
     protected void handleUpdatedDatabaseTask(Map<String, DatabaseTask> updatedDatabaseTasks) {
-        for (Map.Entry<String, DatabaseTask> entry: updatedDatabaseTasks.entrySet()) {
+        for (Map.Entry<String, DatabaseTask> entry : updatedDatabaseTasks.entrySet()) {
             DatabaseTask databaseTask = entry.getValue();
             try {
                 taskContainer.update(databaseTask);
@@ -140,7 +140,7 @@ public class ScheduledTaskChecker implements TaskChecker {
     }
 
     protected void handleCommonDatabaseTask(Map<String, DatabaseTask> commonDatabaseTasks) {
-        for (Map.Entry<String, DatabaseTask> entry: commonDatabaseTasks.entrySet()) {
+        for (Map.Entry<String, DatabaseTask> entry : commonDatabaseTasks.entrySet()) {
             String database = entry.getKey();
             if (checkSource(database)) {
                 TaskExecutor taskExecutor = taskContainer.getExecutor(database);

@@ -1,8 +1,15 @@
 package com.dianping.puma.storage.manage;
 
+import com.dianping.puma.core.model.BinlogInfo;
+
 public interface InstanceStorageManager {
 
-	boolean exist(String filename);
+	BinlogInfo getBinlogInfo(String taskName);
 
-	void delete(String instance);
+	void setBinlogInfo(String taskName, BinlogInfo binlogInfo);
+
+	void rename(String oriTaskName, String taskName);
+
+	void remove(String taskName);
+
 }

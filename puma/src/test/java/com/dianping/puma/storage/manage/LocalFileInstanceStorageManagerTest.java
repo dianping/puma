@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.holder.impl;
+package com.dianping.puma.storage.manage;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.filesystem.FileSystem;
@@ -15,10 +15,10 @@ import java.io.File;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class DefaultBinlogInfoHolderTest {
+public class LocalFileInstanceStorageManagerTest {
     private static File baseDir = new File(System.getProperty("java.io.tmpdir", "."), "puma");
 
-    private DefaultBinlogInfoHolder binlogInfoHolder;
+    private LocalFileInstanceStorageManager localFileInstanceStorageManager;
 
     private BinlogInfo binlogInfo = new BinlogInfo()
             .setBinlogFile("xxx")
@@ -35,8 +35,8 @@ public class DefaultBinlogInfoHolderTest {
         baseDir.mkdirs();
 
         FileSystem.changeBasePath(baseDir.getAbsolutePath());
-        binlogInfoHolder = new DefaultBinlogInfoHolder();
-        binlogInfoHolder.init();
+        localFileInstanceStorageManager = new LocalFileInstanceStorageManager();
+        localFileInstanceStorageManager.init();
     }
 
     @After
@@ -46,25 +46,25 @@ public class DefaultBinlogInfoHolderTest {
 
     @Test
     public void testSetAndGet() throws Exception {
-        binlogInfoHolder.setBinlogInfo("test", binlogInfo);
-        Assert.assertNull(binlogInfoHolder.getBinlogInfo("not_exist"));
-        Assert.assertEquals(binlogInfoHolder.getBinlogInfo("test"), binlogInfo);
+        localFileInstanceStorageManager.setBinlogInfo("test", binlogInfo);
+        Assert.assertNull(localFileInstanceStorageManager.getBinlogInfo("not_exist"));
+        Assert.assertEquals(localFileInstanceStorageManager.getBinlogInfo("test"), binlogInfo);
     }
 
     @Test
     public void testRemove() throws Exception {
-        binlogInfoHolder.setBinlogInfo("test1", binlogInfo);
-        binlogInfoHolder.remove("test1");
+        localFileInstanceStorageManager.setBinlogInfo("test1", binlogInfo);
+        localFileInstanceStorageManager.remove("test1");
 
-        Assert.assertNull(binlogInfoHolder.getBinlogInfo("test1"));
+        Assert.assertNull(localFileInstanceStorageManager.getBinlogInfo("test1"));
     }
 
     @Test
     public void testRename() throws Exception {
-        binlogInfoHolder.setBinlogInfo("test1", binlogInfo);
-        binlogInfoHolder.rename("test1", "test2");
+        localFileInstanceStorageManager.setBinlogInfo("test1", binlogInfo);
+        localFileInstanceStorageManager.rename("test1", "test2");
 
-        Assert.assertNull(binlogInfoHolder.getBinlogInfo("test1"));
-        Assert.assertEquals(binlogInfoHolder.getBinlogInfo("test2"), binlogInfo);
+        Assert.assertNull(localFileInstanceStorageManager.getBinlogInfo("test1"));
+        Assert.assertEquals(localFileInstanceStorageManager.getBinlogInfo("test2"), binlogInfo);
     }
 }

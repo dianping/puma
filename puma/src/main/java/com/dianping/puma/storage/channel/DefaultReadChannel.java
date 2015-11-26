@@ -38,7 +38,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
     }
 
     @Override
-    protected void doStart() {
+    protected synchronized void doStart() {
         readIndexManager = new SeriesReadIndexManager(database);
         readIndexManager.start();
 
@@ -47,7 +47,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
     }
 
     @Override
-    protected void doStop() {
+    protected synchronized void doStop() {
         readIndexManager.stop();
         readDataManager.stop();
     }

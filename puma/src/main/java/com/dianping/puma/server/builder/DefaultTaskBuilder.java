@@ -134,10 +134,7 @@ public class DefaultTaskBuilder implements TaskBuilder {
         List<Sender> senders = new ArrayList<Sender>();
         FileDumpSender sender = new FileDumpSender();
         sender.setName("fileSender-" + taskName);
-        sender.setTaskName(taskName);
-        sender.setCodec(rawCodec);
         sender.setStorageEventFilterChain(eventFilterChain);
-        sender.setPreservedDay(5);
         senders.add(sender);
 
         // Dispatch.

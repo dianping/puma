@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChannel {
@@ -24,10 +23,6 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
     private GroupWriteDataManager writeDataManager;
 
-    private Long currServerId;
-
-    private Date currDate;
-
     private Thread thread;
 
     protected DefaultWriteChannel(String database) {
@@ -35,7 +30,7 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
     }
 
     @Override
-    protected void doStart() {
+    protected synchronized void doStart() {
         writeIndexManager = new SeriesWriteIndexManager(database);
         writeIndexManager.start();
 
@@ -49,7 +44,7 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
     }
 
     @Override
-    protected void doStop() {
+    protected synchronized void doStop() {
         if (writeIndexManager != null) {
             writeIndexManager.stop();
         }

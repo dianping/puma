@@ -352,10 +352,7 @@ public abstract class AbstractBaseDebug {
         List<Sender> senders = new ArrayList<Sender>();
         FileDumpSender sender = new FileDumpSender();
         sender.setName("fileSender-" + taskName);
-        sender.setTaskName(taskName);
-        sender.setCodec(codec);
         sender.setStorageEventFilterChain(eventFilterChain);
-        sender.setPreservedDay(2);
 
         senders.add(sender);
 

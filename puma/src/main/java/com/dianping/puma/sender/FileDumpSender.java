@@ -15,15 +15,6 @@
  */
 package com.dianping.puma.sender;
 
-import java.io.IOException;
-import java.util.Map;
-
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.storage.channel.ChannelFactory;
-import com.dianping.puma.storage.channel.ReadChannel;
-import com.dianping.puma.storage.channel.WriteChannel;
-import org.jboss.netty.util.internal.ConcurrentHashMap;
-
 import com.dianping.cat.Cat;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.core.codec.EventCodec;
@@ -31,145 +22,90 @@ import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.filter.EventFilterChain;
+import com.dianping.puma.storage.channel.ChannelFactory;
+import com.dianping.puma.storage.channel.WriteChannel;
+import org.jboss.netty.util.internal.ConcurrentHashMap;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
- *
  * @author Leo Liang
- *
  */
 public class FileDumpSender extends AbstractSender {
-	private Map<String, ReadChannel> readChannels = new ConcurrentHashMap<String, ReadChannel>();
+    private Map<String, WriteChannel> writeChannels = new ConcurrentHashMap<String, WriteChannel>();
 
-	private Map<String, WriteChannel> writeChannels = new ConcurrentHashMap<String, WriteChannel>();
+    private ChangedEvent transactionBegin;
 
-	private ChangedEvent transactionBegin;
+    private EventFilterChain storageEventFilterChain;
 
-	private EventFilterChain storageEventFilterChain;
+    @Override
+    public void start() throws Exception {
+        super.start();
+    }
 
-	private String taskName;
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+    }
 
-	private int preservedDay;
+    @Override
+    protected void doSend(ChangedEvent event, PumaContext context) throws SenderException {
+        // Storage filter.
+        storageEventFilterChain.reset();
+        if (!storageEventFilterChain.doNext(event)) {
+            return;
+        }
 
-	private EventCodec codec;
+        try {
+            String database = event.getDatabase();
 
-	@Override
-	public void start() throws Exception {
-		super.start();
-	}
+            if (database != null && database.length() > 0) {
+                WriteChannel writeChannel = this.writeChannels.get(database);
 
-	@Override
-	public void stop() throws Exception {
-		super.stop();
-	}
+                if (writeChannel == null) {
+                    writeChannel = buildEventStorage(database);
+                    this.writeChannels.put(database, writeChannel);
+                }
 
-	@Override
-	protected void doSend(ChangedEvent event, PumaContext context) throws SenderException {
-		// Storage filter.
-		storageEventFilterChain.reset();
-		if (!storageEventFilterChain.doNext(event)) {
-			return;
-		}
+                boolean isTransactionBegin = false;
 
-		try {
-			String database = event.getDatabase();
+                if (event instanceof RowChangedEvent) {
+                    isTransactionBegin = ((RowChangedEvent) event).isTransactionBegin();
+                }
 
-			if (database != null && database.length() > 0) {
-				WriteChannel writeChannel = this.writeChannels.get(database);
-
-				if (writeChannel == null) {
-					writeChannel = buildEventStorage(database);
-					this.writeChannels.put(database, writeChannel);
-				}
-
-				boolean isTransactionBegin = false;
-
-				if (event instanceof RowChangedEvent) {
-					isTransactionBegin = ((RowChangedEvent) event).isTransactionBegin();
-				}
-
-				if (transactionBegin != null && !isTransactionBegin) {
-					//readChannel.store(transactionBegin);
-					transactionBegin = null;
-				}
+                if (transactionBegin != null && !isTransactionBegin) {
+                    //readChannel.store(transactionBegin);
+                    transactionBegin = null;
+                }
 
 
+                writeChannel.append(event);
+            } else {
+                if (event instanceof RowChangedEvent) {
+                    if (((RowChangedEvent) event).isTransactionBegin()) {
+                        transactionBegin = event;
+                    } else {
+                        Cat.logEvent("Puma", "RowChangeEvent-Has-No-Database");
+                        LOG.error(String.format("RowChangeEvent[%s] has no database", event.toString()));
+                    }
+                } else {
+                    Cat.logEvent("Puma", "ChangeEvent-Has-No-Database");
+                    LOG.error(String.format("ChangeEvent[%s] has no database", event.toString()));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-				writeChannel.append(event);
-			} else {
-				if (event instanceof RowChangedEvent) {
-					if (((RowChangedEvent) event).isTransactionBegin()) {
-						transactionBegin = event;
-					} else {
-						Cat.logEvent("Puma", "RowChangeEvent-Has-No-Database");
-						LOG.error(String.format("RowChangeEvent[%s] has no database", event.toString()));
-					}
-				} else {
-					Cat.logEvent("Puma", "ChangeEvent-Has-No-Database");
-					LOG.error(String.format("ChangeEvent[%s] has no database", event.toString()));
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    private WriteChannel buildEventStorage(String database) {
+        WriteChannel writeChannel = ChannelFactory.newWriteChannel(database);
+        writeChannel.start();
+        return writeChannel;
+    }
 
-	private WriteChannel buildEventStorage(String database) {
-		WriteChannel writeChannel = ChannelFactory.newWriteChannel(database);
-		writeChannel.start();
-		return writeChannel;
-
-//		// Archive strategy.
-//		DefaultArchiveStrategy archiveStrategy = new DefaultArchiveStrategy();
-//		archiveStrategy.setServerName(taskName);
-//		archiveStrategy.setMaxMasterFileCount(GlobalStorageConfig.MAX_MASTER_FILE_COUNT);
-//
-//		// Clean up strategy.
-//		DefaultCleanupStrategy cleanupStrategy = new DefaultCleanupStrategy();
-//		cleanupStrategy.setPreservedDay(preservedDay);
-//
-//		DefaultEventStorage storage = new DefaultEventStorage();
-//		storage.setName("storage-" + database);
-//		storage.setTaskName(taskName);
-//		storage.setCodec(codec);
-//		storage.setArchiveStrategy(archiveStrategy);
-//		storage.setCleanupStrategy(cleanupStrategy);
-//		storage.setBinlogIndexBaseDir(GlobalStorageConfig.BINLOG_INDEX_BASE_DIR + "/" + database);
-//
-//		storage.start();
-//		return storage;
-	}
-
-	public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
-		this.storageEventFilterChain = storageEventFilterChain;
-	}
-
-	public void setReadChannels(Map<String, ReadChannel> readChannels) {
-		this.readChannels = readChannels;
-	}
-
-	public void setTaskName(String taskName) {
-		this.taskName = taskName;
-	}
-
-	public void setPreservedDay(int preservedDay) {
-		this.preservedDay = preservedDay;
-	}
-
-	@Override
-	public ReadChannel getStorage(String database) {
-		try {
-			ReadChannel readChannel = readChannels.get(database);
-//			if (readChannel == null) {
-//				readChannel = buildEventStorage(database);
-//				readChannels.put(database, readChannel);
-//			}
-			return readChannel;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	public void setCodec(RawEventCodec rawCodec) {
-		this.codec = rawCodec;
-	}
+    public void setStorageEventFilterChain(EventFilterChain storageEventFilterChain) {
+        this.storageEventFilterChain = storageEventFilterChain;
+    }
 }

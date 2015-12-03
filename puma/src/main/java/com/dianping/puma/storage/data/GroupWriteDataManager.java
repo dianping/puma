@@ -7,10 +7,10 @@ import com.dianping.puma.storage.utils.DateUtils;
 
 import java.io.IOException;
 
-public final class GroupWriteDataManager extends AbstractLifeCycle
+public class GroupWriteDataManager extends AbstractLifeCycle
         implements WriteDataManager<Sequence, ChangedEvent> {
 
-    private String database;
+    protected String database;
 
     private SingleWriteDataManager writeDataManager;
 

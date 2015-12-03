@@ -6,6 +6,7 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.cache.CachedGroupReadDataManager;
 import com.dianping.puma.storage.data.GroupReadDataManager;
 import com.dianping.puma.storage.index.SeriesReadIndexManager;
 import com.google.common.base.Function;
@@ -42,7 +43,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
         readIndexManager = new SeriesReadIndexManager(database);
         readIndexManager.start();
 
-        readDataManager = new GroupReadDataManager(database);
+        readDataManager = new CachedGroupReadDataManager(database);
         readDataManager.start();
     }
 
@@ -83,6 +84,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
     public ChangedEvent next() throws IOException {
         while (true) {
             ChangedEvent binlogEvent = readDataManager.next();
+
             if (binlogEvent == null) {
                 return null;
             }

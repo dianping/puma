@@ -4,6 +4,9 @@ import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
+import com.dianping.puma.storage.cache.CachedDataManager;
+import com.dianping.puma.storage.cache.CachedDataManagerFactory;
+import com.dianping.puma.storage.cache.CachedGroupWriteDataManager;
 import com.dianping.puma.storage.data.GroupWriteDataManager;
 import com.dianping.puma.storage.index.SeriesWriteIndexManager;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -34,7 +37,7 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
         writeIndexManager = new SeriesWriteIndexManager(database);
         writeIndexManager.start();
 
-        writeDataManager = new GroupWriteDataManager(database);
+        writeDataManager = new CachedGroupWriteDataManager(database);
         writeDataManager.start();
 
         thread = new Thread(new FlushTask());
@@ -82,7 +85,7 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
             while (!isStopped()) {
                 try {
                     flush();
-                    Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+                    Uninterruptibles.sleepUninterruptibly(1000, TimeUnit.MILLISECONDS);
                 } catch (Exception ignore) {
                     LOG.error("Flush failed!", ignore);
                 }

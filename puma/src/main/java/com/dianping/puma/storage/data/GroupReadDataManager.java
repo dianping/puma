@@ -7,10 +7,10 @@ import com.dianping.puma.storage.Sequence;
 import java.io.EOFException;
 import java.io.IOException;
 
-public final class GroupReadDataManager extends AbstractLifeCycle
+public class GroupReadDataManager extends AbstractLifeCycle
         implements ReadDataManager<com.dianping.puma.storage.Sequence, ChangedEvent> {
 
-    private final String database;
+    protected final String database;
 
     private SingleReadDataManager readDataManager;
 

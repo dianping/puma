@@ -15,21 +15,21 @@ public final class CachedDataManagerFactory {
 
     private static final Map<String, AtomicInteger> READER_COUNTER = new HashMap<String, AtomicInteger>();
     private static final Map<String, AtomicInteger> WRITER_COUNTER = new HashMap<String, AtomicInteger>();
-    private static final Map<String, CachedDataManager> MANAGER_MAP = new HashMap<String, CachedDataManager>();
+    private static final Map<String, CachedDataStorage> MANAGER_MAP = new HashMap<String, CachedDataStorage>();
 
-    public synchronized static CachedDataManager getReadCachedDataManager(String database) {
+    public synchronized static CachedDataStorage.Reader getReadCachedDataManager(String database) {
         if (!READER_COUNTER.containsKey(database)) {
             READER_COUNTER.put(database, new AtomicInteger());
         }
         READER_COUNTER.get(database).incrementAndGet();
-        return getCachedDataManager(database);
+        return getCachedDataManager(database).new Reader();
     }
 
     public synchronized static void releaseReadCachedDataManager(String database) {
         READER_COUNTER.get(database).decrementAndGet();
     }
 
-    public synchronized static CachedDataManager getWriteCachedDataManager(String database) {
+    public synchronized static CachedDataStorage getWriteCachedDataManager(String database) {
         if (!WRITER_COUNTER.containsKey(database)) {
             WRITER_COUNTER.put(database, new AtomicInteger());
         }
@@ -41,11 +41,11 @@ public final class CachedDataManagerFactory {
         WRITER_COUNTER.get(database).decrementAndGet();
     }
 
-    private static CachedDataManager getCachedDataManager(String database) {
+    private static CachedDataStorage getCachedDataManager(String database) {
         if (!MANAGER_MAP.containsKey(database)) {
-            MANAGER_MAP.put(database, new CachedDataManager());
+            MANAGER_MAP.put(database, new CachedDataStorage());
         }
-        CachedDataManager manager = MANAGER_MAP.get(database);
+        CachedDataStorage manager = MANAGER_MAP.get(database);
 
         int readCount = READER_COUNTER.get(database) == null ? 0 : READER_COUNTER.get(database).get();
         int writeCount = WRITER_COUNTER.get(database) == null ? 0 : WRITER_COUNTER.get(database).get();

@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class CachedGroupWriteDataManager extends GroupWriteDataManager {
 
-    private CachedDataManager cachedDataManager;
+    private CachedDataStorage cachedDataStorage;
 
     public CachedGroupWriteDataManager(String database) {
         super(database);
@@ -22,20 +22,20 @@ public class CachedGroupWriteDataManager extends GroupWriteDataManager {
     @Override
     public Sequence append(ChangedEvent binlogEvent) throws IOException {
         Sequence sequence = super.append(binlogEvent);
-        cachedDataManager.append(sequence, binlogEvent);
+        cachedDataStorage.append(new ChangedEventWithSequence(binlogEvent, sequence));
         return sequence;
     }
 
     @Override
     protected void doStart() {
         super.doStart();
-        this.cachedDataManager = CachedDataManagerFactory.getReadCachedDataManager(database);
+        this.cachedDataStorage = CachedDataManagerFactory.getWriteCachedDataManager(database);
     }
 
     @Override
     protected void doStop() {
-        this.cachedDataManager = null;
-        CachedDataManagerFactory.releaseReadCachedDataManager(database);
+        this.cachedDataStorage = null;
+        CachedDataManagerFactory.releaseWriteCachedDataManager(database);
         super.doStop();
     }
 }

@@ -13,11 +13,9 @@ import java.io.IOException;
  */
 public class CachedGroupReadDataManager extends GroupReadDataManager {
 
-    private CachedDataManager cachedDataManager;
+    private CachedDataStorage.Reader cachedDataManager;
 
-    private Sequence memoryCurrentKey;
-
-    private boolean memoryIsEmpty = false;
+    private Sequence lastMemorySequence;
 
     private boolean currentIsMemory = false;
 
@@ -29,39 +27,30 @@ public class CachedGroupReadDataManager extends GroupReadDataManager {
 
     @Override
     public ChangedEvent next() throws IOException {
-        ChangedEvent event = null;
         if (currentIsMemory) {
-            if (!memoryIsEmpty) {
-                event = cachedDataManager.get(memoryCurrentKey);
-                if (event == null) {
-                    open(memoryCurrentKey);
-                    currentIsMemory = false;
-                    memoryIsEmpty = false;
-                    return next();
+            try {
+                ChangedEventWithSequence changedEventWithSequence = cachedDataManager.next();
+                if (changedEventWithSequence == null) {
+                    return null;
                 }
-            }
 
-            Sequence positon = cachedDataManager.nextPosition(memoryCurrentKey);
-            if (positon == null) {
-                memoryIsEmpty = true;
-            } else {
-                memoryIsEmpty = false;
-                memoryCurrentKey = positon;
+                lastMemorySequence = changedEventWithSequence.getSequence();
+                return changedEventWithSequence.getChangedEvent();
+            } catch (IOException e) {
+                open(lastMemorySequence);
+                currentIsMemory = false;
+                lastSwitchTime = System.currentTimeMillis();
+                return next();
             }
-
-            return event;
         } else {
             Sequence position = position();
-            event = super.next();
+            ChangedEvent event = super.next();
 
-            if (System.currentTimeMillis() - lastSwitchTime > 10 * 60 * 1000) {
-                Sequence nextPosition = cachedDataManager.nextPosition(position);
-                if (nextPosition != null) {
-                    lastSwitchTime = System.currentTimeMillis();
-                    currentIsMemory = true;
-                    memoryCurrentKey = nextPosition;
-                }
+            if (System.currentTimeMillis() - lastSwitchTime > 60 * 1000) {
+                lastSwitchTime = System.currentTimeMillis();
+                currentIsMemory = cachedDataManager.open(position);
             }
+
             return event;
         }
     }

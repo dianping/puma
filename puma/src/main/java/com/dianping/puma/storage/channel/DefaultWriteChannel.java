@@ -4,8 +4,6 @@ import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
-import com.dianping.puma.storage.cache.CachedDataManager;
-import com.dianping.puma.storage.cache.CachedDataManagerFactory;
 import com.dianping.puma.storage.cache.CachedGroupWriteDataManager;
 import com.dianping.puma.storage.data.GroupWriteDataManager;
 import com.dianping.puma.storage.index.SeriesWriteIndexManager;

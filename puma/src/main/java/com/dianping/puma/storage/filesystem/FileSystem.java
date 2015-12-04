@@ -1,6 +1,7 @@
 package com.dianping.puma.storage.filesystem;
 
 import com.dianping.puma.storage.utils.DateUtils;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.List;
 
 public final class FileSystem {
 
@@ -141,10 +143,10 @@ public final class FileSystem {
     }
 
     public static final File[] visitL2IndexDateDirs() {
-        File[] dateDirs = new File[0];
+        File[] dateDirs = null;
         File[] databaseDirs = visitDatabaseDirs(l2IndexDir);
         for (File databaseDir : databaseDirs) {
-            ArrayUtils.add(dateDirs, visitL2IndexDateDirs(databaseDir.getName()));
+            dateDirs = ArrayUtils.addAll(dateDirs, visitL2IndexDateDirs(databaseDir.getName()));
         }
         return dateDirs;
     }
@@ -163,10 +165,10 @@ public final class FileSystem {
     }
 
     public static final File[] visitMasterDataDateDirs() {
-        File[] dateDirs = new File[0];
+        File[] dateDirs = null;
         File[] databaseDirs = visitDatabaseDirs(masterDataDir);
         for (File databaseDir : databaseDirs) {
-            ArrayUtils.add(dateDirs, visitMasterDataDateDirs(databaseDir.getName()));
+            dateDirs = ArrayUtils.addAll(dateDirs, visitMasterDataDateDirs(databaseDir.getName()));
         }
         return dateDirs;
     }

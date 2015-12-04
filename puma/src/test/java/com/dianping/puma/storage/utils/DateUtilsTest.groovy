@@ -41,4 +41,10 @@ public class DateUtilsTest extends GroovyTestCase {
     public void testGetNowInteger() throws Exception {
         assertEquals(DateUtils.getNowInteger(), 20150101);
     }
+
+    @Test
+    void testExpired() {
+        assertTrue(DateUtils.expired("20151110", "20151120", 5))
+        assertFalse(DateUtils.expired("20151119", "20151120", 5))
+    }
 }

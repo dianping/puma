@@ -2,6 +2,8 @@ package com.dianping.puma.storage.maintain.clean;
 
 import com.dianping.puma.storage.filesystem.FileSystem;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import java.io.IOException;
 
 @Service
 public final class ScheduledDeleteService implements DeleteService {
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	DeleteStrategy deleteStrategy;
@@ -45,8 +49,13 @@ public final class ScheduledDeleteService implements DeleteService {
 		}
 	}
 
-	@Scheduled(cron = "0 0 2 * * *")
+	@Scheduled(cron = "0 0 2 * * ?")
 	public void scheduledDelete() {
-		delete();
+		try {
+			logger.info("Starting scheduled deleting...");
+			delete();
+		} catch (Throwable e) {
+			logger.error("Scheduled deleting expired files is error.", e);
+		}
 	}
 }

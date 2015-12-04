@@ -77,7 +77,7 @@ class CachedDataStorageTest {
             for (int k = 1; k < count; k++) {
                 ChangedEventWithSequence item = generateItem(k);
                 target.append(item);
-                System.out.println("write ${k}")
+                System.out.print("write ${k}")
             }
 
             writerSuccess.set(true);
@@ -91,7 +91,7 @@ class CachedDataStorageTest {
                     item = reader1.next()
                     if (item != null) {
                         Assert.assertEquals(item.getSequence().getNumber(), k);
-                        System.out.println("reader1 ${k}")
+                        System.out.print("reader1 ${k}")
                     }
                 }
             }
@@ -107,7 +107,7 @@ class CachedDataStorageTest {
                     item = reader2.next()
                     if (item != null) {
                         Assert.assertEquals(item.getSequence().getNumber(), k);
-                        System.out.println("reader2 ${k}")
+                        System.out.print("reader2 ${k}")
                     }
                 }
             }
@@ -123,6 +123,79 @@ class CachedDataStorageTest {
         Assert.assertTrue(writerSuccess.get());
         Assert.assertTrue(reader1Success.get());
         Assert.assertTrue(reader2Success.get());
+    }
+
+
+    @Test(timeout = 10000l)
+    public void testMultiThreadWriteAndReadOutdated() throws Exception {
+        initTarget()
+
+        int count = 15000;
+
+        AtomicBoolean writerSuccess = new AtomicBoolean();
+        AtomicBoolean reader1Success = new AtomicBoolean();
+        AtomicBoolean reader2Success = new AtomicBoolean();
+
+        def writerThread = new Thread({
+            for (int k = 1; k < count; k++) {
+                ChangedEventWithSequence item = generateItem(k);
+                target.append(item);
+                System.out.print("write ${k}")
+            }
+
+            writerSuccess.set(true);
+        });
+        writerThread.start();
+
+        def reader1Thread = new Thread({
+            for (int k = 1; k < count; k++) {
+                def item = null;
+                while (item == null) {
+                    item = reader1.next()
+                    if (item != null) {
+                        Assert.assertEquals(item.getSequence().getNumber(), k);
+                        System.out.print("reader1 ${k}")
+                    }
+                }
+            }
+
+            reader1Success.set(true);
+        });
+        reader1Thread.start();
+
+        def reader2Thread = new Thread({
+            for (int k = 1; k < count; k++) {
+                Thread.sleep(5);
+
+                def item = null;
+                while (item == null) {
+                    item = reader2.next()
+                    if (item != null) {
+                        Assert.assertEquals(item.getSequence().getNumber(), k);
+                        System.out.print("reader2 ${k}")
+                    }
+                }
+            }
+
+            reader2Success.set(true);
+        });
+        reader2Thread.start();
+
+        while (writerThread.alive || reader1Thread.alive || reader2Thread.alive) {
+            Thread.sleep(100);
+        }
+
+        Assert.assertTrue(writerSuccess.get());
+        Assert.assertTrue(reader1Success.get());
+        Assert.assertFalse(reader2Success.get());
+    }
+
+    @Test(expected = IOException.class)
+    public void testVersionChanged() throws Exception {
+        initTarget();
+        target.stop();
+        target.start();
+        reader1.next();
     }
 
     @Test

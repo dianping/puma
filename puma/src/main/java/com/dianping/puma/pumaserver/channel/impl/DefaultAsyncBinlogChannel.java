@@ -100,7 +100,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
         private static final int CACHE_SIZE = 1000;
 
-        private static final int EMPTY_SLEEP_TIME = 5;
+        private static final int EMPTY_SLEEP_TIME = 1;
 
         private final WeakReference<DefaultAsyncBinlogChannel> parent;
 

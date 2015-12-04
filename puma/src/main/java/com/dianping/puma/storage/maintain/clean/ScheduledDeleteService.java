@@ -49,7 +49,7 @@ public final class ScheduledDeleteService implements DeleteService {
 		}
 	}
 
-	@Scheduled(cron = "0 0 2 * * ?")
+	@Scheduled(cron = "* * 1 * * ?")
 	public void scheduledDelete() {
 		try {
 			logger.info("Starting scheduled deleting...");

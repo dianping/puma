@@ -55,7 +55,7 @@ public final class DateUtils {
     public static boolean expired(String preDateStr, String postDateStr, int delta) {
         DateTime preDateTime = DateTime.parse(preDateStr, DATE_FORMATTER);
         DateTime postDateTime = DateTime.parse(postDateStr, DATE_FORMATTER);
-        preDateTime.withFieldAdded(DurationFieldType.days(), delta);
+        preDateTime = preDateTime.withFieldAdded(DurationFieldType.days(), delta);
         return DateTimeComparator.getDateOnlyInstance().compare(preDateTime, postDateTime) < 0;
     }
 }

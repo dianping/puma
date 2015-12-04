@@ -20,6 +20,7 @@ public class CachedDataStorage implements LifeCycle {
 
     private volatile long nextWriteIndex = 0;
 
+    private volatile long dataVersion = 0;
 
     public void append(ChangedEventWithSequence dataValue) {
         if (!started) {
@@ -38,15 +39,25 @@ public class CachedDataStorage implements LifeCycle {
     @Override
     public void stop() {
         started = false;
+        dataVersion++;
+        nextWriteIndex = 0;
     }
 
     public class Reader {
+
+        private volatile long readDataVersion = -1;
+
         private volatile long nextReadIndex = 0;
 
         public boolean open(Sequence sequence) {
+            if (!started) {
+                return false;
+            }
+
             for (long k = nextWriteIndex - 1; (nextWriteIndex - k < CACHED_SIZE) && k >= 0; k--) {
                 if (sequence.equals(data[(int) (k % CACHED_SIZE)].getSequence())) {
                     nextReadIndex = k;
+                    readDataVersion = dataVersion;
                     return true;
                 }
             }
@@ -54,16 +65,21 @@ public class CachedDataStorage implements LifeCycle {
         }
 
         public ChangedEventWithSequence next() throws IOException {
-            if (!started) {
+            if (!started || readDataVersion != dataVersion) {
                 throw new IOException("data outdated");
             }
 
-            if (nextReadIndex > nextWriteIndex - 1) {
+            if (nextReadIndex >= nextWriteIndex) {
                 return null;
             }
 
+            if (nextReadIndex <= nextWriteIndex - CACHED_SIZE) {
+                throw new IOException("data outdated");
+            }
+
             ChangedEventWithSequence event = data[(int) (nextReadIndex % CACHED_SIZE)];
-            if (nextReadIndex <= nextWriteIndex - CACHED_SIZE) {//todo:验证边界条件和并发问题
+
+            if (nextReadIndex <= nextWriteIndex - CACHED_SIZE) {
                 throw new IOException("data outdated");
             } else {
                 nextReadIndex++;

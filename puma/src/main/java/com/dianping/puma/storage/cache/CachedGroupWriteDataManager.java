@@ -3,6 +3,7 @@ package com.dianping.puma.storage.cache;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.GroupWriteDataManager;
+import com.dianping.puma.storage.data.WriteDataManager;
 
 import java.io.IOException;
 
@@ -11,31 +12,46 @@ import java.io.IOException;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class CachedGroupWriteDataManager extends GroupWriteDataManager {
+public class CachedGroupWriteDataManager implements WriteDataManager<Sequence, ChangedEvent> {
 
     private CachedDataStorage cachedDataStorage;
 
+    private final GroupWriteDataManager groupWriteDataManager;
+
+    private final String database;
+
     public CachedGroupWriteDataManager(String database) {
-        super(database);
+        this.database = database;
+        this.groupWriteDataManager = new GroupWriteDataManager(database);
     }
 
     @Override
     public Sequence append(ChangedEvent binlogEvent) throws IOException {
-        Sequence sequence = super.append(binlogEvent);
+        Sequence sequence = groupWriteDataManager.append(binlogEvent);
         cachedDataStorage.append(new ChangedEventWithSequence(binlogEvent, sequence));
         return sequence;
     }
 
     @Override
-    protected void doStart() {
-        super.doStart();
+    public void flush() throws IOException {
+        groupWriteDataManager.flush();
+    }
+
+    @Override
+    public Sequence position() {
+        return groupWriteDataManager.position();
+    }
+
+    @Override
+    public void start() {
+        groupWriteDataManager.start();
         this.cachedDataStorage = CachedDataManagerFactory.getWriteCachedDataManager(database);
     }
 
     @Override
-    protected void doStop() {
+    public void stop() {
         this.cachedDataStorage = null;
         CachedDataManagerFactory.releaseWriteCachedDataManager(database);
-        super.doStop();
+        groupWriteDataManager.stop();
     }
 }

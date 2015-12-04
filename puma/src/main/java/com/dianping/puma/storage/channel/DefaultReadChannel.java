@@ -8,6 +8,7 @@ import com.dianping.puma.filter.EventFilterChainFactory;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.cache.CachedGroupReadDataManager;
 import com.dianping.puma.storage.data.GroupReadDataManager;
+import com.dianping.puma.storage.data.ReadDataManager;
 import com.dianping.puma.storage.index.SeriesReadIndexManager;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -24,7 +25,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 
     private SeriesReadIndexManager readIndexManager;
 
-    private GroupReadDataManager readDataManager;
+    private ReadDataManager<Sequence, ChangedEvent> readDataManager;
 
     protected DefaultReadChannel(String database) {
         this.database = database;

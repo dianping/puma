@@ -46,7 +46,7 @@ public class CachedDataStorage implements LifeCycle {
         public boolean open(Sequence sequence) {
             for (long k = nextWriteIndex - 1; (nextWriteIndex - k < CACHED_SIZE) && k >= 0; k--) {
                 if (sequence.equals(data[(int) (k % CACHED_SIZE)].getSequence())) {
-                    nextReadIndex = k + 1;
+                    nextReadIndex = k;
                     return true;
                 }
             }

@@ -5,7 +5,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.cache.CachedGroupWriteDataManager;
-import com.dianping.puma.storage.data.GroupWriteDataManager;
+import com.dianping.puma.storage.data.WriteDataManager;
 import com.dianping.puma.storage.index.SeriesWriteIndexManager;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
 
     private SeriesWriteIndexManager writeIndexManager;
 
-    private GroupWriteDataManager writeDataManager;
+    private WriteDataManager<Sequence, ChangedEvent> writeDataManager;
 
     private Thread thread;
 

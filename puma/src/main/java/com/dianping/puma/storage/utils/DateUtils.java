@@ -56,6 +56,6 @@ public final class DateUtils {
         DateTime preDateTime = DateTime.parse(preDateStr, DATE_FORMATTER);
         DateTime postDateTime = DateTime.parse(postDateStr, DATE_FORMATTER);
         preDateTime.withFieldAdded(DurationFieldType.days(), delta);
-        return DateTimeComparator.getDateOnlyInstance().compare(preDateTime, postDateTime) > 0;
+        return DateTimeComparator.getDateOnlyInstance().compare(preDateTime, postDateTime) < 0;
     }
 }

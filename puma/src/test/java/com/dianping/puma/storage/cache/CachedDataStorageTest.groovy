@@ -67,7 +67,7 @@ class CachedDataStorageTest {
     public void testMultiThreadWriteAndReadSuccess() throws Exception {
         initTarget()
 
-        int count = 100000;
+        int count = 15000;
 
         AtomicBoolean writerSuccess = new AtomicBoolean();
         AtomicBoolean reader1Success = new AtomicBoolean();

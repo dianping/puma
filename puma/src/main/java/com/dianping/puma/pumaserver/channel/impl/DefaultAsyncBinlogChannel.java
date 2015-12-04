@@ -3,16 +3,22 @@ package com.dianping.puma.pumaserver.channel.impl;
 import com.dianping.cat.Cat;
 import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogMessage;
+import com.dianping.puma.core.dto.ExceptionResponse;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.ServerErrorEvent;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.puma.pumaserver.channel.AsyncBinlogChannel;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogChannelException;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.storage.channel.ChannelFactory;
 import com.dianping.puma.storage.channel.ReadChannel;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
+
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
@@ -64,7 +72,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     }
 
     protected ReadChannel initChannel(long sc, BinlogInfo binlogInfo, List<String> tables,
-                                       boolean dml, boolean ddl, boolean transaction) throws IOException {
+                                      boolean dml, boolean ddl, boolean transaction) throws IOException {
         ReadChannel readChannel = ChannelFactory.newReadChannel(database, tables, dml, ddl, transaction);
         readChannel.start();
 
@@ -110,6 +118,8 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
         private boolean threadNameHasSet = false;
 
+        private Exception lastException = null;
+
         @Override
         public void run() {
             List<Event> results = new ArrayList<Event>();
@@ -121,7 +131,14 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
                     req = getBinlogGetRequest(results, req);
                     boolean needSend = isNeedSend(results, req);
                     if (needSend) {
-                        req.getChannel().writeAndFlush(buildBinlogGetResponse(results, req));
+                        if (results.size() == 0 && lastException != null) {
+                            FullHttpResponse response = new DefaultFullHttpResponse(
+                                    HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                                    Unpooled.wrappedBuffer(ConvertHelper.toBytes(new ExceptionResponse("read event failed!" + lastException.getMessage()))));
+                            req.getChannel().writeAndFlush(response);
+                        } else {
+                            req.getChannel().writeAndFlush(buildBinlogGetResponse(results, req));
+                        }
                         req = null;
                     }
 
@@ -171,14 +188,15 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
 
         protected Event getEvent() {
-            Event binlogEvent;
             try {
-                binlogEvent = getParent().readChannel.next();
+                ChangedEvent event = getParent().readChannel.next();
+                lastException = null;
+                return event;
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
-                binlogEvent = new ServerErrorEvent("get binlog event from storage failure.", e.getCause());
+                lastException = e;
+                return null;
             }
-            return binlogEvent;
         }
 
         protected BinlogGetRequest getBinlogGetRequest(List<Event> results, BinlogGetRequest req)
@@ -190,8 +208,8 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             }
 
             if (request == null && results.size() >= CACHE_SIZE) {
-                while (!getParent().stopped && !Thread.currentThread().isInterrupted() && request != null) {
-                    request = getParent().requests.poll(15, TimeUnit.SECONDS);
+                while (!getParent().stopped && !Thread.currentThread().isInterrupted() && request == null) {
+                    request = getParent().requests.poll(1, TimeUnit.SECONDS);
                 }
             }
 

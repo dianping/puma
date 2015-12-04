@@ -49,9 +49,10 @@ public final class ScheduledDeleteService implements DeleteService {
 		}
 	}
 
-	@Scheduled(cron = "0 5 * * * ?")
+	@Scheduled(cron = "0 0 2 * * ?")
 	public void scheduledDelete() {
 		try {
+			logger.info("Starting scheduled deleting...");
 			delete();
 		} catch (Throwable e) {
 			logger.error("Scheduled deleting expired files is error.", e);

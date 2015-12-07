@@ -53,7 +53,7 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
                 if (changedEventWithSequence == null) {
                     return null;
                 }
-                Cat.logEvent("Read", "M");
+                Cat.logEvent(database, "M");
                 lastMemorySequence = changedEventWithSequence.getSequence();
                 return changedEventWithSequence.getChangedEvent();
             } catch (IOException e) {
@@ -64,7 +64,7 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
             Sequence position = position();
             ChangedEvent event = groupReadDataManager.next();
             if (event != null) {
-                Cat.logEvent("Read", "F");
+                Cat.logEvent(database, "F");
             }
             trySwitchToMemory(position);
             return event;

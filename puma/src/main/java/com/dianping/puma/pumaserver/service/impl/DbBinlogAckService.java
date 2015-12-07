@@ -52,7 +52,7 @@ public class DbBinlogAckService implements BinlogAckService {
     @Override
     public void checkAck(String clientName, BinlogAck binlogAck) {
         if (binlogAck == null && !clientName.toLowerCase().endsWith("test")) {
-            throw new ClientNotRegisterException("you must register first!");
+            throw new ClientNotRegisterException("you must register first! client name:" + clientName);
         }
     }
 }

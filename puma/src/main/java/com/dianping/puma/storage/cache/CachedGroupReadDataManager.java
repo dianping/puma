@@ -23,12 +23,15 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
 
     private final String database;
 
+    private final String eventCategory;
+
     private boolean currentIsMemory = false;
 
     private long lastSwitchTime = 0;
 
     public CachedGroupReadDataManager(String database) {
         this.database = database;
+        this.eventCategory = "ClientStatus." + database;
         this.groupReadDataManager = new GroupReadDataManager(database);
     }
 
@@ -53,7 +56,7 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
                 if (changedEventWithSequence == null) {
                     return null;
                 }
-                Cat.logEvent(database, "M");
+                Cat.logEvent(eventCategory, "M");
                 lastMemorySequence = changedEventWithSequence.getSequence();
                 return changedEventWithSequence.getChangedEvent();
             } catch (IOException e) {
@@ -64,7 +67,7 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
             Sequence position = position();
             ChangedEvent event = groupReadDataManager.next();
             if (event != null) {
-                Cat.logEvent(database, "F");
+                Cat.logEvent(eventCategory, "F");
             }
             trySwitchToMemory(position);
             return event;

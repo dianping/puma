@@ -190,7 +190,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             }
 
             if (request == null && results.size() >= CACHE_SIZE) {
-                while (!getParent().stopped && !Thread.currentThread().isInterrupted() && request != null) {
+                while (!getParent().stopped && !Thread.currentThread().isInterrupted() && request == null) {
                     request = getParent().requests.poll(15, TimeUnit.SECONDS);
                 }
             }

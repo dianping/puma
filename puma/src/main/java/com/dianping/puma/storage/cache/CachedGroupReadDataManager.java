@@ -1,5 +1,6 @@
 package com.dianping.puma.storage.cache;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.GroupReadDataManager;
@@ -52,6 +53,7 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
                 if (changedEventWithSequence == null) {
                     return null;
                 }
+                Cat.logEvent("Read", "M");
                 lastMemorySequence = changedEventWithSequence.getSequence();
                 return changedEventWithSequence.getChangedEvent();
             } catch (IOException e) {
@@ -61,6 +63,9 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
         } else {
             Sequence position = position();
             ChangedEvent event = groupReadDataManager.next();
+            if (event != null) {
+                Cat.logEvent("Read", "F");
+            }
             trySwitchToMemory(position);
             return event;
         }

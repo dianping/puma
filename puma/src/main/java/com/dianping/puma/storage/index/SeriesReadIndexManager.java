@@ -3,6 +3,7 @@ package com.dianping.puma.storage.index;
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 
@@ -38,6 +39,8 @@ public final class SeriesReadIndexManager extends AbstractLifeCycle
     public Sequence findOldest() throws IOException {
         checkStop();
 
+        IndexManagerFactory.waitForPause();
+
         l1ReadIndexManager = SeriesIndexManagerFinder.findL1ReadIndexManager(database);
         l1ReadIndexManager.start();
         Sequence sequence = l1ReadIndexManager.findOldest();
@@ -51,6 +54,8 @@ public final class SeriesReadIndexManager extends AbstractLifeCycle
     public Sequence findLatest() throws IOException {
         checkStop();
 
+        IndexManagerFactory.waitForPause();
+
         l1ReadIndexManager = SeriesIndexManagerFinder.findL1ReadIndexManager(database);
         l1ReadIndexManager.start();
         Sequence sequence = l1ReadIndexManager.findLatest();
@@ -63,6 +68,8 @@ public final class SeriesReadIndexManager extends AbstractLifeCycle
     @Override
     public Sequence find(BinlogInfo binlogInfo) throws IOException {
         checkStop();
+
+        IndexManagerFactory.waitForPause();
 
         l1ReadIndexManager = SeriesIndexManagerFinder.findL1ReadIndexManager(database);
         l1ReadIndexManager.start();

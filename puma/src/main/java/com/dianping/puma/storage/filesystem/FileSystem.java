@@ -1,7 +1,6 @@
 package com.dianping.puma.storage.filesystem;
 
 import com.dianping.puma.storage.utils.DateUtils;
-import com.google.common.collect.Lists;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -9,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.util.List;
 
 public final class FileSystem {
 
@@ -136,6 +134,15 @@ public final class FileSystem {
         return file;
     }
 
+    public static final File[] visitAllL1IndexFile() {
+        File databaseDir = new File(l1IndexDir);
+        File[] files = databaseDir.listFiles();
+        for (int k = 0; k < files.length; k++) {
+            files[k] = new File(files[k], genL1IndexName());
+        }
+        return files;
+    }
+
     public static final File visitL1IndexFile(String database) {
         File databaseDir = new File(l1IndexDir, database);
         File l1Index = new File(databaseDir, genL1IndexName());
@@ -203,26 +210,6 @@ public final class FileSystem {
         return visitFile(slaveDataDir, database, date, number, SLAVE_DATA_PREFIX, SLAVE_DATA_SUFFIX);
     }
 
-    public static final File nextSlaveDataFile(String database) throws IOException {
-        int max = maxSlaveFileNumber(database, today());
-        return createFile(slaveDataDir, database, today(), max + 1, SLAVE_DATA_PREFIX, SLAVE_DATA_SUFFIX);
-    }
-
-    public static final File mapSlaveDatabaseDir(File masterDatabaseDir) {
-        String path = masterDatabaseDir.getAbsolutePath();
-        String relative = StringUtils.substringAfter(path, masterDataDir);
-        return new File(slaveDataDir, relative);
-    }
-
-    public static final File mapSlaveDateDir(File masterDateDir) {
-        return null;
-    }
-
-    public static final File mapSlaveFile(File masterfile) {
-        return null;
-    }
-
-
     protected static final String genL1IndexName() {
         return L1_INDEX_PREFIX + L1_INDEX_SUFFIX;
     }
@@ -232,24 +219,14 @@ public final class FileSystem {
     }
 
     protected static final File[] visitDatabaseDirs(String baseDir) {
-        File[] files = new File(baseDir).listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return true;
-            }
-        });
+        File[] files = new File(baseDir).listFiles();
 
         return files == null ? new File[0] : files;
     }
 
     protected static final File[] visitDateDirs(String baseDir, String database) {
         File databaseDir = new File(baseDir, database);
-        File[] files = databaseDir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return true;
-            }
-        });
+        File[] files = databaseDir.listFiles();
 
         return files == null ? new File[0] : files;
     }
@@ -264,10 +241,6 @@ public final class FileSystem {
 
     protected static final int maxMasterFileNumber(String database, String date) {
         return maxFileNumber(masterDataDir, database, date, MASTER_DATA_PREFIX, MASTER_DATA_SUFFIX);
-    }
-
-    protected static final int maxSlaveFileNumber(String database, String date) {
-        return maxFileNumber(slaveDataDir, database, date, SLAVE_DATA_PREFIX, SLAVE_DATA_SUFFIX);
     }
 
     protected static final void createFile(File file) throws IOException {
@@ -296,10 +269,6 @@ public final class FileSystem {
         }
 
         return file;
-    }
-
-    public static final String parseMasterDataDb(File file) {
-        return parseDb(file);
     }
 
     public static final String parseMasterDataDate(File file) {

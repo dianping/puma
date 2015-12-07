@@ -40,6 +40,8 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
     public void append(BinlogInfo binlogInfo, Sequence sequence) throws IOException {
         checkStop();
 
+        IndexManagerFactory.waitForPause();
+
         if (needPage()) {
             page(binlogInfo, sequence);
             Sequence l2Sequence = l2WriteIndexManager.position();

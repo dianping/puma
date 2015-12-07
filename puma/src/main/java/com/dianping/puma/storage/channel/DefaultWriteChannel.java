@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChannel {
@@ -23,10 +22,6 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
     private SeriesWriteIndexManager writeIndexManager;
 
     private GroupWriteDataManager writeDataManager;
-
-    private Long currServerId;
-
-    private Date currDate;
 
     private Thread thread;
 

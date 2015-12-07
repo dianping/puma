@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 @Service
 public class ExpiredDeleteStrategy implements DeleteStrategy {
 
-    private final int preservedDay = 5;
+    private final int preservedDay = 3;
 
     private static final Pattern DATE_PATTERN = Pattern.compile("\\d{8}");
 

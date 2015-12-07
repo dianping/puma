@@ -15,47 +15,49 @@ import java.io.IOException;
 @Service
 public final class ScheduledDeleteService implements DeleteService {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Autowired
-	DeleteStrategy deleteStrategy;
+    @Autowired
+    DeleteStrategy deleteStrategy;
 
-	@Override
-	public void delete() {
-		File[] l2DateDirs = FileSystem.visitL2IndexDateDirs();
-		for (File l2DateDir: l2DateDirs) {
-			delete(l2DateDir);
-		}
+    @Override
+    public void delete() {
+        File[] l2DateDirs = FileSystem.visitL2IndexDateDirs();
+        for (File l2DateDir : l2DateDirs) {
+            delete(l2DateDir);
+        }
 
-		File[] dataDateDirs = FileSystem.visitMasterDataDateDirs();
-		for (File dataDateDir: dataDateDirs) {
-			delete(dataDateDir);
-		}
-	}
+        File[] dataDateDirs = FileSystem.visitMasterDataDateDirs();
+        for (File dataDateDir : dataDateDirs) {
+            delete(dataDateDir);
+        }
+    }
 
-	protected void delete(File directory) {
-		if (deleteStrategy.canClean(directory)) {
-			try {
-				deleteDirectory(directory);
-			} catch (IOException ignore) {
-			}
-		}
-	}
+    protected void delete(File directory) {
+        if (deleteStrategy.canClean(directory)) {
+            try {
+                deleteDirectory(directory);
+            } catch (IOException ignore) {
+                logger.error(ignore.getMessage(), ignore);
+            }
+        }
+    }
 
-	protected void deleteDirectory(File directory) throws IOException {
-		try {
-			FileUtils.deleteDirectory(directory);
-		} catch (FileNotFoundException ignore) {
-		}
-	}
+    protected void deleteDirectory(File directory) throws IOException {
+        try {
+            FileUtils.deleteDirectory(directory);
+        } catch (FileNotFoundException ignore) {
+            logger.error(ignore.getMessage(), ignore);
+        }
+    }
 
-	@Scheduled(cron = "* * 1 * * ?")
-	public void scheduledDelete() {
-		try {
-			logger.info("Starting scheduled deleting...");
-			delete();
-		} catch (Throwable e) {
-			logger.error("Scheduled deleting expired files is error.", e);
-		}
-	}
+    @Scheduled(fixedDelay = 60 * 60 * 1000)
+    public void scheduledDelete() {
+        try {
+            logger.info("Starting scheduled deleting...");
+            delete();
+        } catch (Throwable e) {
+            logger.error("Scheduled deleting expired files is error.", e);
+        }
+    }
 }

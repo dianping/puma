@@ -18,7 +18,7 @@ public abstract class SingleReadIndexManager<K, V> extends AbstractLifeCycle
 
 	private final int avgSizeByte;
 
-	private ReadBucket readBucket;
+	protected ReadBucket readBucket;
 
 	public SingleReadIndexManager(File file, int bufSizeByte, int avgSizeByte) {
 		this.file = file;

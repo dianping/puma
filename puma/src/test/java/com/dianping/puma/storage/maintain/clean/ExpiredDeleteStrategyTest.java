@@ -3,8 +3,6 @@ package com.dianping.puma.storage.maintain.clean;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import java.io.File;
-
 /**
  * Dozer @ 2015-12
  * mail@dozer.cc
@@ -15,6 +13,6 @@ public class ExpiredDeleteStrategyTest {
 
     @Test
     public void testNotDate() throws Exception {
-        Assert.assertFalse(target.canClean(new File("/data/xxxx")));
+        Assert.assertFalse(target.canClean("/data/xxxx"));
     }
 }

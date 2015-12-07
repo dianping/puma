@@ -15,8 +15,6 @@ public class SystemStatusManager {
 
     private static SystemStatus status = new SystemStatus();
 
-    private static ConcurrentMap<String, AtomicBoolean> stopTheWorlds = new ConcurrentHashMap<String, AtomicBoolean>();
-
     public static void addClient(String clientName, String ip, String database, List<String> tables, boolean withDml,
                                  boolean withDdl, boolean withTransaction, String codec) {
         Client client = new Client(clientName, ip, database, tables, withDml, withDdl, withTransaction, codec);
@@ -93,23 +91,6 @@ public class SystemStatusManager {
             server.increaseTotalUpdateEvent();
             server.incStoreCount();
         }
-    }
-
-    public static boolean isStopTheWorld(String serverName) {
-        if (serverName == null) {
-            return false;
-        }
-        AtomicBoolean stopTheWorld = stopTheWorlds.get(serverName);
-
-        return (stopTheWorld != null) && stopTheWorld.get();
-    }
-
-    public static void startTheWorld(String serverName) {
-        stopTheWorlds.put(serverName, new AtomicBoolean(false));
-    }
-
-    public static void stopTheWorld(String serverName) {
-        stopTheWorlds.put(serverName, new AtomicBoolean(true));
     }
 
     public static void addClientFetchQps(String clientName, long size) {

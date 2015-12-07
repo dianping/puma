@@ -422,14 +422,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     private void processBinlog() throws IOException {
         while (!isStop()) {
-            // only slow down parsing, not stop
-            if (SystemStatusManager.isStopTheWorld(this.getTaskName())) {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException ignore) {
-                }
-            }
-
             BinlogPacket binlogPacket = (BinlogPacket) PacketFactory.parsePacket(is, PacketType.BINLOG_PACKET,
                     getContext());
 

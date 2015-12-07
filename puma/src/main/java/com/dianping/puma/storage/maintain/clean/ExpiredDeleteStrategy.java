@@ -14,10 +14,10 @@ public class ExpiredDeleteStrategy implements DeleteStrategy {
     private static final Pattern DATE_PATTERN = Pattern.compile("\\d{8}");
 
     @Override
-    public boolean canClean(File directory) {
-        if (!DATE_PATTERN.matcher(directory.getName()).matches()) {
+    public boolean canClean(String name) {
+        if (!DATE_PATTERN.matcher(name).matches()) {
             return false;
         }
-        return DateUtils.expired(directory.getName(), DateUtils.getNowString(), preservedDay);
+        return DateUtils.expired(name, DateUtils.getNowString(), preservedDay);
     }
 }

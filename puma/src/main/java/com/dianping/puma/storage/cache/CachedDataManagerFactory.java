@@ -27,6 +27,7 @@ public final class CachedDataManagerFactory {
 
     public synchronized static void releaseReadCachedDataManager(String database) {
         READER_COUNTER.get(database).decrementAndGet();
+        getCachedDataManager(database);
     }
 
     public synchronized static CachedDataStorage getWriteCachedDataManager(String database) {
@@ -39,6 +40,7 @@ public final class CachedDataManagerFactory {
 
     public synchronized static void releaseWriteCachedDataManager(String database) {
         WRITER_COUNTER.get(database).decrementAndGet();
+        getCachedDataManager(database);
     }
 
     private static CachedDataStorage getCachedDataManager(String database) {

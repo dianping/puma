@@ -65,6 +65,9 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
             ChangedEvent event = groupReadDataManager.next();
             if (event != null) {
                 Cat.logEvent("Storage.ReadFile", database);
+            } else {
+                //如果一直是Null,说明已经到达最新数据了,可以尽早尝试切换
+                lastSwitchTime--;
             }
             trySwitchToMemory(position);
             return event;

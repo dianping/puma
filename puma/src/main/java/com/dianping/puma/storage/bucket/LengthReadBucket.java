@@ -85,6 +85,7 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
             long skipLength = input.skip(count);
             count -= skipLength;
         }
+        position += offset;
     }
 
     @Override

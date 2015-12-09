@@ -18,7 +18,7 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
 
     private DataInputStream input;
 
-    private long position;
+    private int position;
 
     protected LengthReadBucket(File file, int bufSizeByte, int avgSizeByte) {
         this.file = file;
@@ -88,7 +88,7 @@ public final class LengthReadBucket extends AbstractLifeCycle implements ReadBuc
     }
 
     @Override
-    public long position() {
+    public int position() {
         return position;
     }
 

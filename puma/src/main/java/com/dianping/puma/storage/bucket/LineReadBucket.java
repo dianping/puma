@@ -14,7 +14,7 @@ public final class LineReadBucket extends AbstractLifeCycle implements ReadBucke
 
 	private BufferedReader reader;
 
-	private long position;
+	private int position;
 
 	protected LineReadBucket(File file, int bufSizeByte, int avgSizeByte) {
 		this.file = file;
@@ -87,7 +87,7 @@ public final class LineReadBucket extends AbstractLifeCycle implements ReadBucke
 	}
 
 	@Override
-	public long position() {
+	public int position() {
 		return position;
 	}
 }

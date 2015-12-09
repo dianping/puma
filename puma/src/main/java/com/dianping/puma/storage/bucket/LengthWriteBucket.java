@@ -14,7 +14,7 @@ public final class LengthWriteBucket extends AbstractLifeCycle implements WriteB
 
 	private final int maxSizeByte;
 
-	private long offset;
+	private int offset;
 
 	private DataOutputStream output;
 
@@ -71,7 +71,7 @@ public final class LengthWriteBucket extends AbstractLifeCycle implements WriteB
 	}
 
 	@Override
-	public long position() {
+	public int position() {
 		return offset;
 	}
 

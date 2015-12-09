@@ -27,5 +27,5 @@ public interface ReadBucket extends LifeCycle {
 	 *
 	 * @return offset count in byte.
 	 */
-	long position();
+	int position();
 }

@@ -28,5 +28,5 @@ public interface WriteBucket extends LifeCycle {
 	 */
 	boolean hasRemainingForWrite();
 
-	long position();
+	int position();
 }

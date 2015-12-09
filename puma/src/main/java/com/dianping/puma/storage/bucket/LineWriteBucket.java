@@ -19,7 +19,7 @@ public final class LineWriteBucket extends AbstractLifeCycle implements WriteBuc
 
 	private BufferedWriter writer;
 
-	private long offset;
+	private int offset;
 
 	protected LineWriteBucket(File file, int bufSizeByte, int maxSizeByte) {
 		this.file = file;
@@ -79,7 +79,7 @@ public final class LineWriteBucket extends AbstractLifeCycle implements WriteBuc
 	}
 
 	@Override
-	public long position() {
+	public int position() {
 		return offset;
 	}
 }

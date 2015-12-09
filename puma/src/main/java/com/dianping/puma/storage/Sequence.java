@@ -18,170 +18,122 @@ import java.util.Calendar;
  * <p>
  * <b>由上可见，每个文件最大不能大于2G</b>
  * </p>
- * 
+ *
  * @author Leo Liang
- * 
  */
 public class Sequence {
 
-	/**
-	 * format: 20150102
-	 */
-	private int creationDate;
+    /**
+     * format: 20150102
+     */
+    private int creationDate;
 
-	private int number;
+    private int number;
 
-	private int offset;
+    private int offset;
 
-	private int len;
+    public Sequence(int creationDate, int number) {
+        this(creationDate, number, 0);
+    }
 
-	public Sequence(int creationDate, int number) {
-		this(creationDate, number, 0, 0);
-	}
+    public Sequence(int creationDate, int number, int offset) {
+        this.creationDate = creationDate;
+        this.number = number;
+        this.offset = offset;
+    }
 
-	public Sequence(int creationDate, int number, int offset) {
-		this.creationDate = creationDate;
-		this.number = number;
-		this.offset = offset;
-	}
+    public Sequence(String creationDate, int number, int offset) {
+        this.creationDate = Integer.valueOf(creationDate);
+        this.number = number;
+        this.offset = offset;
+    }
 
-	public Sequence(String creationDate, int number, long offset) {
-		this.creationDate = Integer.valueOf(creationDate);
-		this.number = number;
-		this.offset = (int) offset;
-	}
+    public Sequence(Sequence sequence) {
+        this.creationDate = sequence.creationDate;
+        this.number = sequence.number;
+        this.offset = sequence.offset;
+    }
 
-	public Sequence(int creationDate, int number, int offset, int len) {
-		this.creationDate = creationDate;
-		this.number = number;
-		this.offset = offset;
-		this.len = len;
-	}
+    public Sequence(long seq) {
+        parse(seq);
+    }
 
-	public Sequence(Sequence sequence) {
-		this.creationDate = sequence.creationDate;
-		this.number = sequence.number;
-		this.offset = sequence.offset;
-		this.len = sequence.len;
-	}
+    public int getCreationDate() {
+        return creationDate;
+    }
 
-	public Sequence(long seq, int len) {
-		parse(seq);
-		this.len = len;
-	}
+    /**
+     * 获得下一个sequence
+     *
+     * @param renewDate 是否需要重新生成创建日期
+     * @return 如果不renewDate为true，则返回以今天日期为创建日期的0号文件，并且偏移量为0的sequence； 否则返回同一创建日期的下一个编号的并且偏移量为0的文件对应的sequence
+     */
+    public Sequence getNext(boolean renewDate) {
+        if (!renewDate) {
+            return new Sequence(creationDate, number + 1, 0);
+        } else {
+            Calendar cal = Calendar.getInstance();
 
-	public int getCreationDate() {
-		return creationDate;
-	}
+            int date = (cal.get(Calendar.YEAR) - 2000) * 10000 + (cal.get(Calendar.MONTH) + 1) * 100
+                    + cal.get(Calendar.DATE);
+            return new Sequence(date, 0, 0);
+        }
+    }
 
-	/**
-	 * 获得本sequence对应的偏移量增加delta后的sequence的新实例
-	 * 
-	 * @param delta
-	 * @return
-	 */
-	public Sequence addOffset(int delta) {
-		return new Sequence(creationDate, number, this.offset + delta, delta);
-	}
+    public String date() {
+        return String.valueOf(creationDate);
+    }
 
-	public Sequence addOffset(long delta) {
-		return new Sequence(creationDate, number, this.offset + (int) delta, (int) delta);
-	}
+    public int getNumber() {
+        return number;
+    }
 
-	public void incrOffset(int delta) {
-		this.offset += delta;
-	}
+    public int getOffset() {
+        return offset;
+    }
 
-	/**
-	 * 获得本sequence对应的偏移量为0的sequence的新实例
-	 * 
-	 */
-	public Sequence clearOffset() {
-		return new Sequence(creationDate, number, 0, 0);
-	}
+    /**
+     * 获得对应的long值
+     */
+    public long longValue() {
+        return ((long) creationDate << 46) | ((long) (number & 0x3FFF)) << 32 | offset;
+    }
 
-	/**
-	 * 获得下一个sequence
-	 * 
-	 * @param renewDate
-	 *           是否需要重新生成创建日期
-	 * @return 如果不renewDate为true，则返回以今天日期为创建日期的0号文件，并且偏移量为0的sequence； 否则返回同一创建日期的下一个编号的并且偏移量为0的文件对应的sequence
-	 */
-	public Sequence getNext(boolean renewDate) {
-		if (!renewDate) {
-			return new Sequence(creationDate, number + 1, 0, 0);
-		} else {
-			Calendar cal = Calendar.getInstance();
+    private void parse(long seq) {
+        creationDate = (int) (seq >>> 46);
+        number = (int) ((seq >>> 32) & 0x3FFF);
+        offset = (int) (seq & 0xFFFFFFFF);
+    }
 
-			int date = (cal.get(Calendar.YEAR) - 2000) * 10000 + (cal.get(Calendar.MONTH) + 1) * 100
-			      + cal.get(Calendar.DATE);
-			return new Sequence(date, 0, 0, 0);
-		}
-	}
+    @Override
+    public String toString() {
+        return "Sequence [creationDate=" + creationDate + ", number=" + number + ", offset=" + offset + "]";
+    }
 
-	public String date() {
-		return String.valueOf(creationDate);
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof Sequence))
+            return false;
 
-	public int getNumber() {
-		return number;
-	}
+        Sequence sequence = (Sequence) o;
 
-	public int getOffset() {
-		return offset;
-	}
+        if (creationDate != sequence.creationDate)
+            return false;
+        if (number != sequence.number)
+            return false;
+        if (offset != sequence.offset)
+            return false;
 
-	/**
-	 * 获得对应的long值
-	 */
-	public long longValue() {
-		return ((long) creationDate << 46) | ((long) (number & 0x3FFF)) << 32 | offset;
-	}
+        return true;
+    }
 
-	private void parse(long seq) {
-		creationDate = (int) (seq >>> 46);
-		number = (int) ((seq >>> 32) & 0x3FFF);
-		offset = (int) (seq & 0xFFFFFFFF);
-	}
-
-	public int getLen() {
-		return len;
-	}
-
-	public void setLen(int len) {
-		this.len = len;
-	}
-
-	@Override
-	public String toString() {
-		return "Sequence [creationDate=" + creationDate + ", number=" + number + ", offset=" + offset + ", len=" + len
-		      + "]";
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof Sequence))
-			return false;
-
-		Sequence sequence = (Sequence) o;
-
-		if (creationDate != sequence.creationDate)
-			return false;
-		if (number != sequence.number)
-			return false;
-		if (offset != sequence.offset)
-			return false;
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = creationDate;
-		result = 31 * result + number;
-		result = 31 * result + offset;
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        int result = creationDate;
+        result = 31 * result + number;
+        result = 31 * result + offset;
+        return result;
+    }
 }

@@ -13,72 +13,72 @@ import java.io.File;
 import java.io.IOException;
 
 public final class SingleReadDataManager extends AbstractLifeCycle
-		implements ReadDataManager<Sequence, ChangedEvent> {
+        implements ReadDataManager<Sequence, ChangedEvent> {
 
-	private final File file;
+    private final File file;
 
-	private final int bufSizeByte;
+    private final int bufSizeByte;
 
-	private final int avgSizeByte;
+    private final int avgSizeByte;
 
-	private ReadBucket readBucket;
+    private ReadBucket readBucket;
 
-	private Sequence sequence;
+    private Sequence sequence;
 
-	private EventCodec eventCodec = new RawEventCodec();
+    private EventCodec eventCodec = new RawEventCodec();
 
-	protected SingleReadDataManager(File file, int bufSizeByte, int avgSizeByte) {
-		this.file = file;
-		this.bufSizeByte = bufSizeByte;
-		this.avgSizeByte = avgSizeByte;
-	}
+    protected SingleReadDataManager(File file, int bufSizeByte, int avgSizeByte) {
+        this.file = file;
+        this.bufSizeByte = bufSizeByte;
+        this.avgSizeByte = avgSizeByte;
+    }
 
-	@Override
-	protected void doStart() {
-		readBucket = BucketFactory.newLengthReadBucket(file, bufSizeByte, avgSizeByte);
-		readBucket.start();
-	}
+    @Override
+    protected void doStart() {
+        readBucket = BucketFactory.newLengthReadBucket(file, bufSizeByte, avgSizeByte);
+        readBucket.start();
+    }
 
-	@Override
-	protected void doStop() {
-		if (readBucket != null) {
-			readBucket.stop();
-		}
-	}
+    @Override
+    protected void doStop() {
+        if (readBucket != null) {
+            readBucket.stop();
+        }
+    }
 
-	@Override
-	public Sequence position() {
-		checkStop();
+    @Override
+    public Sequence position() {
+        checkStop();
 
-		return sequence.addOffset(readBucket.position());
-	}
+        return new Sequence(sequence.getCreationDate(), sequence.getNumber(), readBucket.position());
+    }
 
-	@Override
-	public void open(Sequence sequence) throws IOException {
-		checkStop();
+    @Override
+    public void open(Sequence sequence) throws IOException {
+        checkStop();
 
-		this.sequence = new Sequence(sequence.getCreationDate(), sequence.getNumber(), 0);
+        this.sequence = new Sequence(sequence.getCreationDate(), sequence.getNumber(), 0);
 
-		long offset = sequence.getOffset();
-		readBucket.skip(offset);
-	}
+        long offset = sequence.getOffset();
+        readBucket.skip(offset);
+    }
 
-	@Override
-	public ChangedEvent next() throws IOException {
-		checkStop();
+    @Override
+    public ChangedEvent next() throws IOException {
+        checkStop();
 
-		byte[] data = readBucket.next();
-		if (data == null) {
-			return null;
-		}
-		return decode(data);
-	}
+        byte[] data = readBucket.next();
+        if (data == null) {
+            return null;
+        }
+        return decode(data);
+    }
 
-	protected ChangedEvent decode(byte[] data) throws IOException {
-		Event event = eventCodec.decode(data);
-		if (!(event instanceof ChangedEvent)) {
-			throw new IOException("unknown binlog event format.");
-		}
-		return (ChangedEvent) event;
-	}
+    protected ChangedEvent decode(byte[] data) throws IOException {
+        Event event = eventCodec.decode(data);
+        if (!(event instanceof ChangedEvent)) {
+            throw new IOException("unknown binlog event format.");
+        }
+        return (ChangedEvent) event;
+    }
 }

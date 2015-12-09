@@ -21,6 +21,8 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
 
     private Sequence lastMemorySequence;
 
+    private Sequence lastFileSequence;
+
     private final String database;
 
     private boolean currentIsMemory = false;
@@ -42,6 +44,7 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
         currentIsMemory = cachedDataManager.open(dataKey);
         if (!currentIsMemory) {
             groupReadDataManager.open(dataKey);
+            lastFileSequence = dataKey;
         }
     }
 
@@ -64,12 +67,13 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
             Sequence position = position();
             ChangedEvent event = groupReadDataManager.next();
             if (event != null) {
+                lastFileSequence = position;
                 Cat.logEvent("Storage.ReadFile", database);
             } else {
                 //如果一直是Null,说明已经到达最新数据了,可以尽早尝试切换
                 lastSwitchTime--;
             }
-            trySwitchToMemory(position);
+            trySwitchToMemory();
             return event;
         }
     }
@@ -79,10 +83,10 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
         return currentIsMemory ? "Memory" : "File";
     }
 
-    private void trySwitchToMemory(Sequence position) {
+    private void trySwitchToMemory() {
         if (System.currentTimeMillis() - lastSwitchTime > 60 * 1000) {
             lastSwitchTime = System.currentTimeMillis();
-            currentIsMemory = cachedDataManager.open(position);
+            currentIsMemory = cachedDataManager.open(lastFileSequence);
         }
     }
 

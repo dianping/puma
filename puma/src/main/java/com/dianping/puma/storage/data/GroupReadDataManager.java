@@ -74,4 +74,9 @@ public class GroupReadDataManager extends AbstractLifeCycle
             }
         }
     }
+
+    @Override
+    public String getStorageMode() {
+        return "File";
+    }
 }

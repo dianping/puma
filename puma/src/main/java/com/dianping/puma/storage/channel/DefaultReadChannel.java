@@ -99,6 +99,11 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
         }
     }
 
+    @Override
+    public String getStorageMode() {
+        return readDataManager.getStorageMode();
+    }
+
     protected void initFilter(final String database, List<String> tables, boolean dml, boolean ddl, boolean transaction) {
         String[] dts = FluentIterable
                 .from(tables)

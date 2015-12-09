@@ -8,11 +8,13 @@ import java.io.IOException;
 
 public interface ReadChannel extends LifeCycle {
 
-	void openOldest() throws IOException;
+    void openOldest() throws IOException;
 
-	void openLatest() throws IOException;
+    void openLatest() throws IOException;
 
-	void open(BinlogInfo binlogInfo) throws IOException;
+    void open(BinlogInfo binlogInfo) throws IOException;
 
-	ChangedEvent next() throws IOException;
+    ChangedEvent next() throws IOException;
+
+    String getStorageMode();
 }

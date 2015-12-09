@@ -74,6 +74,11 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
         }
     }
 
+    @Override
+    public String getStorageMode() {
+        return currentIsMemory ? "Memory" : "File";
+    }
+
     private void trySwitchToMemory(Sequence position) {
         if (System.currentTimeMillis() - lastSwitchTime > 60 * 1000) {
             lastSwitchTime = System.currentTimeMillis();

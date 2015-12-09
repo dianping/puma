@@ -7,9 +7,6 @@ import com.dianping.puma.status.SystemStatus.Server;
 import com.google.common.base.Strings;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SystemStatusManager {
 
@@ -120,6 +117,15 @@ public class SystemStatusManager {
             Client client = status.getClients().get(clientName);
             if (client != null) {
                 client.setAckBinlogInfo(binlogInfo);
+            }
+        }
+    }
+
+    public static void updateClientStorageMode(String clientName, String mode) {
+        if (!Strings.isNullOrEmpty(mode)) {
+            Client client = status.getClients().get(clientName);
+            if (client != null) {
+                client.setStorage(mode);
             }
         }
     }

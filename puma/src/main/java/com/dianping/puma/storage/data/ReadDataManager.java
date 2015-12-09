@@ -6,9 +6,11 @@ import java.io.IOException;
 
 public interface ReadDataManager<K, V> extends LifeCycle {
 
-	K position();
+    K position();
 
-	void open(K dataKey) throws IOException;
+    void open(K dataKey) throws IOException;
 
-	V next() throws IOException;
+    V next() throws IOException;
+
+    String getStorageMode();
 }

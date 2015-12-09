@@ -220,6 +220,8 @@ public class SystemStatus {
 
         private String codec;
 
+        private String storage;
+
         private BinlogInfo sendBinlogInfo;
 
         private BinlogInfo ackBinlogInfo;
@@ -304,6 +306,15 @@ public class SystemStatus {
 
         public void count() {
             this.fetchQps = fetchQpsCounter.get(15);
+        }
+
+        public String getStorage() {
+            return storage;
+        }
+
+        public Client setStorage(String storage) {
+            this.storage = storage;
+            return this;
         }
     }
 

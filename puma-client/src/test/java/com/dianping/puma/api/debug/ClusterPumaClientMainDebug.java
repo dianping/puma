@@ -14,7 +14,7 @@ public class ClusterPumaClientMainDebug {
     public static void main(String[] args) throws InterruptedException, IOException {
 
         PumaClient client = new PumaClientConfig()
-                .setClientName("xxxx1112-test")
+                .setClientName("xxxx1112112-test")
                 .setDatabase("UnifiedOrder1")
                 .setTables(Lists.newArrayList("UOD_Order2"))
                 .setServerHosts(Lists.newArrayList("127.0.0.1:4040"))

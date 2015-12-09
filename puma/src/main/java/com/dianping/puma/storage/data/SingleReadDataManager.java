@@ -74,6 +74,11 @@ public final class SingleReadDataManager extends AbstractLifeCycle
         return decode(data);
     }
 
+    @Override
+    public String getStorageMode() {
+        return "File";
+    }
+
     protected ChangedEvent decode(byte[] data) throws IOException {
         Event event = eventCodec.decode(data);
         if (!(event instanceof ChangedEvent)) {

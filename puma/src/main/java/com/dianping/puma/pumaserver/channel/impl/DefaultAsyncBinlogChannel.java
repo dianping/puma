@@ -190,6 +190,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         protected Event getEvent() {
             try {
                 ChangedEvent event = getParent().readChannel.next();
+                SystemStatusManager.updateClientStorageMode(getParent().clientName, getParent().readChannel.getStorageMode());
                 lastException = null;
                 return event;
             } catch (Exception e) {

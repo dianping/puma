@@ -88,6 +88,6 @@ public final class LineReadBucket extends AbstractLifeCycle implements ReadBucke
 
 	@Override
 	public int position() {
-		return position;
+		throw new IllegalAccessError();
 	}
 }

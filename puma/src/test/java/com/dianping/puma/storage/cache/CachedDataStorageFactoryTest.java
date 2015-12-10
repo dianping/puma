@@ -10,32 +10,32 @@ import static org.mockito.Mockito.*;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class CachedDataManagerFactoryTest {
+public class CachedDataStorageFactoryTest {
     @Test(expected = Exception.class)
     public void test_release_reader_exp() throws Exception {
-        Assert.assertNotNull(CachedDataManagerFactory.getInstance().getReadCachedDataManager("test"));
-        Assert.assertNotNull(CachedDataManagerFactory.getInstance().getReadCachedDataManager("test"));
-        CachedDataManagerFactory.getInstance().releaseReadCachedDataManager("test");
-        CachedDataManagerFactory.getInstance().releaseReadCachedDataManager("test");
-        CachedDataManagerFactory.getInstance().releaseReadCachedDataManager("test");
+        Assert.assertNotNull(CachedDataStorageFactory.getInstance().getReadCachedDataManager("test"));
+        Assert.assertNotNull(CachedDataStorageFactory.getInstance().getReadCachedDataManager("test"));
+        CachedDataStorageFactory.getInstance().releaseReadCachedDataManager("test");
+        CachedDataStorageFactory.getInstance().releaseReadCachedDataManager("test");
+        CachedDataStorageFactory.getInstance().releaseReadCachedDataManager("test");
     }
 
     @Test(expected = Exception.class)
     public void test_release_writer_exp() throws Exception {
-        Assert.assertNotNull(CachedDataManagerFactory.getInstance().getWriteCachedDataManager("test"));
-        CachedDataManagerFactory.getInstance().releaseWriteCachedDataManager("test");
-        CachedDataManagerFactory.getInstance().releaseWriteCachedDataManager("test");
+        Assert.assertNotNull(CachedDataStorageFactory.getInstance().getWriteCachedDataManager("test"));
+        CachedDataStorageFactory.getInstance().releaseWriteCachedDataManager("test");
+        CachedDataStorageFactory.getInstance().releaseWriteCachedDataManager("test");
     }
 
     @Test(expected = Exception.class)
     public void test_can_not_alloc_multi_writer() throws Exception {
-        CachedDataManagerFactory.getInstance().getWriteCachedDataManager("test");
-        CachedDataManagerFactory.getInstance().getWriteCachedDataManager("test");
+        CachedDataStorageFactory.getInstance().getWriteCachedDataManager("test");
+        CachedDataStorageFactory.getInstance().getWriteCachedDataManager("test");
     }
 
     @Test
     public void test_start_stop() throws Exception {
-        CachedDataManagerFactory factory = spy(new CachedDataManagerFactory());
+        CachedDataStorageFactory factory = spy(new CachedDataStorageFactory());
         CachedDataStorage storage = mock(CachedDataStorage.class);
         doReturn(storage).when(factory).initCachedDataStorage();
 

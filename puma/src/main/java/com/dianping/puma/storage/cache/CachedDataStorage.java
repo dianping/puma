@@ -43,7 +43,14 @@ public class CachedDataStorage implements LifeCycle {
         nextWriteIndex = 0;
     }
 
+    public Reader createReader() {
+        return new Reader();
+    }
+
     public class Reader {
+
+        private Reader() {
+        }
 
         private volatile long readDataVersion = -1;
 

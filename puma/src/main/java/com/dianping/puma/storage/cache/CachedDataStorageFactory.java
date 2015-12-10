@@ -11,17 +11,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-class CachedDataManagerFactory {
-    private static volatile CachedDataManagerFactory instance;
+class CachedDataStorageFactory {
+    private static volatile CachedDataStorageFactory instance;
 
-    protected CachedDataManagerFactory() {
+    protected CachedDataStorageFactory() {
     }
 
-    final static CachedDataManagerFactory getInstance() {
+    final static CachedDataStorageFactory getInstance() {
         if (instance == null) {
-            synchronized (CachedDataManagerFactory.class) {
+            synchronized (CachedDataStorageFactory.class) {
                 if (instance == null) {
-                    instance = new CachedDataManagerFactory();
+                    instance = new CachedDataStorageFactory();
                 }
             }
         }
@@ -37,7 +37,7 @@ class CachedDataManagerFactory {
             READER_COUNTER.put(database, new AtomicInteger());
         }
         READER_COUNTER.get(database).incrementAndGet();
-        return getCachedDataManager(database).new Reader();
+        return getCachedDataManager(database).createReader();
     }
 
     final synchronized void releaseReadCachedDataManager(String database) {

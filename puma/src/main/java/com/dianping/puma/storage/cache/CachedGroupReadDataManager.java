@@ -19,24 +19,29 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
 
     private final GroupReadDataManager groupReadDataManager;
 
-    private Sequence lastMemorySequence;
-
-    private Sequence lastFileSequence;
+    private final CachedDataStorageFactory cachedDataStorageFactory;
 
     private final String database;
+
+    private Sequence lastSequence;
 
     private boolean currentIsMemory = false;
 
     private long lastSwitchTime = 0;
 
     public CachedGroupReadDataManager(String database) {
+        this(database, CachedDataStorageFactory.getInstance(), new GroupReadDataManager(database));
+    }
+
+    protected CachedGroupReadDataManager(String database, CachedDataStorageFactory cachedDataStorageFactory, GroupReadDataManager groupReadDataManager) {
         this.database = database;
-        this.groupReadDataManager = new GroupReadDataManager(database);
+        this.cachedDataStorageFactory = cachedDataStorageFactory;
+        this.groupReadDataManager = groupReadDataManager;
     }
 
     @Override
     public Sequence position() {
-        return currentIsMemory ? lastMemorySequence : groupReadDataManager.position();
+        return lastSequence;
     }
 
     @Override
@@ -44,37 +49,49 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
         currentIsMemory = cachedDataManager.open(dataKey);
         if (!currentIsMemory) {
             groupReadDataManager.open(dataKey);
-            lastFileSequence = dataKey;
         }
+
+        lastSequence = dataKey;
     }
 
     @Override
     public ChangedEvent next() throws IOException {
         if (currentIsMemory) {
             try {
-                ChangedEventWithSequence changedEventWithSequence = cachedDataManager.next();
-                if (changedEventWithSequence == null) {
-                    return null;
-                }
-                Cat.logEvent("Storage.ReadMemory", database);
-                lastMemorySequence = changedEventWithSequence.getSequence();
-                return changedEventWithSequence.getChangedEvent();
+                return memoryNext();
             } catch (IOException e) {
                 switchToFile();
                 return next();
             }
         } else {
-            Sequence position = position();
-            ChangedEvent event = groupReadDataManager.next();
-            if (event != null) {
-                lastFileSequence = position;
-                Cat.logEvent("Storage.ReadFile", database);
-            } else {
-                //如果一直是Null,说明已经到达最新数据了,可以尽早尝试切换
-                lastSwitchTime--;
-            }
+            ChangedEvent event = fileNext();
             trySwitchToMemory();
             return event;
+        }
+    }
+
+    protected ChangedEvent fileNext() throws IOException {
+        Sequence position = groupReadDataManager.position();
+        ChangedEvent event = groupReadDataManager.next();
+
+        if (event != null) {
+            lastSequence = position;
+            Cat.logEvent("Storage.ReadFile", database);
+        } else {
+            //如果一直是Null,说明已经到达最新数据了,可以尽早尝试切换
+            lastSwitchTime--;
+        }
+        return event;
+    }
+
+    protected ChangedEvent memoryNext() throws IOException {
+        ChangedEventWithSequence changedEventWithSequence = cachedDataManager.next();
+        if (changedEventWithSequence == null) {
+            return null;
+        } else {
+            Cat.logEvent("Storage.ReadMemory", database);
+            lastSequence = changedEventWithSequence.getSequence();
+            return changedEventWithSequence.getChangedEvent();
         }
     }
 
@@ -83,15 +100,15 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
         return currentIsMemory ? "Memory" : "File";
     }
 
-    private void trySwitchToMemory() {
+    protected void trySwitchToMemory() {
         if (System.currentTimeMillis() - lastSwitchTime > 60 * 1000) {
             lastSwitchTime = System.currentTimeMillis();
-            currentIsMemory = cachedDataManager.open(lastFileSequence);
+            currentIsMemory = cachedDataManager.open(lastSequence);
         }
     }
 
-    private void switchToFile() throws IOException {
-        groupReadDataManager.open(lastMemorySequence);
+    protected void switchToFile() throws IOException {
+        groupReadDataManager.open(lastSequence);
         currentIsMemory = false;
         lastSwitchTime = System.currentTimeMillis();
     }
@@ -99,13 +116,13 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
     @Override
     public void start() {
         groupReadDataManager.start();
-        this.cachedDataManager = CachedDataManagerFactory.getInstance().getReadCachedDataManager(database);
+        this.cachedDataManager = cachedDataStorageFactory.getReadCachedDataManager(database);
     }
 
     @Override
     public void stop() {
         this.cachedDataManager = null;
-        CachedDataManagerFactory.getInstance().releaseReadCachedDataManager(database);
+        cachedDataStorageFactory.releaseReadCachedDataManager(database);
         groupReadDataManager.stop();
     }
 }

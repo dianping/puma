@@ -43,8 +43,8 @@ public final class SeriesIndexManagerFinder {
     }
 
     private static void checkFileExists(File file) throws FileNotFoundException {
-        if (!file.exists()) {
-            throw new FileNotFoundException(file.getAbsolutePath());
+        if (file == null || !file.exists()) {
+            throw new FileNotFoundException();
         }
     }
 

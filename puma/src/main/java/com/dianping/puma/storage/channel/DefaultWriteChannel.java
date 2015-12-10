@@ -80,7 +80,7 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
     private class FlushTask implements Runnable {
         @Override
         public void run() {
-            while (!isStopped()) {
+            while (!isStopped() && !Thread.currentThread().isInterrupted()) {
                 try {
                     flush();
                     Uninterruptibles.sleepUninterruptibly(1000, TimeUnit.MILLISECONDS);

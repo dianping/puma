@@ -76,7 +76,6 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
 
         if (event != null) {
             lastSequence = position;
-            Cat.logEvent("Storage.ReadFile", database);
         } else {
             //如果一直是Null,说明已经到达最新数据了,可以尽早尝试切换
             lastSwitchTime--;
@@ -89,7 +88,6 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
         if (changedEventWithSequence == null) {
             return null;
         } else {
-            Cat.logEvent("Storage.ReadMemory", database);
             lastSequence = changedEventWithSequence.getSequence();
             return changedEventWithSequence.getChangedEvent();
         }

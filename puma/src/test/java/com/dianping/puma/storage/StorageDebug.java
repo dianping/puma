@@ -17,6 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
@@ -62,11 +63,16 @@ public class StorageDebug extends StorageBaseTest {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(5000);
-
-                    DefaultReadChannel readChannel = ChannelFactory.newReadChannel("test", Lists.newArrayList("table1", "table2", "table3"), true, false, false);
-                    readChannel.start();
-                    readChannel.openOldest();
+                    DefaultReadChannel readChannel;
+                    while (true) {
+                        try {
+                            readChannel = ChannelFactory.newReadChannel("test", Lists.newArrayList("table1", "table2", "table3"), true, false, false);
+                            readChannel.start();
+                            readChannel.openOldest();
+                            break;
+                        } catch (IOException e) {
+                        }
+                    }
 
                     while (true) {
                         Event event1 = events.take();

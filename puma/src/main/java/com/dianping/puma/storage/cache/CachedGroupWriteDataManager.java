@@ -45,13 +45,13 @@ public class CachedGroupWriteDataManager implements WriteDataManager<Sequence, C
     @Override
     public void start() {
         groupWriteDataManager.start();
-        this.cachedDataStorage = CachedDataManagerFactory.getWriteCachedDataManager(database);
+        this.cachedDataStorage = CachedDataManagerFactory.getInstance().getWriteCachedDataManager(database);
     }
 
     @Override
     public void stop() {
         this.cachedDataStorage = null;
-        CachedDataManagerFactory.releaseWriteCachedDataManager(database);
+        CachedDataManagerFactory.getInstance().releaseWriteCachedDataManager(database);
         groupWriteDataManager.stop();
     }
 }

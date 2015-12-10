@@ -1,5 +1,7 @@
 package com.dianping.puma.storage.cache;
 
+import com.google.common.base.Preconditions;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -9,15 +11,28 @@ import java.util.concurrent.atomic.AtomicInteger;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public final class CachedDataManagerFactory {
-    private CachedDataManagerFactory() {
+class CachedDataManagerFactory {
+    private static volatile CachedDataManagerFactory instance;
+
+    protected CachedDataManagerFactory() {
     }
 
-    private static final Map<String, AtomicInteger> READER_COUNTER = new HashMap<String, AtomicInteger>();
-    private static final Map<String, AtomicInteger> WRITER_COUNTER = new HashMap<String, AtomicInteger>();
-    private static final Map<String, CachedDataStorage> MANAGER_MAP = new HashMap<String, CachedDataStorage>();
+    final static CachedDataManagerFactory getInstance() {
+        if (instance == null) {
+            synchronized (CachedDataManagerFactory.class) {
+                if (instance == null) {
+                    instance = new CachedDataManagerFactory();
+                }
+            }
+        }
+        return instance;
+    }
 
-    public synchronized static CachedDataStorage.Reader getReadCachedDataManager(String database) {
+    private final Map<String, AtomicInteger> READER_COUNTER = new HashMap<String, AtomicInteger>();
+    private final Map<String, AtomicInteger> WRITER_COUNTER = new HashMap<String, AtomicInteger>();
+    private final Map<String, CachedDataStorage> MANAGER_MAP = new HashMap<String, CachedDataStorage>();
+
+    final synchronized CachedDataStorage.Reader getReadCachedDataManager(String database) {
         if (!READER_COUNTER.containsKey(database)) {
             READER_COUNTER.put(database, new AtomicInteger());
         }
@@ -25,27 +40,34 @@ public final class CachedDataManagerFactory {
         return getCachedDataManager(database).new Reader();
     }
 
-    public synchronized static void releaseReadCachedDataManager(String database) {
+    final synchronized void releaseReadCachedDataManager(String database) {
+        Preconditions.checkState(READER_COUNTER.get(database).get() > 0, "No reader allocated.");
+
         READER_COUNTER.get(database).decrementAndGet();
         getCachedDataManager(database);
     }
 
-    public synchronized static CachedDataStorage getWriteCachedDataManager(String database) {
+    final synchronized CachedDataStorage getWriteCachedDataManager(String database) {
         if (!WRITER_COUNTER.containsKey(database)) {
             WRITER_COUNTER.put(database, new AtomicInteger());
         }
+
+        Preconditions.checkState(WRITER_COUNTER.get(database).get() == 0, "Not allow multi writer.");
+
         WRITER_COUNTER.get(database).incrementAndGet();
         return getCachedDataManager(database);
     }
 
-    public synchronized static void releaseWriteCachedDataManager(String database) {
+    final synchronized void releaseWriteCachedDataManager(String database) {
+        Preconditions.checkState(WRITER_COUNTER.get(database).get() == 1, "No writer allocated.");
+
         WRITER_COUNTER.get(database).decrementAndGet();
         getCachedDataManager(database);
     }
 
-    private static CachedDataStorage getCachedDataManager(String database) {
+    private final CachedDataStorage getCachedDataManager(String database) {
         if (!MANAGER_MAP.containsKey(database)) {
-            MANAGER_MAP.put(database, new CachedDataStorage());
+            MANAGER_MAP.put(database, initCachedDataStorage());
         }
         CachedDataStorage manager = MANAGER_MAP.get(database);
 
@@ -58,5 +80,9 @@ public final class CachedDataManagerFactory {
         }
 
         return manager;
+    }
+
+    protected CachedDataStorage initCachedDataStorage() {
+        return new CachedDataStorage();
     }
 }

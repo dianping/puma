@@ -99,13 +99,13 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
     @Override
     public void start() {
         groupReadDataManager.start();
-        this.cachedDataManager = CachedDataManagerFactory.getReadCachedDataManager(database);
+        this.cachedDataManager = CachedDataManagerFactory.getInstance().getReadCachedDataManager(database);
     }
 
     @Override
     public void stop() {
         this.cachedDataManager = null;
-        CachedDataManagerFactory.releaseReadCachedDataManager(database);
+        CachedDataManagerFactory.getInstance().releaseReadCachedDataManager(database);
         groupReadDataManager.stop();
     }
 }

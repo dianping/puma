@@ -4,6 +4,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
 import com.dianping.puma.core.event.EventFactory;
 import com.dianping.puma.core.util.sql.DMLType;
+import com.dianping.puma.status.QpsCounter;
 import com.dianping.puma.storage.channel.ChannelFactory;
 import com.dianping.puma.storage.channel.DefaultReadChannel;
 import com.dianping.puma.storage.channel.ReadChannel;
@@ -29,6 +30,8 @@ public class StorageDebug extends StorageBaseTest {
 
     WriteChannel writeChannel;
 
+    QpsCounter qpsCounter = new QpsCounter(5);
+
     @Override
     @Before
     public void setUp() throws Exception {
@@ -43,7 +46,7 @@ public class StorageDebug extends StorageBaseTest {
         readChannel.start();
     }
 
-    BlockingQueue<Event> events = new LinkedBlockingQueue<Event>(10000);
+    BlockingQueue<Event> events = new LinkedBlockingQueue<Event>(100000);
 
     @Test
     public void testAll() throws Exception {
@@ -59,34 +62,21 @@ public class StorageDebug extends StorageBaseTest {
 
         long count = 0;
 
+        new Thread(new Reader(true)).start();
+        new Thread(new Reader(false)).start();
+        new Thread(new Reader(false)).start();
+        new Thread(new Reader(false)).start();
+        new Thread(new Reader(false)).start();
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    DefaultReadChannel readChannel;
-                    while (true) {
-                        try {
-                            readChannel = ChannelFactory.newReadChannel("test", Lists.newArrayList("table1", "table2", "table3"), true, false, false);
-                            readChannel.start();
-                            readChannel.openOldest();
-                            break;
-                        } catch (IOException e) {
-                        }
+                while (true) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
                     }
-
-                    while (true) {
-                        Event event1 = events.take();
-
-                        Event event2;
-
-                        while ((event2 = readChannel.next()) == null) {
-                            Thread.sleep(1);
-                        }
-
-                        assert event1.toString().equals(event2.toString());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    System.out.println(qpsCounter.get(5));
                 }
             }
         }).start();
@@ -124,4 +114,43 @@ public class StorageDebug extends StorageBaseTest {
         FileSystem.changeBasePath(FileSystem.DEFAULT_PATH);
     }
 
+    class Reader implements Runnable {
+        private final boolean checkData;
+
+        public Reader(boolean checkData) {
+            this.checkData = checkData;
+        }
+
+        @Override
+        public void run() {
+            try {
+                DefaultReadChannel readChannel;
+                while (true) {
+                    try {
+                        readChannel = ChannelFactory.newReadChannel("test", Lists.newArrayList("table1", "table2", "table3"), true, false, false);
+                        readChannel.start();
+                        readChannel.openOldest();
+                        break;
+                    } catch (IOException e) {
+                    }
+                }
+
+                while (true) {
+                    Event event2;
+
+                    while ((event2 = readChannel.next()) == null) {
+                        Thread.sleep(1);
+                    }
+
+                    if (checkData) {
+                        Event event1 = events.take();
+                        assert event1.toString().equals(event2.toString());
+                    }
+                    qpsCounter.increase();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

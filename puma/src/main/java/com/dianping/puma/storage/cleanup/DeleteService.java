@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.maintain.clean;
+package com.dianping.puma.storage.cleanup;
 
 public interface DeleteService {
 

@@ -1,9 +1,8 @@
-package com.dianping.puma.storage.maintain.clean;
+package com.dianping.puma.storage.cleanup;
 
 import com.dianping.puma.storage.utils.DateUtils;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.regex.Pattern;
 
 @Service

@@ -1,4 +1,4 @@
-package com.dianping.puma.storage.maintain.clean;
+package com.dianping.puma.storage.cleanup;
 
 import com.dianping.puma.storage.filesystem.FileSystem;
 import org.apache.commons.io.FileUtils;

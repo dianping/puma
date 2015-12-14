@@ -29,33 +29,7 @@ public final class L1SingleReadIndexManager extends SingleReadIndexManager<Binlo
 
     @Override
     protected boolean greater(BinlogInfo aBinlogInfo, BinlogInfo bBinlogInfo) {
-        long aServerId = aBinlogInfo.getServerId();
-        long bServerId = bBinlogInfo.getServerId();
-        if (aServerId != 0 && bServerId != 0 && aServerId == bServerId) {
-            String aBinlogFile = aBinlogInfo.getBinlogFile();
-            String bBinlogFile = bBinlogInfo.getBinlogFile();
-
-            Integer aBinlogFileNumber = Integer.valueOf(StringUtils.substringAfterLast(aBinlogFile, "."));
-            Integer bBinlogFileNumber = Integer.valueOf(StringUtils.substringAfterLast(bBinlogFile, "."));
-            int result = aBinlogFileNumber.compareTo(bBinlogFileNumber);
-
-            if (result > 0) {
-                return true;
-            } else if (result < 0) {
-                return false;
-            } else {
-                long aBinlogPosition = aBinlogInfo.getBinlogPosition();
-                long bBinlogPosition = bBinlogInfo.getBinlogPosition();
-                return aBinlogPosition > bBinlogPosition;
-            }
-        } else {
-            long aTimestamp = aBinlogInfo.getTimestamp();
-            long bTimestamp = bBinlogInfo.getTimestamp();
-            if (aTimestamp == 0 || bTimestamp == 0) {
-                return true;
-            }
-            return aTimestamp > bTimestamp;
-        }
+        return aBinlogInfo.greaterThan(bBinlogInfo);
     }
 
     @Override

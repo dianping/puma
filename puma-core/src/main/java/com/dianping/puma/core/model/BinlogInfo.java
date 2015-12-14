@@ -1,6 +1,7 @@
 package com.dianping.puma.core.model;
 
 import com.google.common.base.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 
@@ -107,5 +108,35 @@ public class BinlogInfo implements Serializable {
                 ", eventIndex=" + eventIndex +
                 ", timestamp=" + timestamp +
                 '}';
+    }
+
+    public boolean greaterThan(BinlogInfo bBinlogInfo) {
+        long aServerId = this.getServerId();
+        long bServerId = bBinlogInfo.getServerId();
+        if (aServerId != 0 && bServerId != 0 && aServerId == bServerId) {
+            String aBinlogFile = this.getBinlogFile();
+            String bBinlogFile = bBinlogInfo.getBinlogFile();
+
+            Integer aBinlogFileNumber = Integer.valueOf(StringUtils.substringAfterLast(aBinlogFile, "."));
+            Integer bBinlogFileNumber = Integer.valueOf(StringUtils.substringAfterLast(bBinlogFile, "."));
+            int result = aBinlogFileNumber.compareTo(bBinlogFileNumber);
+
+            if (result > 0) {
+                return true;
+            } else if (result < 0) {
+                return false;
+            } else {
+                long aBinlogPosition = this.getBinlogPosition();
+                long bBinlogPosition = bBinlogInfo.getBinlogPosition();
+                return aBinlogPosition > bBinlogPosition;
+            }
+        } else {
+            long aTimestamp = this.getTimestamp();
+            long bTimestamp = bBinlogInfo.getTimestamp();
+            if (aTimestamp == 0 || bTimestamp == 0) {
+                return true;
+            }
+            return aTimestamp > bTimestamp;
+        }
     }
 }

@@ -10,78 +10,50 @@ import java.io.IOException;
 
 public final class L2SingleReadIndexManager extends SingleReadIndexManager<BinlogInfo, Sequence> {
 
-	public static final int ENCODE_NUMBER = 2;
-	public static final int BINLOG_INFO_FIELD_NUMBER = 4;
-	public static final int SEQUENCE_FIELD_NUMBER = 3;
+    public static final int ENCODE_NUMBER = 2;
+    public static final int BINLOG_INFO_FIELD_NUMBER = 4;
+    public static final int SEQUENCE_FIELD_NUMBER = 3;
 
-	public L2SingleReadIndexManager(File file, int bufSizeByte, int avgSizeByte) {
-		super(file, bufSizeByte, avgSizeByte);
-	}
+    public L2SingleReadIndexManager(File file, int bufSizeByte, int avgSizeByte) {
+        super(file, bufSizeByte, avgSizeByte);
+    }
 
-	@Override
-	protected boolean greater(BinlogInfo aBinlogInfo, BinlogInfo bBinlogInfo) {
-		long aServerId = aBinlogInfo.getServerId();
-		long bServerId = bBinlogInfo.getServerId();
-		if (aServerId != 0 && bServerId != 0 && aServerId == bServerId) {
-			String aBinlogFile = aBinlogInfo.getBinlogFile();
-			String bBinlogFile = bBinlogInfo.getBinlogFile();
+    @Override
+    protected boolean greater(BinlogInfo aBinlogInfo, BinlogInfo bBinlogInfo) {
+        return aBinlogInfo.greaterThan(bBinlogInfo);
+    }
 
-			Integer aBinlogFileNumber = Integer.valueOf(StringUtils.substringAfterLast(aBinlogFile, "."));
-			Integer bBinlogFileNumber = Integer.valueOf(StringUtils.substringAfterLast(bBinlogFile, "."));
-			int result = aBinlogFileNumber.compareTo(bBinlogFileNumber);
+    @Override
+    protected Pair<BinlogInfo, Sequence> decode(byte[] data) throws IOException {
+        String rawString = new String(data);
+        String[] rawStrings = StringUtils.split(rawString, "=");
+        if (rawStrings == null || rawStrings.length != ENCODE_NUMBER) {
+            throw new IOException("unknown L2 index format.");
+        }
 
-			if (result > 0) {
-				return true;
-			} else if (result < 0) {
-				return false;
-			} else {
-				long aBinlogPosition = aBinlogInfo.getBinlogPosition();
-				long bBinlogPosition = bBinlogInfo.getBinlogPosition();
+        String binlogInfoString = rawStrings[0];
+        String[] binlogInfoStrings = StringUtils.split(binlogInfoString, "!");
+        if (binlogInfoStrings == null || binlogInfoStrings.length != BINLOG_INFO_FIELD_NUMBER) {
+            throw new IOException("unknown L2 index format.");
+        }
 
-				return aBinlogPosition > bBinlogPosition ;
+        long timestamp = Long.valueOf(binlogInfoStrings[0]);
+        long serverId = Long.valueOf(binlogInfoStrings[1]);
+        String binlogFile = binlogInfoStrings[2];
+        long binlogPosition = Long.valueOf(binlogInfoStrings[3]);
+        BinlogInfo binlogInfo = new BinlogInfo(timestamp, serverId, binlogFile, binlogPosition);
 
-			}
-		} else {
-			long aTimestamp = aBinlogInfo.getTimestamp();
-			long bTimestamp = bBinlogInfo.getTimestamp();
-			if (aTimestamp == 0 || bTimestamp == 0) {
-				return true;
-			}
-			return aTimestamp > bTimestamp;
-		}
-	}
+        String sequenceString = rawStrings[1];
+        String[] sequenceStrings = StringUtils.split(sequenceString, "!");
+        if (sequenceStrings == null || sequenceStrings.length != SEQUENCE_FIELD_NUMBER) {
+            throw new IOException("unknown L2 index format.");
+        }
 
-	@Override
-	protected Pair<BinlogInfo, Sequence> decode(byte[] data) throws IOException {
-		String rawString = new String(data);
-		String[] rawStrings = StringUtils.split(rawString, "=");
-		if (rawStrings == null || rawStrings.length != ENCODE_NUMBER) {
-			throw new IOException("unknown L2 index format.");
-		}
+        int date = Integer.valueOf(sequenceStrings[0]);
+        int number = Integer.valueOf(sequenceStrings[1]);
+        int offset = Integer.valueOf(sequenceStrings[2]);
+        Sequence sequence = new Sequence(date, number, offset);
 
-		String binlogInfoString = rawStrings[0];
-		String[] binlogInfoStrings = StringUtils.split(binlogInfoString, "!");
-		if (binlogInfoStrings == null || binlogInfoStrings.length != BINLOG_INFO_FIELD_NUMBER) {
-			throw new IOException("unknown L2 index format.");
-		}
-
-		long timestamp = Long.valueOf(binlogInfoStrings[0]);
-		long serverId = Long.valueOf(binlogInfoStrings[1]);
-		String binlogFile = binlogInfoStrings[2];
-		long binlogPosition = Long.valueOf(binlogInfoStrings[3]);
-		BinlogInfo binlogInfo = new BinlogInfo(timestamp, serverId, binlogFile, binlogPosition);
-
-		String sequenceString = rawStrings[1];
-		String[] sequenceStrings = StringUtils.split(sequenceString, "!");
-		if (sequenceStrings == null || sequenceStrings.length != SEQUENCE_FIELD_NUMBER) {
-			throw new IOException("unknown L2 index format.");
-		}
-
-		int date = Integer.valueOf(sequenceStrings[0]);
-		int number = Integer.valueOf(sequenceStrings[1]);
-		int offset = Integer.valueOf(sequenceStrings[2]);
-		Sequence sequence = new Sequence(date, number, offset);
-
-		return Pair.of(binlogInfo, sequence);
-	}
+        return Pair.of(binlogInfo, sequence);
+    }
 }

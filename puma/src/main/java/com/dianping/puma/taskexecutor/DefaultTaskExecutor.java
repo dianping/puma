@@ -273,7 +273,9 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         SrcDbEntity newSrcEntity = sortedSet.get(index);
 
         Cat.logEvent("SrcDbSwitch", taskName, Message.SUCCESS,
-                oldSrcEntity.toString() + " -> " + newSrcEntity.toString());
+                (oldSrcEntity == null ? "null" : oldSrcEntity.toString())
+                        + " -> " +
+                        (newSrcEntity == null ? "null" : newSrcEntity.toString()));
 
         return newSrcEntity;
     }

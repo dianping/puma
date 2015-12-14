@@ -4,8 +4,6 @@ import java.io.File;
 
 public final class IndexManagerFactory {
 
-    private static volatile boolean pause = false;
-
     private static final int L1_READ_BUF_SIZE_BYTE = 64 * 1024; // 64K.
 
     private static final int L1_READ_AVG_SIZE_BYTE = 64 * 1024; // 64K.
@@ -23,25 +21,6 @@ public final class IndexManagerFactory {
     private static final int L2_WRITE_MAX_SIZE_BYTE = 1024 * 1024 * 1024; // 1G.
 
     private IndexManagerFactory() {
-    }
-
-    public static void waitForPause() {
-        while (pause) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-    }
-
-    public static void pause() {
-        pause = true;
-    }
-
-    public static void resume() {
-        pause = false;
     }
 
     public static L1SingleReadIndexManager newL1SingleReadIndexManager(File file) {

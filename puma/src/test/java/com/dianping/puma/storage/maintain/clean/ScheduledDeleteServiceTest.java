@@ -34,53 +34,6 @@ public class ScheduledDeleteServiceTest extends StorageBaseTest {
     }
 
     @Test
-    public void testDeleAteOldData() throws Exception {
-        SeriesWriteIndexManager indexManager = new SeriesWriteIndexManager("test");
-        indexManager.start();
-        GroupWriteDataManager dataManager = new GroupWriteDataManager("test");
-        dataManager.start();
-
-        DateUtils.changeGetNowTime("20150101");
-        RowChangedEvent event1 = EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT);
-        Sequence sequence1 = dataManager.append(event1);
-        indexManager.append(event1.getBinlogInfo(), sequence1);
-
-        DateUtils.changeGetNowTime("20150102");
-        RowChangedEvent event2 = EventFactory.dml(2, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT);
-        Sequence sequence2 = dataManager.append(event2);
-        indexManager.append(event2.getBinlogInfo(), sequence2);
-
-        DateUtils.changeGetNowTime("20150103");
-        RowChangedEvent event3 = EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT);
-        Sequence sequence3 = dataManager.append(event3);
-        indexManager.append(event3.getBinlogInfo(), sequence3);
-
-        DateUtils.changeGetNowTime("20150104");
-        indexManager.flush();
-        dataManager.flush();
-
-        scheduledDeleteService.scheduledDelete();
-
-        RowChangedEvent event4 = EventFactory.dml(3, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT);
-        Sequence sequence4 = dataManager.append(event4);
-        indexManager.append(event4.getBinlogInfo(), sequence4);
-        indexManager.flush();
-        dataManager.flush();
-
-        SeriesReadIndexManager readIndexManager = new SeriesReadIndexManager("test");
-        readIndexManager.start();
-        GroupReadDataManager readDataManager = new GroupReadDataManager("test");
-        readDataManager.start();
-
-        Sequence seq = readIndexManager.findOldest();
-        readDataManager.open(seq);
-
-        Assert.assertEquals(readDataManager.next(), event2);
-        Assert.assertEquals(readDataManager.next(), event3);
-        Assert.assertEquals(readDataManager.next(), event4);
-    }
-
-    @Test
     public void testDeleteDirectory() throws Exception {
         File directory0 = new File(testDir, "directory0");
         createDirectory(directory0);

@@ -1,17 +1,7 @@
 package com.dianping.puma.storage.maintain.clean;
 
-import com.dianping.puma.core.event.EventFactory;
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.StorageBaseTest;
-import com.dianping.puma.storage.data.GroupReadDataManager;
-import com.dianping.puma.storage.data.GroupWriteDataManager;
 import com.dianping.puma.storage.filesystem.FileSystem;
-import com.dianping.puma.storage.index.SeriesReadIndexManager;
-import com.dianping.puma.storage.index.SeriesWriteIndexManager;
-import com.dianping.puma.storage.utils.DateUtils;
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

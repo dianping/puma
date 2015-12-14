@@ -41,7 +41,7 @@ class CachedDataStorageFactory {
     }
 
     final synchronized void releaseReadCachedDataManager(String database) {
-        Preconditions.checkState(READER_COUNTER.get(database).get() > 0, "No reader allocated.");
+        Preconditions.checkState(READER_COUNTER.get(database).get() > 0, "No reader allocated:" + database);
 
         READER_COUNTER.get(database).decrementAndGet();
         getCachedDataManager(database);
@@ -52,14 +52,14 @@ class CachedDataStorageFactory {
             WRITER_COUNTER.put(database, new AtomicInteger());
         }
 
-        Preconditions.checkState(WRITER_COUNTER.get(database).get() == 0, "Not allow multi writer.");
+        Preconditions.checkState(WRITER_COUNTER.get(database).get() == 0, "Not allow multi writer:" + database);
 
         WRITER_COUNTER.get(database).incrementAndGet();
         return getCachedDataManager(database);
     }
 
     final synchronized void releaseWriteCachedDataManager(String database) {
-        Preconditions.checkState(WRITER_COUNTER.get(database).get() == 1, "No writer allocated.");
+        Preconditions.checkState(WRITER_COUNTER.get(database).get() == 1, "No writer allocated:" + database);
 
         WRITER_COUNTER.get(database).decrementAndGet();
         getCachedDataManager(database);

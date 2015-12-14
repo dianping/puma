@@ -4,7 +4,6 @@ import com.dianping.puma.storage.filesystem.FileSystem;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +16,7 @@ public final class ScheduledDeleteService implements DeleteService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Autowired
-    DeleteStrategy deleteStrategy;
+    private DeleteStrategy deleteStrategy = new ExpiredDeleteStrategy();
 
     @Override
     public void delete() {

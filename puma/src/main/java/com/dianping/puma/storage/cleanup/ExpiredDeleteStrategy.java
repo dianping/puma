@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.regex.Pattern;
 
-@Service
 public class ExpiredDeleteStrategy implements DeleteStrategy {
 
     private final int preservedDay = 3;

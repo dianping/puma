@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public abstract class SingleWriteIndexManager<K, V> extends AbstractLifeCycle implements WriteIndexManager<K, V> {
 
-	private final File file;
+	protected final File file;
 
 	private final int bufSizeByte;
 

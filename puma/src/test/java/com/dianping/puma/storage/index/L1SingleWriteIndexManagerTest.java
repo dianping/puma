@@ -10,65 +10,68 @@ import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class L1SingleWriteIndexManagerTest extends StorageBaseTest {
 
-	L1SingleWriteIndexManager l1SingleWriteIndexManager;
+    L1SingleWriteIndexManager l1SingleWriteIndexManager;
 
-	File bucket;
+    File bucket;
 
-	@Before
-	public void setUp() throws Exception {
-		super.setUp();
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
 
-		bucket = new File(testDir, "bucket");
-		createFile(bucket);
+        bucket = new File(testDir, "bucket");
+        createFile(bucket);
 
-		l1SingleWriteIndexManager = IndexManagerFactory.newL1SingleWriteIndexManager(bucket);
-		l1SingleWriteIndexManager.start();
-	}
+        l1SingleWriteIndexManager = IndexManagerFactory.newL1SingleWriteIndexManager(bucket);
+        l1SingleWriteIndexManager.start();
+    }
 
-	@Test
-	public void testEncode() throws Exception {
-		BinlogInfo binlogInfo0 = new BinlogInfo(1, 2, "mysql-bin.3", 4);
-		Sequence sequence0 = new Sequence(5, 6);
-		String string0 = "1!2!mysql-bin.3!4=5-Bucket-6";
-		assertArrayEquals(string0.getBytes(), l1SingleWriteIndexManager.encode(binlogInfo0, sequence0));
+    @Test
+    public void testEncode() throws Exception {
+        BinlogInfo binlogInfo0 = new BinlogInfo(1, 2, "mysql-bin.3", 4);
+        Sequence sequence0 = new Sequence(5, 6);
+        String string0 = "1!2!mysql-bin.3!4=5-Bucket-6";
+        assertArrayEquals(string0.getBytes(), l1SingleWriteIndexManager.encode(binlogInfo0, sequence0));
 
-		BinlogInfo binlogInfo1 = new BinlogInfo(2, 3, "mysql-bin.4", 5);
-		Sequence sequence1 = new Sequence(6, 7);
-		String string1 = "2!3!mysql-bin.4!5=6-Bucket-7";
-		assertArrayEquals(string1.getBytes(), l1SingleWriteIndexManager.encode(binlogInfo1, sequence1));
-	}
+        BinlogInfo binlogInfo1 = new BinlogInfo(2, 3, "mysql-bin.4", 5);
+        Sequence sequence1 = new Sequence(6, 7);
+        String string1 = "2!3!mysql-bin.4!5=6-Bucket-7";
+        assertArrayEquals(string1.getBytes(), l1SingleWriteIndexManager.encode(binlogInfo1, sequence1));
+    }
 
-	@Test
-	public void testAppendAndFlush() throws Exception {
-		BufferedReader bufferedReader = new BufferedReader(new FileReader(bucket));
+    @Test
+    public void testAppendAndFlush() throws Exception {
+        BinlogInfo binlogInfo0 = new BinlogInfo(1, 2, "mysql-bin.3", 4);
+        Sequence sequence0 = new Sequence(30000101, 6);
+        l1SingleWriteIndexManager.append(binlogInfo0, sequence0);
+        l1SingleWriteIndexManager.flush();
 
-		BinlogInfo binlogInfo0 = new BinlogInfo(1, 2, "mysql-bin.3", 4);
-		Sequence sequence0 = new Sequence(5, 6);
-		l1SingleWriteIndexManager.append(binlogInfo0, sequence0);
-		l1SingleWriteIndexManager.flush();
+        BufferedReader bufferedReader1 = new BufferedReader(new FileReader(bucket));
+        assertEquals("1!2!mysql-bin.3!4=30000101-Bucket-6", bufferedReader1.readLine());
+        bufferedReader1.close();
 
-		assertEquals("1!2!mysql-bin.3!4=5-Bucket-6", bufferedReader.readLine());
+        BinlogInfo binlogInfo1 = new BinlogInfo(2, 3, "mysql-bin.4", 5);
+        Sequence sequence1 = new Sequence(30000102, 7);
+        l1SingleWriteIndexManager.append(binlogInfo1, sequence1);
+        l1SingleWriteIndexManager.flush();
 
-		BinlogInfo binlogInfo1 = new BinlogInfo(2, 3, "mysql-bin.4", 5);
-		Sequence sequence1 = new Sequence(6, 7);
-		l1SingleWriteIndexManager.append(binlogInfo1, sequence1);
-		l1SingleWriteIndexManager.flush();
+        BufferedReader bufferedReader2 = new BufferedReader(new FileReader(bucket));
+        bufferedReader2.readLine();
+        assertEquals("2!3!mysql-bin.4!5=30000102-Bucket-7", bufferedReader2.readLine());
+        bufferedReader2.close();
+    }
 
-		assertEquals("2!3!mysql-bin.4!5=6-Bucket-7", bufferedReader.readLine());
-	}
+    @After
+    public void tearDown() throws Exception {
+        if (l1SingleWriteIndexManager != null) {
+            l1SingleWriteIndexManager.stop();
+        }
 
-	@After
-	public void tearDown() throws Exception {
-		if (l1SingleWriteIndexManager != null) {
-			l1SingleWriteIndexManager.stop();
-		}
-
-		super.tearDown();
-	}
+        super.tearDown();
+    }
 }

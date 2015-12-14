@@ -39,6 +39,8 @@ public final class SeriesReadIndexManager extends AbstractLifeCycle
     public Sequence findOldest() throws IOException {
         checkStop();
 
+        doStop();
+
         l1ReadIndexManager = SeriesIndexManagerFinder.findL1ReadIndexManager(database);
         l1ReadIndexManager.start();
         Sequence sequence = l1ReadIndexManager.findOldest();
@@ -52,6 +54,8 @@ public final class SeriesReadIndexManager extends AbstractLifeCycle
     public Sequence findLatest() throws IOException {
         checkStop();
 
+        doStop();
+
         l1ReadIndexManager = SeriesIndexManagerFinder.findL1ReadIndexManager(database);
         l1ReadIndexManager.start();
         Sequence sequence = l1ReadIndexManager.findLatest();
@@ -64,6 +68,8 @@ public final class SeriesReadIndexManager extends AbstractLifeCycle
     @Override
     public Sequence find(BinlogInfo binlogInfo) throws IOException {
         checkStop();
+
+        doStop();
 
         l1ReadIndexManager = SeriesIndexManagerFinder.findL1ReadIndexManager(database);
         l1ReadIndexManager.start();

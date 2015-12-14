@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 基于MySQL复制机制的Server
@@ -262,6 +261,10 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             }
         });
         sortedSet.addAll(instanceManager.getUrlByCluster(instanceTask.getInstance()));
+
+        if (sortedSet.size() == 0) {
+            return oldSrcEntity;
+        }
 
         int index = sortedSet.indexOf(this.currentSrcDbEntity) + 1;
         if (index >= sortedSet.size()) {

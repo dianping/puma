@@ -33,11 +33,15 @@ public final class L1SingleWriteIndexManager extends SingleWriteIndexManager<Bin
                 while (true) {
                     Pair<BinlogInfo, Sequence> l1index = l1IndexReader.next();
 
-                    if (l1index != null && !deleteStrategy.canClean(String.valueOf(l1index.getRight().getCreationDate()))) {
-                        result.add(l1index);
-                    } else {
+                    if (l1index == null) {
                         break;
                     }
+
+                    if (deleteStrategy.canClean(String.valueOf(l1index.getRight().getCreationDate()))) {
+                        continue;
+                    }
+
+                    result.add(l1index);
                 }
             } finally {
                 l1IndexReader.stop();

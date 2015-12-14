@@ -17,8 +17,6 @@ package com.dianping.puma.sender;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.core.codec.EventCodec;
-import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.filter.EventFilterChain;
@@ -46,6 +44,9 @@ public class FileDumpSender extends AbstractSender {
 
     @Override
     public void stop() throws Exception {
+        for (WriteChannel channel : writeChannels.values()) {
+            channel.stop();
+        }
         super.stop();
     }
 

@@ -44,7 +44,9 @@ public final class SeriesWriteIndexManager extends AbstractLifeCycle implements 
             page(binlogInfo, sequence);
             Sequence l2Sequence = l2WriteIndexManager.position();
             l2WriteIndexManager.append(binlogInfo, sequence);
+            l2WriteIndexManager.flush();
             l1WriteIndexManager.append(binlogInfo, l2Sequence);
+            l1WriteIndexManager.flush();
             return;
         }
 

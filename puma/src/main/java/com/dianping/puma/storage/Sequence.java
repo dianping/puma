@@ -119,14 +119,9 @@ public class Sequence {
 
         Sequence sequence = (Sequence) o;
 
-        if (creationDate != sequence.creationDate)
-            return false;
-        if (number != sequence.number)
-            return false;
-        if (offset != sequence.offset)
-            return false;
-
-        return true;
+        return creationDate == sequence.creationDate &&
+                number == sequence.number &&
+                offset == sequence.offset;
     }
 
     @Override

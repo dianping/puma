@@ -20,7 +20,7 @@ public final class DateUtils {
 
     private volatile static DateTime mockedNow;
 
-    public static final void changeGetNowTime(String date) {
+    public static void changeGetNowTime(String date) {
         if (Strings.isNullOrEmpty(date)) {
             mockedNow = null;
             return;
@@ -28,14 +28,14 @@ public final class DateUtils {
         mockedNow = DateTime.parse(date, DATE_FORMATTER);
     }
 
-    public static final String getNextDayWithoutFuture(String dateStr) {
+    public static String getNextDayWithoutFuture(String dateStr) {
         DateTime date = DateTime.parse(dateStr, DATE_FORMATTER);
         date = date.withFieldAdded(DurationFieldType.days(), 1);
         DateTime now = getNow();
         return DateTimeComparator.getDateOnlyInstance().compare(date, now) > 0 ? null : date.toString(DATE_FORMATTER);
     }
 
-    protected static final DateTime getNow() {
+    protected static DateTime getNow() {
         if (mockedNow == null) {
             return DateTime.now();
         } else {
@@ -43,11 +43,11 @@ public final class DateUtils {
         }
     }
 
-    public static final String getNowString() {
+    public static String getNowString() {
         return getNow().toString(DATE_FORMATTER);
     }
 
-    public static final int getNowInteger() {
+    public static int getNowInteger() {
         DateTime date = getNow();
         return date.getYear() * 10000 + date.getMonthOfYear() * 100 + date.getDayOfMonth();
     }

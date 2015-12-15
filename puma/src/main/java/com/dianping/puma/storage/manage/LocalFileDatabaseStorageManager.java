@@ -10,39 +10,32 @@ import java.io.IOException;
 @Service
 public class LocalFileDatabaseStorageManager implements DatabaseStorageManager {
 
-	private static final String BINLOG_L1_INDEX_ROOT_PATH = FileSystem.getL1IndexDir().getAbsolutePath();
+    private static final String BINLOG_L1_INDEX_ROOT_PATH = FileSystem.getL1IndexDir().getAbsolutePath();
 
-	private static final String BINLOG_L2_INDEX_ROOT_PATH = FileSystem.getL2IndexDir().getAbsolutePath();
+    private static final String BINLOG_L2_INDEX_ROOT_PATH = FileSystem.getL2IndexDir().getAbsolutePath();
 
-	private static final String BINLOG_MASTER_STORAGE_ROOT_PATH = FileSystem.getMasterDataDir().getAbsolutePath();
+    private static final String BINLOG_MASTER_STORAGE_ROOT_PATH = FileSystem.getMasterDataDir().getAbsolutePath();
 
-	private static final String BINLOG_SLAVE_STORAGE_ROOT_PATH = FileSystem.getSlaveDataDir().getAbsolutePath();
+    @Override
+    public void delete(String database) {
+        try {
+            File binlogL1IndexFile = new File(BINLOG_L1_INDEX_ROOT_PATH, database);
+            if (binlogL1IndexFile.exists()) {
+                FileUtils.forceDelete(binlogL1IndexFile);
+            }
 
-	@Override
-	public void delete(String database) {
-		try {
-			File binlogL1IndexFile = new File(BINLOG_L1_INDEX_ROOT_PATH, database);
-			if (binlogL1IndexFile.exists()) {
-				FileUtils.forceDelete(binlogL1IndexFile);
-			}
+            File binlogL2IndexFile = new File(BINLOG_L2_INDEX_ROOT_PATH, database);
+            if (binlogL2IndexFile.exists()) {
+                FileUtils.forceDelete(binlogL2IndexFile);
+            }
 
-			File binlogL2IndexFile = new File(BINLOG_L2_INDEX_ROOT_PATH, database);
-			if (binlogL2IndexFile.exists()) {
-				FileUtils.forceDelete(binlogL2IndexFile);
-			}
+            File binlogMasterStorageFile = new File(BINLOG_MASTER_STORAGE_ROOT_PATH, database);
+            if (binlogMasterStorageFile.exists()) {
+                FileUtils.forceDelete(binlogMasterStorageFile);
+            }
 
-			File binlogMasterStorageFile = new File(BINLOG_MASTER_STORAGE_ROOT_PATH, database);
-			if (binlogMasterStorageFile.exists()) {
-				FileUtils.forceDelete(binlogMasterStorageFile);
-			}
-
-			File binlogSlaveStorageFile = new File(BINLOG_SLAVE_STORAGE_ROOT_PATH, database);
-			if (binlogSlaveStorageFile.exists()) {
-				FileUtils.forceDelete(binlogSlaveStorageFile);
-			}
-
-		} catch (IOException e) {
-			throw new RuntimeException("failed to delete database files.", e);
-		}
-	}
+        } catch (IOException e) {
+            throw new RuntimeException("failed to delete database files.", e);
+        }
+    }
 }

@@ -22,41 +22,37 @@ public final class IndexCodec {
     }
 
     public static byte[] encodeL1Index(BinlogInfo binlogInfo, Sequence sequence) {
-        return new StringBuilder()
-                .append(binlogInfo.getTimestamp())
-                .append("!")
-                .append(binlogInfo.getServerId())
-                .append("!")
-                .append(binlogInfo.getBinlogFile())
-                .append("!")
-                .append(binlogInfo.getBinlogPosition())
-                .append("=")
-                .append(sequence.getCreationDate())
-                .append("-")
-                .append("Bucket")
-                .append("-")
-                .append(sequence.getNumber())
-                .toString()
+        return (String.valueOf(binlogInfo.getTimestamp()) +
+                "!" +
+                binlogInfo.getServerId() +
+                "!" +
+                binlogInfo.getBinlogFile() +
+                "!" +
+                binlogInfo.getBinlogPosition() +
+                "=" +
+                sequence.getCreationDate() +
+                "-" +
+                "Bucket" +
+                "-" +
+                sequence.getNumber())
                 .getBytes();
     }
 
 
     public static byte[] encodeL2Index(BinlogInfo binlogInfo, Sequence sequence) {
-        return new StringBuilder()
-                .append(binlogInfo.getTimestamp())
-                .append("!")
-                .append(binlogInfo.getServerId())
-                .append("!")
-                .append(binlogInfo.getBinlogFile())
-                .append("!")
-                .append(binlogInfo.getBinlogPosition())
-                .append("=")
-                .append(sequence.getCreationDate())
-                .append("!")
-                .append(sequence.getNumber())
-                .append("!")
-                .append(sequence.getOffset())
-                .toString()
+        return (String.valueOf(binlogInfo.getTimestamp()) +
+                "!" +
+                binlogInfo.getServerId() +
+                "!" +
+                binlogInfo.getBinlogFile() +
+                "!" +
+                binlogInfo.getBinlogPosition() +
+                "=" +
+                sequence.getCreationDate() +
+                "!" +
+                sequence.getNumber() +
+                "!" +
+                sequence.getOffset())
                 .getBytes();
     }
 

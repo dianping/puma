@@ -7,7 +7,6 @@ import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.cache.CachedGroupReadDataManager;
-import com.dianping.puma.storage.data.GroupReadDataManager;
 import com.dianping.puma.storage.data.ReadDataManager;
 import com.dianping.puma.storage.index.SeriesReadIndexManager;
 import com.google.common.base.Function;

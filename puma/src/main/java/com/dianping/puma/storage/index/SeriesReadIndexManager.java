@@ -3,7 +3,6 @@ package com.dianping.puma.storage.index;
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.Sequence;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 

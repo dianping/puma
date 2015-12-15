@@ -17,7 +17,7 @@ class CachedDataStorageFactory {
     protected CachedDataStorageFactory() {
     }
 
-    final static CachedDataStorageFactory getInstance() {
+    static CachedDataStorageFactory getInstance() {
         if (instance == null) {
             synchronized (CachedDataStorageFactory.class) {
                 if (instance == null) {
@@ -65,7 +65,7 @@ class CachedDataStorageFactory {
         getCachedDataManager(database);
     }
 
-    private final CachedDataStorage getCachedDataManager(String database) {
+    private CachedDataStorage getCachedDataManager(String database) {
         if (!MANAGER_MAP.containsKey(database)) {
             MANAGER_MAP.put(database, initCachedDataStorage());
         }

@@ -26,24 +26,6 @@ public final class GroupDataManagerFinder {
         return result;
     }
 
-    public static SingleReadDataManager findSlaveReadDataManager(String database, Sequence sequence)
-            throws IOException {
-        String date = sequence.date();
-        int number = sequence.getNumber();
-
-        File file = FileSystem.visitSlaveDataFile(database, date, number);
-
-        if (file == null) {
-            return null;
-        }
-
-        SingleReadDataManager result = DataManagerFactory.newSingleReadDataManager(file);
-        result.start();
-        result.open(sequence);
-        return result;
-    }
-
-    //todo: + ut
     public static SingleReadDataManager findNextMasterReadDataManager(String database, Sequence sequence)
             throws IOException {
         String date = sequence.date();
@@ -54,33 +36,6 @@ public final class GroupDataManagerFinder {
             number = 0;
             while ((date = DateUtils.getNextDayWithoutFuture(date)) != null) {
                 file = FileSystem.visitMasterDataFile(database, date, number);
-                if (file != null) {
-                    break;
-                }
-            }
-        }
-
-        if (file == null) {
-            return null;
-        }
-
-        SingleReadDataManager result = DataManagerFactory.newSingleReadDataManager(file);
-        result.start();
-        result.open(new Sequence(date, number, 0));
-        return result;
-    }
-
-    //todo: + ut
-    public static SingleReadDataManager findNextSlaveReadDataManager(String database, Sequence sequence)
-            throws IOException {
-        String date = sequence.date();
-        int number = sequence.getNumber();
-
-        File file = FileSystem.visitSlaveDataFile(database, date, ++number);
-        if (file == null) {
-            number = 0;
-            while ((date = DateUtils.getNextDayWithoutFuture(date)) != null) {
-                file = FileSystem.visitSlaveDataFile(database, date, number);
                 if (file != null) {
                     break;
                 }

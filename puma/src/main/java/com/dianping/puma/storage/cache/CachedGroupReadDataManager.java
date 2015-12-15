@@ -1,6 +1,5 @@
 package com.dianping.puma.storage.cache;
 
-import com.dianping.cat.Cat;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.data.GroupReadDataManager;
@@ -41,7 +40,10 @@ public class CachedGroupReadDataManager implements ReadDataManager<Sequence, Cha
 
     @Override
     public Sequence position() {
-        return lastSequence;
+        throw new IllegalAccessError();
+        //by Dozer
+        //这里不能用 return lastSequence,因为整个系统 position 的语义是下一个位置,而这里是上一个位置,所以会造成误解,引发bug.
+        //目前没有方法调用这里的position,所以就先不实现了,等需要调用的时候再去实现
     }
 
     @Override

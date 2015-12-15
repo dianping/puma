@@ -5,7 +5,7 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.biz.entity.SrcDbEntity;
-import com.dianping.puma.core.config.ConfigManager;
+import com.dianping.puma.config.ConfigManager;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import com.google.common.base.Optional;

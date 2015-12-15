@@ -7,54 +7,54 @@ import java.util.List;
 
 public class RoundRobinPumaServerRouter implements PumaServerRouter {
 
-	protected PumaServerMonitor monitor;
+    protected PumaServerMonitor monitor;
 
-	private boolean inited = false;
+    private boolean inited = false;
 
-	private volatile List<String> servers;
+    private volatile List<String> servers;
 
-	private int index;
+    private int index;
 
-	public RoundRobinPumaServerRouter(PumaServerMonitor monitor) {
-		this.monitor = monitor;
-	}
+    public RoundRobinPumaServerRouter(PumaServerMonitor monitor) {
+        this.monitor = monitor;
+    }
 
-	@Override
-	public String next() {
-		if (!inited) {
-			init();
-			inited = true;
-		}
+    @Override
+    public String next() {
+        if (!inited) {
+            init();
+            inited = true;
+        }
 
-		if (servers == null || servers.size() == 0) {
-			return null;
-		}
+        if (servers == null || servers.size() == 0) {
+            return null;
+        }
 
-		if (index >= servers.size()) {
-			index = index - servers.size();
-		}
+        if (index >= servers.size()) {
+            index = index - servers.size();
+        }
 
-		return servers.get(index++);
-	}
+        return servers.get(index++);
+    }
 
-	@Override
-	public boolean exist(String server) {
-		if (!inited) {
-			init();
-			inited = true;
-		}
+    @Override
+    public boolean exist(String server) {
+        if (!inited) {
+            init();
+            inited = true;
+        }
 
-		return servers != null && servers.contains(server);
-	}
+        return servers != null && servers.contains(server);
+    }
 
-	protected void init() {
-		servers = monitor.get();
-		PumaServerMonitor.PumaServerMonitorListener listener = new PumaServerMonitor.PumaServerMonitorListener() {
-			@Override
-			public void onChange(List<String> oriServers, List<String> servers) {
-				RoundRobinPumaServerRouter.this.servers = servers;
-			}
-		};
-		monitor.addListener(listener);
-	}
+    protected void init() {
+        servers = monitor.get();
+        PumaServerMonitor.PumaServerMonitorListener listener = new PumaServerMonitor.PumaServerMonitorListener() {
+            @Override
+            public void onChange(List<String> servers) {
+                RoundRobinPumaServerRouter.this.servers = servers;
+            }
+        };
+        monitor.addListener(listener);
+    }
 }

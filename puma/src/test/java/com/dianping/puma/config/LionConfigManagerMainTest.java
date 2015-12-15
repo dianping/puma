@@ -1,4 +1,4 @@
-package com.dianping.puma.core.config;
+package com.dianping.puma.config;
 
 public class LionConfigManagerMainTest {
 

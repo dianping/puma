@@ -1,4 +1,4 @@
-package com.dianping.puma.core.config;
+package com.dianping.puma.config;
 
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;

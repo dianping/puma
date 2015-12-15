@@ -1,6 +1,6 @@
 package com.dianping.puma.instance;
 
-import com.dianping.puma.core.config.ConfigManager;
+import com.dianping.puma.config.ConfigManager;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

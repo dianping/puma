@@ -1,7 +1,7 @@
 package com.dianping.puma.server.registry;
 
 import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.puma.core.config.ConfigManager;
+import com.dianping.puma.config.ConfigManager;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;

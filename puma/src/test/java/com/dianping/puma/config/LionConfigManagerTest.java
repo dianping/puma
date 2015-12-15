@@ -1,10 +1,7 @@
-package com.dianping.puma.core.config;
+package com.dianping.puma.config;
 
-import com.dianping.lion.client.ConfigChange;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class LionConfigManagerTest {
 

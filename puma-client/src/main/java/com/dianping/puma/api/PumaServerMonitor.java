@@ -4,13 +4,13 @@ import java.util.List;
 
 public interface PumaServerMonitor {
 
-	List<String> get();
+    List<String> get();
 
-	void addListener(PumaServerMonitorListener listener);
+    void addListener(PumaServerMonitorListener listener);
 
-	void removeListener();
+    void removeListener();
 
-	interface PumaServerMonitorListener {
-		void onChange(List<String> oriServers, List<String> servers);
-	}
+    interface PumaServerMonitorListener {
+        void onChange(List<String> servers);
+    }
 }

@@ -1,6 +1,6 @@
 package com.dianping.puma.server.registry;
 
-import com.dianping.puma.core.config.ConfigManager;
+import com.dianping.puma.config.ConfigManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

@@ -1,15 +1,15 @@
 package com.dianping.puma.storage.manage;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.filesystem.FileSystem;
 import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,8 +20,6 @@ public class LocalFileInstanceStorageManager implements InstanceStorageManager {
     private static final Logger LOG = Logger.getLogger(LocalFileInstanceStorageManager.class);
 
     private final Map<String, BinlogInfo> binlogInfoMap = new ConcurrentHashMap<String, BinlogInfo>();
-
-    private final Map<String, MappedByteBuffer> mappedByteBufferMapping = new ConcurrentHashMap<String, MappedByteBuffer>();
 
     private static final String SUFFIX = ".binlog";
 
@@ -62,18 +60,55 @@ public class LocalFileInstanceStorageManager implements InstanceStorageManager {
         }
     }
 
-    public synchronized BinlogInfo getBinlogInfo(String taskName) {
+    @Scheduled(fixedDelay = 10 * 1000)
+    public void saveToFile() {
+        for (Map.Entry<String, BinlogInfo> entry : binlogInfoMap.entrySet()) {
+            FileOutputStream writer = null;
+            try {
+                File f = new File(baseDir, task2file(entry.getKey()));
+
+                writer = new FileOutputStream(f, false);
+                writer.write(BUF_MASK);
+                writer.close();
+
+                BinlogInfo binlogInfo = entry.getValue();
+
+                writer = new FileOutputStream(f, false);
+                writer.write(String.valueOf(binlogInfo.getServerId()).getBytes());
+                writer.write("\n".getBytes());
+                writer.write((binlogInfo.getBinlogFile() == null ? "" : binlogInfo.getBinlogFile()).getBytes());
+                writer.write("\n".getBytes());
+                writer.write(String.valueOf(binlogInfo.getBinlogPosition()).getBytes());
+                writer.write("\n".getBytes());
+                writer.write(String.valueOf(binlogInfo.getEventIndex()).getBytes());
+                writer.write("\n".getBytes());
+                writer.write(String.valueOf(binlogInfo.getTimestamp()).getBytes());
+                writer.write("\n".getBytes());
+                writer.flush();
+            } catch (IOException e) {
+                LOG.error(e.getMessage(), e);
+                Cat.logError(e.getMessage(), e);
+            } finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    } catch (IOException ignore) {
+                    }
+                }
+            }
+        }
+    }
+
+    public BinlogInfo getBinlogInfo(String taskName) {
         return binlogInfoMap.get(taskName);
     }
 
-    public synchronized void setBinlogInfo(String taskName, BinlogInfo binlogInfo) {
+    public void setBinlogInfo(String taskName, BinlogInfo binlogInfo) {
         this.binlogInfoMap.put(taskName, binlogInfo);
-        this.saveToFile(taskName, binlogInfo);
     }
 
-    public synchronized void rename(String oriTaskName, String taskName) {
+    public void rename(String oriTaskName, String taskName) {
         binlogInfoMap.put(taskName, binlogInfoMap.remove(oriTaskName));
-        mappedByteBufferMapping.remove(oriTaskName);
 
         File f = new File(bakDir, task2file(oriTaskName));
         if (f.exists() && !f.renameTo(new File(bakDir, task2file(taskName)))) {
@@ -81,16 +116,13 @@ public class LocalFileInstanceStorageManager implements InstanceStorageManager {
         }
     }
 
-    public synchronized void remove(String taskName) {
+    public void remove(String taskName) {
         binlogInfoMap.remove(taskName);
         removeFile(taskName);
     }
 
     private void removeFile(String taskName) {
         String path = (new File(baseDir, task2file(taskName))).getAbsolutePath();
-
-        // Remove from the file cache.
-        mappedByteBufferMapping.remove(taskName);
 
         // Remove the file to the backup folder.
         File f = new File(path);
@@ -101,7 +133,6 @@ public class LocalFileInstanceStorageManager implements InstanceStorageManager {
         }
     }
 
-    @SuppressWarnings({"resource"})
     private void loadFromFile(String taskName) {
         String path = (new File(baseDir, task2file(taskName))).getAbsolutePath();
         File f = new File(path);
@@ -130,8 +161,6 @@ public class LocalFileInstanceStorageManager implements InstanceStorageManager {
             int eventIndex = Integer.parseInt(eventIndexStr);
             BinlogInfo binlogInfo = new BinlogInfo(serverId, binlogFile, binlogPosition, eventIndex, timestamp);
 
-            mappedByteBufferMapping.put(taskName,
-                    new RandomAccessFile(f, "rwd").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
             binlogInfoMap.put(taskName, binlogInfo);
 
         } catch (Exception e) {
@@ -154,40 +183,6 @@ public class LocalFileInstanceStorageManager implements InstanceStorageManager {
             }
         }
 
-    }
-
-    private synchronized void saveToFile(String taskName, BinlogInfo binlogInfo) {
-        String path = new File(baseDir, task2file(taskName)).getAbsolutePath();
-
-        if (!mappedByteBufferMapping.containsKey(taskName)) {
-            File f = new File(path);
-            if (!f.exists()) {
-                try {
-                    if (!f.createNewFile()) {
-                        throw new RuntimeException("Can not create file(" + f.getAbsolutePath() + ")");
-                    }
-                    mappedByteBufferMapping.put(taskName,
-                            new RandomAccessFile(f, "rwd").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, MAX_FILE_SIZE));
-                } catch (IOException e) {
-                    throw new RuntimeException("Create file(" + path + " failed.", e);
-                }
-            }
-        }
-
-        MappedByteBuffer mbb = mappedByteBufferMapping.get(taskName);
-        mbb.position(0);
-        mbb.put(BUF_MASK);
-        mbb.position(0);
-        mbb.put(String.valueOf(binlogInfo.getServerId()).getBytes());
-        mbb.put("\n".getBytes());
-        mbb.put((binlogInfo.getBinlogFile() == null ? "" : binlogInfo.getBinlogFile()).getBytes());
-        mbb.put("\n".getBytes());
-        mbb.put(String.valueOf(binlogInfo.getBinlogPosition()).getBytes());
-        mbb.put("\n".getBytes());
-        mbb.put(String.valueOf(binlogInfo.getEventIndex()).getBytes());
-        mbb.put("\n".getBytes());
-        mbb.put(String.valueOf(binlogInfo.getTimestamp()).getBytes());
-        mbb.put("\n".getBytes());
     }
 
     private String task2file(String taskName) {

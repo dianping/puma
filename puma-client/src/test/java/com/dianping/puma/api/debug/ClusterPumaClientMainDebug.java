@@ -14,9 +14,9 @@ public class ClusterPumaClientMainDebug {
     public static void main(String[] args) throws InterruptedException, IOException {
 
         PumaClient client = new PumaClientConfig()
-                .setClientName("union_192_168_216_143-test")
-                .setDatabase("DianPingMidasOnline")
-                .setTables(Lists.newArrayList("NAD_Launch"))
+                .setClientName("dozer-test")
+                .setDatabase("UnifiedOrder0")
+                .setTables(Lists.newArrayList("UOD_Order0"))
                 .buildClusterPumaClient();
 
         while (true) {
@@ -27,7 +27,7 @@ public class ClusterPumaClientMainDebug {
                     System.out.println(event);
                 }
 
-//                client.ack(message.getLastBinlogInfo());
+                client.ack(message.getLastBinlogInfo());
             } catch (Throwable t) {
 
             }

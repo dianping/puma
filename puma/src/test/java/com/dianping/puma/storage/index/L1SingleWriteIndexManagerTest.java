@@ -7,9 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -42,6 +40,27 @@ public class L1SingleWriteIndexManagerTest extends StorageBaseTest {
         Sequence sequence1 = new Sequence(6, 7);
         String string1 = "2!3!mysql-bin.4!5=6-Bucket-7";
         assertArrayEquals(string1.getBytes(), l1SingleWriteIndexManager.encode(binlogInfo1, sequence1));
+    }
+
+    @Test
+    public void testCleanOutdated() throws Exception {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(bucket));
+        writer.write("1!2!mysql-bin.3!2=20000101-Bucket-2");
+        writer.newLine();
+        writer.write("1!2!mysql-bin.3!3=30000101-Bucket-3");
+        writer.newLine();
+        writer.flush();
+        writer.close();
+
+        BinlogInfo binlogInfo0 = new BinlogInfo(1, 2, "mysql-bin.3", 4);
+        Sequence sequence0 = new Sequence(30000101, 6);
+        l1SingleWriteIndexManager.append(binlogInfo0, sequence0);
+        l1SingleWriteIndexManager.flush();
+
+        BufferedReader bufferedReader1 = new BufferedReader(new FileReader(bucket));
+        assertEquals("1!2!mysql-bin.3!3=30000101-Bucket-3", bufferedReader1.readLine());
+        assertEquals("1!2!mysql-bin.3!4=30000101-Bucket-6", bufferedReader1.readLine());
+        bufferedReader1.close();
     }
 
     @Test

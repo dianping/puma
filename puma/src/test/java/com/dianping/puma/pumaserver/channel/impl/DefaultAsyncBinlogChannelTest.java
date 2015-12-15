@@ -3,10 +3,10 @@ package com.dianping.puma.pumaserver.channel.impl;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.EventFactory;
 import com.dianping.puma.core.event.EventType;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.storage.channel.ReadChannel;
+import com.dianping.puma.utils.EventFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import junit.framework.Assert;
@@ -57,8 +57,8 @@ public class DefaultAsyncBinlogChannelTest {
 
 
         target = spy(new DefaultAsyncBinlogChannel(null));
-        doReturn(eventChannel).when(target).initChannel(anyLong(), any(BinlogInfo.class), anyList(), anyBoolean(), anyBoolean(), anyBoolean());
-        target.init(-1, new BinlogInfo(-1, "", 1l, 1, 0), "", new ArrayList<String>(), false, false, false);
+        doReturn(eventChannel).when(target).initChannel(any(BinlogInfo.class), anyList(), anyBoolean(), anyBoolean(), anyBoolean());
+        target.init(new BinlogInfo(-1, "", 1l, 1, 0), "", new ArrayList<String>(), false, false, false);
     }
 
     @After

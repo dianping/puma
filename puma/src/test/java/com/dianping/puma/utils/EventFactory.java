@@ -1,5 +1,7 @@
-package com.dianping.puma.core.event;
+package com.dianping.puma.utils;
 
+import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
 
 public final class EventFactory {

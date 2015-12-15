@@ -16,13 +16,13 @@
 package com.dianping.puma.datahandler;
 
 import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.SimpleDdlParser;
+import com.dianping.puma.parser.meta.TableMetaInfo;
 import com.dianping.puma.parser.meta.TableMetaInfoFetcher;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
@@ -56,22 +56,13 @@ public abstract class AbstractDataHandler implements DataHandler {
         this.tableMetasInfoFetcher = tableMetasInfoFetcher;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.dianping.puma.common.LifeCycle#start()
-     */
     @Override
-    public void start() throws Exception {
+    public void start() {
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.dianping.puma.common.LifeCycle#stop()
-     */
+
     @Override
-    public void stop() throws Exception {
+    public void stop() {
 
     }
 

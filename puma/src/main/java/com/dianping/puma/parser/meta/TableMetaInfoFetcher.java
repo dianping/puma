@@ -15,8 +15,6 @@
  */
 package com.dianping.puma.parser.meta;
 
-import com.dianping.puma.core.meta.TableMetaInfo;
-
 /**
  *
  * @author Leo Liang

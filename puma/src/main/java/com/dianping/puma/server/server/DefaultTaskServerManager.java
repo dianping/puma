@@ -1,7 +1,7 @@
 package com.dianping.puma.server.server;
 
 import com.dianping.puma.biz.service.PumaServerService;
-import com.dianping.puma.core.util.IPUtils;
+import com.dianping.puma.utils.IPUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

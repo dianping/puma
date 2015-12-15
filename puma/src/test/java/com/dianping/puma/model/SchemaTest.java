@@ -1,4 +1,4 @@
-package com.dianping.puma.core.model;
+package com.dianping.puma.model;
 
 import org.junit.Assert;
 import org.junit.Before;

@@ -15,7 +15,7 @@ import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogRollbackResponse;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.util.GsonUtil;
+import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.puma.log.LoggerLoader;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
@@ -242,7 +242,7 @@ public class SimplePumaClient implements PumaClient {
             throw new PumaClientException("Please subscribe first");
         }
         BinlogSubscriptionResponse response;
-        response = execute("/puma/binlog/subscribe", null, HTTP_POST, GsonUtil.toJson(this.subscribeRequest), BinlogSubscriptionResponse.class);
+        response = execute("/puma/binlog/subscribe", null, HTTP_POST, ConvertHelper.toJson(this.subscribeRequest), BinlogSubscriptionResponse.class);
         this.token = response.getToken();
     }
 

@@ -2,10 +2,8 @@ package com.dianping.puma.filter;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.Schema;
-import com.dianping.puma.core.model.SchemaSet;
-import com.dianping.puma.core.model.Table;
-import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.model.Schema;
+import com.dianping.puma.model.SchemaSet;
 
 public class TransactionEventFilter extends AbstractEventFilter {
 

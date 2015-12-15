@@ -1,7 +1,7 @@
 package com.dianping.puma.status;
 
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.model.TableSet;
 import com.dianping.puma.status.SystemStatus.Client;
 import com.dianping.puma.status.SystemStatus.Server;
 import com.google.common.base.Strings;

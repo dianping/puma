@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.util.ByteArrayUtils;
 import com.dianping.puma.parser.AbstractBaseDebug;
 
 /***
@@ -60,11 +59,22 @@ public class BitTypeDebug extends AbstractBaseDebug {
 					Assert.assertEquals(SCHEMA_NAME, rowChangedEvent.getDatabase());
 					Assert.assertEquals(2, rowChangedEvent.getColumns().size());
 					byte[] value = (byte[]) rowChangedEvent.getColumns().get("default_bit").getNewValue();
-					Assert.assertEquals(testData[i][0], ByteArrayUtils.byteArrayToInt(value, 0, value.length));
+					Assert.assertEquals(testData[i][0], byteArrayToInt(value, 0, value.length));
 					Assert.assertEquals(null, rowChangedEvent.getColumns().get("default_bit").getOldValue());
 				}
 			}
 
 		});
+	}
+
+	int byteArrayToInt(byte[] data, int start, int length) {
+		if (length <= 4) {
+			int r = 0;
+			for (int i = start; i < length; i++) {
+				r |= ((data[i] & 0xff) << ((length - (i - start) - 1) << 3));
+			}
+			return r;
+		}
+		return 0;
 	}
 }

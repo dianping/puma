@@ -38,12 +38,12 @@ public class FileDumpSender extends AbstractSender {
     private EventFilterChain storageEventFilterChain;
 
     @Override
-    public void start() throws Exception {
+    public void start() {
         super.start();
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         for (WriteChannel channel : writeChannels.values()) {
             channel.stop();
         }

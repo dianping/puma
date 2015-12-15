@@ -2,8 +2,8 @@ package com.dianping.puma.filter;
 
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.Schema;
-import com.dianping.puma.core.model.SchemaSet;
+import com.dianping.puma.model.Schema;
+import com.dianping.puma.model.SchemaSet;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -2,7 +2,7 @@ package com.dianping.puma.common;
 
 import com.dianping.puma.core.config.ConfigChangeListener;
 import com.dianping.puma.core.config.ConfigManager;
-import com.dianping.puma.core.util.IPUtils;
+import com.dianping.puma.utils.IPUtils;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

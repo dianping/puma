@@ -1,4 +1,4 @@
-package com.dianping.puma.core.model;
+package com.dianping.puma.model;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.junit.Assert;

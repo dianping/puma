@@ -1,8 +1,6 @@
 package com.dianping.puma.biz.entity;
 
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.BinlogStat;
 
 import java.util.Date;
 
@@ -16,11 +14,7 @@ public class PumaTaskStateEntity {
 
     private String detail;
 
-    private Status status;
-
     private BinlogInfo binlogInfo = new BinlogInfo();
-
-    private BinlogStat binlogStat = new BinlogStat();
 
     public PumaTaskStateEntity() {
         updateTime = new Date();
@@ -56,22 +50,6 @@ public class PumaTaskStateEntity {
 
     public void setBinlogInfo(BinlogInfo binlogInfo) {
         this.binlogInfo = binlogInfo;
-    }
-
-    public BinlogStat getBinlogStat() {
-        return binlogStat;
-    }
-
-    public void setBinlogStat(BinlogStat binlogStat) {
-        this.binlogStat = binlogStat;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     public int getId() {

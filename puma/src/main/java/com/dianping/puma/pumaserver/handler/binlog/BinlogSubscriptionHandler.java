@@ -1,13 +1,11 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientSession;
-import com.dianping.puma.pumaserver.exception.client.ClientNotRegisterException;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.status.SystemStatusManager;
@@ -31,14 +29,8 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         binlogAckService.checkAck(clientName,binlogAck);
 
-        long seq = binlogAck == null ? SubscribeConstant.SEQ_FROM_OLDEST :
-                (Strings.isNullOrEmpty(binlogAck.getBinlogInfo().getBinlogFile()) ?
-                        SubscribeConstant.SEQ_FROM_TIMESTAMP :
-                        SubscribeConstant.SEQ_FROM_BINLOGINFO);
-
         DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel(clientName);
         defaultAsyncBinlogChannel.init(
-                seq,
                 binlogAck == null ? null : binlogAck.getBinlogInfo(),
                 binlogSubscriptionRequest.getDatabase(),
                 binlogSubscriptionRequest.getTables(),

@@ -9,7 +9,6 @@ import java.util.List;
 public interface AsyncBinlogChannel {
 
     void init(
-            long sc,
             BinlogInfo binlogInfo,
             String database,
             List<String> tables,

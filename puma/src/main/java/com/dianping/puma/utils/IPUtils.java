@@ -1,4 +1,4 @@
-package com.dianping.puma.core.util;
+package com.dianping.puma.utils;
 
 /**
  * Project: puma-server

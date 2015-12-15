@@ -7,6 +7,5 @@ package com.dianping.puma.core.event;
  */
 public enum EventType {
     DDL,
-    DML,
-    ERROR,
+    DML
 }

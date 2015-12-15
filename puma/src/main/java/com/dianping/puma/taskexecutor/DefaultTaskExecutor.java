@@ -17,12 +17,11 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.BinlogStat;
 import com.dianping.puma.datahandler.DataHandlerResult;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.parser.mysql.BinlogConstants;
@@ -32,7 +31,6 @@ import com.dianping.puma.parser.mysql.UpdateExecutor;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 import com.dianping.puma.parser.mysql.event.RotateEvent;
 import com.dianping.puma.parser.mysql.packet.*;
-import com.dianping.puma.server.exception.ServerEventParserException;
 import com.dianping.puma.status.SystemStatusManager;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
 import com.dianping.zebra.util.JDBCUtils;
@@ -456,7 +454,7 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
             LOG.error("TaskName: " + getTaskName() + ", Binlog_format is MIXED or STATEMENT ,System is not support.");
             String eventName = String.format("slave(%s) -- db(%s:%d)", getTaskName(), currentSrcDbEntity.getHost(), currentSrcDbEntity.getPort());
             Cat.logEvent("Slave.dbBinlogFormat", eventName, "1", "");
-            Cat.logError("Puma.server.mixedorstatement.format", new ServerEventParserException("TaskName: "
+            Cat.logError("Puma.server.mixedorstatement.format", new IllegalArgumentException("TaskName: "
                     + getTaskName() + ", Binlog_format is MIXED or STATEMENT ,System is not support."));
             stopTask();
         }
@@ -525,22 +523,18 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
                 && !((RowChangedEvent) changedEvent).isTransactionCommit()) {
             switch (((RowChangedEvent) changedEvent).getDmlType()) {
                 case INSERT:
-                    incrRowsInsert();
                     SystemStatusManager.incServerRowInsertCounter(getTaskName());
                     break;
                 case UPDATE:
-                    incrRowsUpdate();
                     SystemStatusManager.incServerRowUpdateCounter(getTaskName());
                     break;
                 case DELETE:
-                    incrRowsDelete();
                     SystemStatusManager.incServerRowDeleteCounter(getTaskName());
                     break;
                 default:
                     break;
             }
         } else if (changedEvent instanceof DdlEvent) {
-            incrDdls();
             SystemStatusManager.incServerDdlCounter(getTaskName());
         }
     }
@@ -883,34 +877,6 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
 
     public void setBinlogInfo(BinlogInfo binlogInfo) {
         this.state.setBinlogInfo(binlogInfo);
-    }
-
-    public BinlogStat getBinlogStat() {
-        return this.state.getBinlogStat();
-    }
-
-    public void setBinlogStat(BinlogStat binlogStat) {
-        this.state.setBinlogStat(binlogStat);
-    }
-
-    public void incrRowsInsert() {
-        Long rowsInsert = this.state.getBinlogStat().getRowsInsert();
-        this.getBinlogStat().setRowsInsert(rowsInsert + 1);
-    }
-
-    public void incrRowsUpdate() {
-        Long rowsUpdate = this.state.getBinlogStat().getRowsUpdate();
-        this.state.getBinlogStat().setRowsUpdate(rowsUpdate + 1);
-    }
-
-    public void incrRowsDelete() {
-        Long rowsDelete = this.state.getBinlogStat().getRowsDelete();
-        this.state.getBinlogStat().setRowsDelete(rowsDelete + 1);
-    }
-
-    public void incrDdls() {
-        Long ddls = this.state.getBinlogStat().getDdls();
-        this.state.getBinlogStat().setDdls(ddls + 1);
     }
 
     public enum BinlogFormat {

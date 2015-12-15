@@ -1,7 +1,6 @@
 package com.dianping.puma.pumaserver.channel.impl;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.ExceptionResponse;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
@@ -53,7 +52,6 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
 
     @Override
     public void init(
-            long sc,
             BinlogInfo binlogInfo,
             String database,
             List<String> tables,
@@ -63,7 +61,7 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
     ) throws BinlogChannelException {
         try {
             this.database = database;
-            this.readChannel = initChannel(sc, binlogInfo, tables, dml, ddl, transaction);
+            this.readChannel = initChannel(binlogInfo, tables, dml, ddl, transaction);
             THREAD_POOL.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -71,20 +69,12 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         }
     }
 
-    protected ReadChannel initChannel(long sc, BinlogInfo binlogInfo, List<String> tables,
+    protected ReadChannel initChannel(BinlogInfo binlogInfo, List<String> tables,
                                       boolean dml, boolean ddl, boolean transaction) throws IOException {
         ReadChannel readChannel = ChannelFactory.newReadChannel(database, tables, dml, ddl, transaction);
         readChannel.start();
 
-        if (sc == SubscribeConstant.SEQ_FROM_BINLOGINFO) {
-            readChannel.open(binlogInfo);
-        } else if (sc == SubscribeConstant.SEQ_FROM_TIMESTAMP) {
-            readChannel.open(binlogInfo);
-        } else if (sc == SubscribeConstant.SEQ_FROM_LATEST) {
-            readChannel.openLatest();
-        } else {
-            readChannel.openOldest();
-        }
+        readChannel.open(binlogInfo);
 
         return readChannel;
     }

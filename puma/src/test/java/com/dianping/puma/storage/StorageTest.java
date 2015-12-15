@@ -1,7 +1,7 @@
 package com.dianping.puma.storage;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.EventFactory;
+import com.dianping.puma.utils.EventFactory;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.storage.channel.ChannelFactory;

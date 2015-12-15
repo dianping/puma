@@ -3,18 +3,15 @@ package com.dianping.puma.parser;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
-import com.dianping.puma.core.constant.Status;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.model.BinlogStat;
-import com.dianping.puma.core.model.Table;
-import com.dianping.puma.core.model.TableSet;
-import com.dianping.puma.core.util.PumaThreadUtils;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.filter.*;
 import com.dianping.puma.instance.InstanceManager;
+import com.dianping.puma.model.Table;
+import com.dianping.puma.model.TableSet;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
 import com.dianping.puma.sender.FileDumpSender;
 import com.dianping.puma.sender.Sender;
@@ -203,37 +200,27 @@ public abstract class AbstractBaseDebug {
         taskExecutor.initContext();
 
         try {
-            PumaThreadUtils.createThread(new Runnable() {
+            new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         taskExecutor.start();
                     } catch (Exception e) {
-                        taskExecutor.getTaskState().setStatus(Status.FAILED);
                     }
                 }
-            }, taskExecutor.getTaskName(), false).start();
+            }).start();
         } catch (Exception e) {
-            taskExecutor.getTaskState().setStatus(Status.FAILED);
             throw e;
         }
-
-        taskExecutor.getTaskState().setStatus(Status.RUNNING);
     }
 
     private void stopTask() throws Exception {
         if (taskExecutor != null) {
-            taskExecutor.getTaskState().setStatus(Status.STOPPING);
-
             try {
                 taskExecutor.stop();
             } catch (Exception e) {
-                taskExecutor.getTaskState().setStatus(Status.FAILED);
                 throw e;
             }
-
-            taskExecutor.getTaskState().setStatus(Status.STOPPED);
-
         }
 
     }
@@ -272,7 +259,6 @@ public abstract class AbstractBaseDebug {
         // state
         PumaTaskStateEntity taskState = new PumaTaskStateEntity();
         taskState.setTaskName(taskName);
-        taskState.setStatus(Status.PREPARING);
         taskExecutor.setTaskState(taskState);
 
         // Base.
@@ -282,7 +268,6 @@ public abstract class AbstractBaseDebug {
         // Bin log.
         taskExecutor.setInstanceStorageManager(localFileInstanceStorageManager);
         taskExecutor.setBinlogInfo(getLastestBinlog());
-        taskExecutor.setBinlogStat(new BinlogStat());
         // data source
         SrcDbEntity srcdb = new SrcDbEntity();
         srcdb.setServerId(serverId);
@@ -366,9 +351,6 @@ public abstract class AbstractBaseDebug {
         dispatcher.setName("dispatch-" + taskName);
         dispatcher.setSenders(senders);
         taskExecutor.setDispatcher(dispatcher);
-
-        // Set puma task status.
-        taskExecutor.getTaskState().setStatus(Status.WAITING);
 
         return taskExecutor;
     }

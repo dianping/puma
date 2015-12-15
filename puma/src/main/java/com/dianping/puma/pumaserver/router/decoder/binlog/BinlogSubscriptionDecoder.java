@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.router.decoder.binlog;
 
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
-import com.dianping.puma.core.util.GsonUtil;
+import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.puma.pumaserver.exception.DecoderException;
 import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -31,7 +31,7 @@ public class BinlogSubscriptionDecoder implements RequestDecoder {
     public Object decode(FullHttpRequest request) throws DecoderException {
         if (request.getMethod().equals(HttpMethod.POST)) {
             String json = request.content().toString(Charset.forName("utf-8"));
-            return GsonUtil.fromJson(json, BinlogSubscriptionRequest.class);
+            return ConvertHelper.fromJson(json, BinlogSubscriptionRequest.class);
         }
 
         BinlogSubscriptionRequest binlogSubscriptionRequest = new BinlogSubscriptionRequest();

@@ -16,7 +16,7 @@
 package com.dianping.puma.sender;
 
 import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.core.LifeCycle;
+import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
 
 /**
@@ -24,7 +24,7 @@ import com.dianping.puma.core.event.ChangedEvent;
  * @author Leo Liang
  *
  */
-public interface Sender extends LifeCycle<Exception> {
+public interface Sender extends LifeCycle {
 
     String getName();
 

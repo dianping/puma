@@ -19,9 +19,9 @@ import java.util.Date;
 import java.util.List;
 
 import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.annotation.ThreadUnSafe;
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.model.TableSet;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.parser.Parser;

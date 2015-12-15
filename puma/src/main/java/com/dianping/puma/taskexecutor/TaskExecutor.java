@@ -14,8 +14,8 @@ package com.dianping.puma.taskexecutor;
 
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.core.LifeCycle;
-import com.dianping.puma.core.model.TableSet;
+import com.dianping.puma.common.LifeCycle;
+import com.dianping.puma.model.TableSet;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.sender.Sender;
 import com.dianping.puma.storage.manage.InstanceStorageManager;
@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * @author Leo Liang
  */
-public interface TaskExecutor extends LifeCycle<Exception> {
+public interface TaskExecutor extends LifeCycle {
 
     boolean isStop();
 

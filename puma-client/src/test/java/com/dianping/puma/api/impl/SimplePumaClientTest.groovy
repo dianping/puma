@@ -7,7 +7,7 @@ import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse
 import com.dianping.puma.core.event.DdlEvent
 import com.dianping.puma.core.model.BinlogInfo
-import com.dianping.puma.core.util.GsonUtil
+import com.dianping.puma.core.util.ConvertHelper
 import com.dianping.puma.core.util.constant.DdlEventSubType
 import com.dianping.puma.core.util.constant.DdlEventType
 import com.dianping.puma.core.util.sql.DDLType
@@ -79,7 +79,7 @@ class SimplePumaClientTest {
     public void testDecodeJson() throws Exception {
         def response = new BinlogGetResponse(binlogMessage: new BinlogMessage(binlogEvents: []));
         def httpResponse = [
-                getEntity : { new StringEntity(GsonUtil.toJson(response)) },
+                getEntity : { new StringEntity(ConvertHelper.toJson(response)) },
                 getHeaders: { null }
         ] as HttpResponse
 

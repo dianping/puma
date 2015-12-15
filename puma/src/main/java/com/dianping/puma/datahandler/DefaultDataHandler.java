@@ -16,11 +16,11 @@
 package com.dianping.puma.datahandler;
 
 import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.core.annotation.ThreadUnSafe;
+import com.dianping.puma.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import com.dianping.puma.core.meta.TableMetaInfo;
+import com.dianping.puma.parser.meta.TableMetaInfo;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.column.Column;

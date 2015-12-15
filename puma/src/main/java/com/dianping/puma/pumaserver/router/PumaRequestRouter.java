@@ -2,7 +2,6 @@ package com.dianping.puma.pumaserver.router;
 
 import com.dianping.puma.pumaserver.router.decoder.*;
 import com.dianping.puma.pumaserver.router.decoder.binlog.*;
-import com.dianping.puma.pumaserver.router.decoder.deprecated.DeprecatedBinlogQueryDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.util.LinkedHashSet;
@@ -22,7 +21,6 @@ public class PumaRequestRouter {
         decoders.add(new BinlogGetDecoder());
         decoders.add(new BinlogAckDecoder());
         decoders.add(new BinlogRollbackDecoder());
-        decoders.add(new DeprecatedBinlogQueryDecoder());
     }
 
     public Object route(FullHttpRequest request) {

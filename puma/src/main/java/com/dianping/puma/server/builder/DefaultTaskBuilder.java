@@ -1,13 +1,15 @@
 package com.dianping.puma.server.builder;
 
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-import com.dianping.puma.core.constant.Status;
-import com.dianping.puma.core.model.*;
-import com.dianping.puma.core.util.IPUtils;
+import com.dianping.puma.utils.IPUtils;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.filter.*;
 import com.dianping.puma.instance.InstanceManager;
+import com.dianping.puma.model.Schema;
+import com.dianping.puma.model.SchemaSet;
+import com.dianping.puma.model.Table;
+import com.dianping.puma.model.TableSet;
 import com.dianping.puma.parser.DefaultBinlogParser;
 import com.dianping.puma.parser.Parser;
 import com.dianping.puma.parser.meta.DefaultTableMetaInfoFetcher;
@@ -64,11 +66,9 @@ public class DefaultTaskBuilder implements TaskBuilder {
 
         PumaTaskStateEntity taskState = new PumaTaskStateEntity();
         taskState.setTaskName(taskName);
-        taskState.setStatus(Status.PREPARING);
         taskExecutor.setTaskState(taskState);
 
         taskExecutor.setInstanceStorageManager(instanceStorageManager);
-        taskExecutor.setBinlogStat(new BinlogStat());
 
         // Parser.
         Parser parser = new DefaultBinlogParser();
@@ -133,9 +133,6 @@ public class DefaultTaskBuilder implements TaskBuilder {
         dispatcher.setSenders(senders);
         taskExecutor.setDispatcher(dispatcher);
         taskExecutor.initContext();
-
-        // Set puma task status.
-        taskExecutor.getTaskState().setStatus(Status.WAITING);
 
         return taskExecutor;
     }

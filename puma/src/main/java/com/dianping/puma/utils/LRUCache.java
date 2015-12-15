@@ -13,12 +13,12 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.puma.core;
+package com.dianping.puma.utils;
+
+import com.dianping.puma.annotation.ThreadUnSafe;
 
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-
-import com.dianping.puma.core.annotation.ThreadUnSafe;
 
 /**
  * TODO Comment of LRUCache

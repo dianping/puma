@@ -5,6 +5,7 @@ import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.cleanup.DeleteStrategy;
 import com.dianping.puma.storage.cleanup.ExpiredDeleteStrategy;
 import com.dianping.puma.storage.index.utils.IndexCodec;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
@@ -47,7 +48,7 @@ public final class L1SingleWriteIndexManager extends SingleWriteIndexManager<Bin
                 l1IndexReader.stop();
             }
 
-            file.delete();
+            FileUtils.forceDelete(file);
         }
 
         result.add(Pair.of(indexKey, indexValue));

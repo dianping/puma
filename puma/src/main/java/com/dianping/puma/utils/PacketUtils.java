@@ -36,7 +36,7 @@ public final class PacketUtils {
     }
 
     public static byte[] readBit(ByteBuffer buf, int length, boolean isLittleEndian) throws IOException {
-        final byte[] value = readBytes(buf, (int) ((length + 7) >> 3));
+        final byte[] value = readBytes(buf, (length + 7) >> 3);
         return isLittleEndian ? value : CodecUtils.toBigEndian(value);
     }
 
@@ -167,7 +167,7 @@ public final class PacketUtils {
     }
 
     public static BitSet readBitSet(ByteBuffer buf, int len) {
-        BitSet bs = new BitSet((int) ((len + 7) >>> 3));
+        BitSet bs = new BitSet((len + 7) >>> 3);
         int i;
         int b = 0;
         int leftBit = 0x01;

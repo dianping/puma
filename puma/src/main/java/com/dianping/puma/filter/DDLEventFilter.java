@@ -40,11 +40,8 @@ public class DDLEventFilter extends AbstractEventFilter {
 
             // In accepted table list.
             Table table = new Table(changedEvent.getDatabase(), changedEvent.getTable());
-            if (!acceptedTables.contains(table)) {
-                return false;
-            }
+            return acceptedTables.contains(table);
 
-            return true;
         }
 
         return true;

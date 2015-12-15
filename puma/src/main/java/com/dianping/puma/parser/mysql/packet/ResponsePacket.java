@@ -25,5 +25,5 @@ import com.dianping.puma.common.PumaContext;
  */
 public interface ResponsePacket extends Packet {
 
-	public void readPacket(InputStream is, PumaContext context) throws IOException;
+	void readPacket(InputStream is, PumaContext context) throws IOException;
 }

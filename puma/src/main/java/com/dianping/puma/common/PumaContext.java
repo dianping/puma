@@ -304,10 +304,7 @@ public class PumaContext implements Serializable {
 	}
 
 	public boolean isCheckSum() {
-		if (checksumAlg != BinlogConstants.CHECKSUM_ALG_OFF && checksumAlg != BinlogConstants.CHECKSUM_ALG_UNDEF) {
-			return true;
-		}
-		return false;
+		return checksumAlg != BinlogConstants.CHECKSUM_ALG_OFF && checksumAlg != BinlogConstants.CHECKSUM_ALG_UNDEF;
 	}
 
 	public int getEventIndex() {

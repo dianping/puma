@@ -98,7 +98,7 @@ public class AuthenticatePacket extends AbstractCommandPacket {
 
 				PacketUtils.writeBytesNoNull(bodyBuf, new byte[23]);
 			} else {
-				PacketUtils.writeInt(bodyBuf, (int) context.getClientParam(), 2);
+				PacketUtils.writeInt(bodyBuf, context.getClientParam(), 2);
 				PacketUtils.writeInt(bodyBuf, context.getMaxThreeBytes(), 3);
 			}
 
@@ -142,7 +142,7 @@ public class AuthenticatePacket extends AbstractCommandPacket {
 					PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 4);
 				}
 			} else {
-				PacketUtils.writeInt(buf, (int) context.getClientParam(), 2);
+				PacketUtils.writeInt(buf, context.getClientParam(), 2);
 				PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 3);
 			}
 		}

@@ -32,11 +32,7 @@ public class DefaultChannelHolder extends DefaultChannelGroup implements Channel
 
             @Override
             public boolean matches(Channel channel) {
-                if (matchedIndex == index++) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return matchedIndex == index++;
             }
         });
     }

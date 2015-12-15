@@ -2,7 +2,7 @@ package com.dianping.puma.common;
 
 public interface LifeCycle {
 
-	public void start();
+	void start();
 
-	public void stop();
+	void stop();
 }

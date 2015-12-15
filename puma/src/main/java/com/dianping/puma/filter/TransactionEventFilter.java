@@ -43,11 +43,8 @@ public class TransactionEventFilter extends AbstractEventFilter {
             }
 
             Schema schema = new Schema(database);
-            if (!acceptedSchemas.contains(schema)) {
-                return false;
-            }
+            return acceptedSchemas.contains(schema);
 
-            return true;
         }
 
         return true;

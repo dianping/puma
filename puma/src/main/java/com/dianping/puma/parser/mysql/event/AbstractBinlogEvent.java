@@ -54,7 +54,7 @@ public abstract class AbstractBinlogEvent implements BinlogEvent {
 	@Override
 	public void setHeader(BinlogHeader header) {
 		this.header = header;
-	};
+	}
 
 	public abstract void doParse(ByteBuffer buf, PumaContext context) throws IOException;
 

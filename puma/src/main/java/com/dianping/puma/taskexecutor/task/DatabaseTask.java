@@ -43,10 +43,8 @@ public class DatabaseTask {
 			return false;
 		if (!database.equals(that.database))
 			return false;
-		if (!tables.equals(that.tables))
-			return false;
+		return tables.equals(that.tables);
 
-		return true;
 	}
 
 	@Override

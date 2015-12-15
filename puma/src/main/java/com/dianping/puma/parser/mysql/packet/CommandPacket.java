@@ -25,9 +25,9 @@ import com.dianping.puma.common.PumaContext;
  */
 public interface CommandPacket extends Packet {
 
-	public byte[] getBytes();
+	byte[] getBytes();
 
-	public void buildPacket(PumaContext context) throws IOException;
+	void buildPacket(PumaContext context) throws IOException;
 
-	public void write(OutputStream os, PumaContext context) throws IOException;
+	void write(OutputStream os, PumaContext context) throws IOException;
 }

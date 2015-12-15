@@ -20,8 +20,8 @@ import java.io.Serializable;
  * 
  */
 public interface Packet extends Serializable {
-    public int length();
+    int length();
 
-    public int seq();
+    int seq();
 
 }

@@ -215,13 +215,13 @@ public final class MySQLUtils {
 	}
 
 	public static java.sql.Time toTime(int value) {
-		int s = (int) (value % 100);
+		int s = value % 100;
 		if (value <= 1) {
 			s = 1;
 		}
 		value /= 100;
-		int m = (int) (value % 100);
-		int h = (int) (value / 100);
+		int m = value % 100;
+		int h = value / 100;
 		Calendar c = Calendar.getInstance();
 		c.set(70, 0, 1, h, m, s);
 		return new java.sql.Time(c.getTimeInMillis());

@@ -28,9 +28,9 @@ import com.dianping.puma.common.PumaContext;
  * 
  */
 public interface BinlogEvent extends Serializable {
-	public BinlogHeader getHeader();
+	BinlogHeader getHeader();
 	
-	public void setHeader(BinlogHeader header);
+	void setHeader(BinlogHeader header);
 
-	public void parse(ByteBuffer buf, PumaContext context, BinlogHeader header) throws IOException;
+	void parse(ByteBuffer buf, PumaContext context, BinlogHeader header) throws IOException;
 }

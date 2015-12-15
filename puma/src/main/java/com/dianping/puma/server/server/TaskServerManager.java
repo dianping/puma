@@ -2,7 +2,7 @@ package com.dianping.puma.server.server;
 
 public interface TaskServerManager {
 
-	public String findSelfHost();
+	String findSelfHost();
 
-	public void register();
+	void register();
 }

@@ -913,12 +913,12 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         this.state.getBinlogStat().setDdls(ddls + 1);
     }
 
-    public static enum BinlogFormat {
+    public enum BinlogFormat {
         STATEMENT("STATEMENT"), ROW("ROW"), MIXED("MIXED");
 
         private String value;
 
-        private BinlogFormat(String value) {
+        BinlogFormat(String value) {
             this.value = value;
         }
 
@@ -945,13 +945,13 @@ public class DefaultTaskExecutor extends AbstractTaskExecutor {
         }
     }
 
-    public static enum BinlogRowImage {
+    public enum BinlogRowImage {
 
         FULL("FULL"), MINIMAL("MINIMAL"), NOBLOB("NOBLOB");
 
         private String value;
 
-        private BinlogRowImage(String value) {
+        BinlogRowImage(String value) {
             this.value = value;
         }
 

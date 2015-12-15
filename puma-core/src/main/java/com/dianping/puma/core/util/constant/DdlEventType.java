@@ -48,7 +48,7 @@ public enum DdlEventType {
 		}
 	}
 
-	private DdlEventType(int type) {
+	DdlEventType(int type) {
 		this.type = type;
 	}
 

@@ -190,7 +190,7 @@ public enum DdlEventSubType {
 		}
 	}
 
-	private DdlEventSubType(int type) {
+	DdlEventSubType(int type) {
 		this.type = type;
 	}
 

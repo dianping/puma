@@ -17,7 +17,7 @@ public enum ColumnType {
 	
 	private int type;
 
-	private ColumnType(int type) {
+	ColumnType(int type) {
 		this.type = type;
 	}
 

@@ -28,10 +28,8 @@ public class Schema {
 
 		Schema schema = (Schema) o;
 
-		if (!schemaName.equals(schema.schemaName))
-			return false;
+		return schemaName.equals(schema.schemaName);
 
-		return true;
 	}
 
 	@Override

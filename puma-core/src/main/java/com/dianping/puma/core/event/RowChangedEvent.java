@@ -163,10 +163,8 @@ public class RowChangedEvent extends ChangedEvent implements Serializable, Clone
             return false;
         if (dmlType != that.dmlType)
             return false;
-        if (eventType != that.eventType)
-            return false;
+        return eventType == that.eventType;
 
-        return true;
     }
 
     @Override

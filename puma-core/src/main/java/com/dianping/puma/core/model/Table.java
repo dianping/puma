@@ -43,10 +43,8 @@ public class Table {
 
 		if (!schemaName.equals(table.schemaName))
 			return false;
-		if (!tableName.equals(table.tableName))
-			return false;
+		return tableName.equals(table.tableName);
 
-		return true;
 	}
 
 	@Override

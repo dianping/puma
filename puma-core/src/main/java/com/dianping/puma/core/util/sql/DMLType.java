@@ -6,7 +6,7 @@ public enum DMLType {
 
 	private int type;
 
-	private DMLType(int type) {
+	DMLType(int type) {
 		this.type = type;
 	}
 

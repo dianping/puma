@@ -18,7 +18,7 @@ public enum Status {
 
 	private final String desc;
 
-	private Status(String desc) {
+	Status(String desc) {
 		this.desc = desc;
 	}
 

@@ -20,7 +20,7 @@ package com.dianping.puma.core;
  * 
  */
 public interface LifeCycle<T extends Exception> {
-	public void start() throws T;
+	void start() throws T;
 
-	public void stop() throws T;
+	void stop() throws T;
 }

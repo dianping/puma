@@ -43,7 +43,7 @@ public enum DDLType {
 	
 	private int type;
 	
-	private DDLType(int type){
+	DDLType(int type){
 		this.type = type;
 	}
 	

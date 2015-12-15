@@ -1,4 +1,4 @@
-package com.dianping.puma.core.registry;
+package com.dianping.puma.server.registry;
 
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.puma.core.config.ConfigManager;

@@ -2,7 +2,7 @@ package com.dianping.puma.server.container;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.model.Table;
-import com.dianping.puma.core.registry.RegistryService;
+import com.dianping.puma.server.registry.RegistryService;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.builder.TaskBuilder;
 import com.dianping.puma.server.server.TaskServerManager;

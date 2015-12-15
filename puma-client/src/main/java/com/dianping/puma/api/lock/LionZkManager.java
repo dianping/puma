@@ -12,9 +12,9 @@ public class LionZkManager {
 
     private final Logger logger = LoggerFactory.getLogger(LionZkManager.class);
 
-    private final int defaultSessionTimeoutMs = 30 * 1000; // 30s.
+    private static final int DEFAULT_SESSION_TIMEOUT_MS = 30 * 1000;
 
-    private final int defaultConnectionTimeoutMs = 15 * 1000; // 15s.
+    private static final int DEFAULT_CONNECTION_TIMEOUT_MS = 15 * 1000;
 
     private final RetryPolicy defaultRetryPolicy = new ExponentialBackoffRetry(1000, 3);
 
@@ -24,7 +24,7 @@ public class LionZkManager {
     }
 
     public CuratorFramework getZkClient() {
-        return getZkClient(defaultSessionTimeoutMs, defaultConnectionTimeoutMs, defaultRetryPolicy);
+        return getZkClient(DEFAULT_SESSION_TIMEOUT_MS, DEFAULT_CONNECTION_TIMEOUT_MS, defaultRetryPolicy);
     }
 
     protected CuratorFramework getZkClient(int sessionTimeoutMs, int connectionTimeoutMs,

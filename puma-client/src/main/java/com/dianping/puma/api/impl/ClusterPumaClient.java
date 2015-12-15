@@ -66,6 +66,7 @@ public class ClusterPumaClient implements PumaClient {
             String msg = String.format("[%s] failed to create new client. No puma server available.", clientName);
             PumaClientException e = new PumaClientException(msg);
             LOG.error(msg, e);
+            throw e;
         }
 
         return new PumaClientConfig()

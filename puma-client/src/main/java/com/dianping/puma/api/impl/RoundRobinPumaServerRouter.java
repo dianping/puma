@@ -44,11 +44,7 @@ public class RoundRobinPumaServerRouter implements PumaServerRouter {
 			inited = true;
 		}
 
-		if (servers == null) {
-			return false;
-		}
-
-		return servers.contains(server);
+		return servers != null && servers.contains(server);
 	}
 
 	protected void init() {

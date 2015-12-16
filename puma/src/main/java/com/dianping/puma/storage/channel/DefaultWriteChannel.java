@@ -7,12 +7,10 @@ import com.dianping.puma.storage.Sequence;
 import com.dianping.puma.storage.cache.CachedGroupWriteDataManager;
 import com.dianping.puma.storage.data.WriteDataManager;
 import com.dianping.puma.storage.index.SeriesWriteIndexManager;
-import com.google.common.util.concurrent.Uninterruptibles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChannel {
 
@@ -83,9 +81,14 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
             while (!isStopped() && !Thread.currentThread().isInterrupted()) {
                 try {
                     flush();
-                    Uninterruptibles.sleepUninterruptibly(1000, TimeUnit.MILLISECONDS);
-                } catch (Exception ignore) {
-                    LOG.error("Flush failed!", ignore);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        flush();
+                        Thread.currentThread().interrupt();
+                    }
+                } catch (Exception e) {
+                    LOG.error("Flush failed!", e);
                 }
             }
         }

@@ -23,6 +23,9 @@ import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.meta.TableMetaInfo;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.SimpleDdlParser;
+import com.dianping.puma.core.util.constant.DdlEventSubType;
+import com.dianping.puma.core.util.constant.DdlEventType;
+import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.parser.meta.TableMetaInfoFetcher;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
@@ -198,6 +201,31 @@ public abstract class AbstractDataHandler implements DataHandler {
         DdlEvent ddlEvent = (DdlEvent) dataChangedEvent;
         ddlEvent.setSql(sql);
         ddlEvent.setDdlEventType(SimpleDdlParser.getEventType(sql));
+
+        ddlEvent.setDdlEventSubType(SimpleDdlParser.getEventSubType(ddlEvent.getDdlEventType(), sql));
+        if (ddlEvent.getDdlEventType() == DdlEventType.DDL_DEFAULT
+                || ddlEvent.getDdlEventSubType() == DdlEventSubType.DDL_SUB_DEFAULT) {
+            log.info("DdlEvent Type do not found. ddl sql=" + sql);
+        }
+        SimpleDdlParser.DdlResult ddlResult = SimpleDdlParser
+                .getDdlResult(ddlEvent.getDdlEventType(), ddlEvent.getDdlEventSubType(), sql);
+        if (ddlResult != null) {
+            ddlEvent.setDatabase(StringUtils.isNotBlank(ddlResult.getDatabase()) ? ddlResult.getDatabase()
+                    : StringUtils.EMPTY);
+            ddlEvent.setTable(StringUtils.isNotBlank(ddlResult.getTable()) ? ddlResult.getTable() : StringUtils.EMPTY);
+            if (ddlEvent.getDdlEventType() != DdlEventType.DDL_CREATE) {
+                log.info("DDL event, sql=" + sql + "  ,database =" + ddlResult.getDatabase() + " table ="
+                        + ddlResult.getTable() + " queryEvent.getDatabaseName()" + queryEvent.getDatabaseName());
+            }
+        }
+        if (StringUtils.isBlank(ddlEvent.getDatabase())) {
+            ddlEvent.setDatabase(queryEvent.getDatabaseName());
+        }
+
+        if (ddlEvent.getDdlEventType() == DdlEventType.DDL_ALTER
+                && ddlEvent.getDdlEventSubType() == DdlEventSubType.DDL_ALTER_TABLE) {
+            ddlEvent.setDDLType(DDLType.ALTER_TABLE);
+        }
 
         tableMetasInfoFetcher.refreshTableMeta(ddlEvent.getDatabase(), ddlEvent.getTable());
 

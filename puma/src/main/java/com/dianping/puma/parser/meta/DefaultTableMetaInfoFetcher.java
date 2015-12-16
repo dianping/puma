@@ -58,7 +58,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
             return null;
         }
 
-        String key = database + "." + table;
+        String key = getKey(database, table);
         if (!tableMetaInfoCache.containsKey(key)) {
             try {
                 tableMetaInfoCache.put(key, _refreshTableMeta(database, table));
@@ -71,7 +71,11 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
     @Override
     public void refreshTableMeta(final String databaseName, final String tableName) {
-        tableMetaInfoCache.remove(databaseName + "." + tableName);
+        tableMetaInfoCache.remove(getKey(databaseName, tableName));
+    }
+
+    private String getKey(String databaseName, String tableName) {
+        return databaseName + "." + tableName;
     }
 
     @Override
@@ -84,7 +88,7 @@ public class DefaultTableMetaInfoFetcher implements TableMetaInfoFetcher {
 
         QueryRunner runner = new QueryRunner(metaDs);
 
-        Transaction t = Cat.newTransaction("SQL.meta", database + "." + table);
+        Transaction t = Cat.newTransaction("SQL.meta", getKey(database, table));
         try {
             TableMetaInfo tableMetaInfo = runner.query(genTableMetaSql(database, table),
                     new ResultSetHandler<TableMetaInfo>() {

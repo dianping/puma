@@ -58,13 +58,12 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
             this.readChannel = initChannel(sc, binlogInfo, tables, dml, ddl, transaction);
             THREAD_POOL.execute(new AsyncTask(new WeakReference<DefaultAsyncBinlogChannel>(this)));
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw new BinlogChannelException("find event storage failure", e);
+            throw new BinlogChannelException(database + " find event storage failure", e);
         }
     }
 
     protected ReadChannel initChannel(long sc, BinlogInfo binlogInfo, List<String> tables,
-                                       boolean dml, boolean ddl, boolean transaction) throws IOException {
+                                      boolean dml, boolean ddl, boolean transaction) throws IOException {
         ReadChannel readChannel = ChannelFactory.newReadChannel(database, tables, dml, ddl, transaction);
         readChannel.start();
 

@@ -15,6 +15,7 @@
  */
 package com.dianping.puma.datahandler;
 
+import com.dianping.cat.Cat;
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.annotation.ThreadUnSafe;
 import com.dianping.puma.core.event.ChangedEvent;
@@ -286,7 +287,8 @@ public class DefaultDataHandler extends AbstractDataHandler {
             msg.append("Unknown column for Binlog:  ").append(context.getBinlogFileName()).append(" BinlogPos: ")
                     .append(context.getBinlogStartPos()).append(" Skip to ").append(context.getNextBinlogPos());
             msg.append(" columnPos: ").append(pos);
-            log.warn(msg.toString());
+            log.error(msg.toString());
+            Cat.logError(msg.toString(), new IllegalArgumentException(msg.toString()));
             skipEvent((byte) 0, result, context);
 
             return false;

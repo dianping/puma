@@ -148,6 +148,18 @@ public class DdlEvent extends ChangedEvent implements Serializable {
         this.ddlType = ddlType;
     }
 
+    public DDLType getDdlType() {
+        return ddlType;
+    }
+
+    public DdlEventType getDdlEventType() {
+        return ddlEventType;
+    }
+
+    public DdlEventSubType getDdlEventSubType() {
+        return ddlEventSubType;
+    }
+
     @Override
     public EventType getEventType() {
         return eventType;

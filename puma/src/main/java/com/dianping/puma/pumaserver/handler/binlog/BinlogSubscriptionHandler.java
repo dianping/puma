@@ -24,6 +24,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
     @Override
     public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
         String clientName = binlogSubscriptionRequest.getClientName();
+        Cat.logEvent("Client.Subscription", String.format("%s %s", clientName, ctx.channel().remoteAddress().toString()));
 
         BinlogAck binlogAck = binlogAckService.load(clientName);
 
@@ -39,15 +40,12 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 binlogSubscriptionRequest.isTransaction()
         );
 
-
         ClientSession session = new ClientSession(clientName, defaultAsyncBinlogChannel, binlogSubscriptionRequest.getCodec());
         clientSessionService.subscribe(session);
 
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
         binlogSubscriptionResponse.setToken(session.getToken());
         ctx.channel().writeAndFlush(binlogSubscriptionResponse);
-
-        Cat.logEvent("Client.Subscription", String.format("%s %s", clientName, ctx.channel().remoteAddress().toString()));
 
         SystemStatusManager.addClient(
                 clientName,

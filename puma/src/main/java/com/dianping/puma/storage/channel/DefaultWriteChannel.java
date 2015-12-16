@@ -37,7 +37,6 @@ public class DefaultWriteChannel extends AbstractLifeCycle implements WriteChann
         writeDataManager.start();
 
         thread = new Thread(new FlushTask());
-        thread.setDaemon(true);
         thread.setName("flush-" + database);
         thread.start();
     }

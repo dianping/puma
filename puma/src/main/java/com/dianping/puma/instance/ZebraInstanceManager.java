@@ -6,6 +6,7 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.config.ConfigManager;
+import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import com.google.common.base.Optional;
@@ -14,21 +15,22 @@ import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
 public class ZebraInstanceManager implements InstanceManager {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ZebraInstanceManager.class);
 
     @Autowired
     private ConfigManager configManager;
@@ -124,6 +126,8 @@ public class ZebraInstanceManager implements InstanceManager {
                 clusterIpMap.put(writeUrl, clusterIps);
             }
 
+            List<String> clusterIpsList = new ArrayList<String>();
+
             for (Map.Entry<String, DefaultDataSourceConfigManager.ReadOrWriteRole> entry : groupdsResult.entrySet()) {
                 if (!entry.getValue().isRead() && !entry.getValue().isWrite()) {
                     continue;
@@ -139,6 +143,7 @@ public class ZebraInstanceManager implements InstanceManager {
                 }
 
                 String url = matcher.group(1);
+                clusterIpsList.add(url);
                 SrcDbEntity srcDbEntity = new SrcDbEntity();
                 String[] urlAndPort = url.split(":");
                 srcDbEntity.setHost(urlAndPort[0]);
@@ -163,9 +168,11 @@ public class ZebraInstanceManager implements InstanceManager {
                 clusterIps.add(srcDbEntity);
             }
 
-            this.clusterIpMap = clusterIpMap;
-            this.dbClusterMap = dbClusterMap;
+//            LOGGER.info("build cluster info from {} cluster:{}ips: {}", db, writeUrl, ConvertHelper.toJson(clusterIpsList));
         }
+
+        this.clusterIpMap = clusterIpMap;
+        this.dbClusterMap = dbClusterMap;
     }
 
     private String getSingleDataSourceKey(String key, String dsId) {

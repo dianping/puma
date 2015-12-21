@@ -96,7 +96,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 
             eventFilterChain.reset();
             if (!eventFilterChain.doNext(binlogEvent)) {
-                if (System.currentTimeMillis() - lastEventTime > 60 * 1000 && binlogEvent.getBinlogInfo() != null) {
+                if (System.currentTimeMillis() - lastEventTime > 60 * 60 * 1000 && binlogEvent.getBinlogInfo() != null) {
                     RowChangedEvent heartbeatEvent = new RowChangedEvent();
                     heartbeatEvent.setDmlType(DMLType.NULL);
                     heartbeatEvent.setBinlogInfo(binlogEvent.getBinlogInfo());

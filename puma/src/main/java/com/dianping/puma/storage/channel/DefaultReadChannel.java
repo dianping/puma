@@ -29,7 +29,7 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 
     private ReadDataManager<Sequence, ChangedEvent> readDataManager;
 
-    private long lastHeartbeatTime = 0;
+    private long lastEventTime = 0;
 
     protected DefaultReadChannel(String database) {
         this.database = database;
@@ -96,19 +96,21 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 
             eventFilterChain.reset();
             if (!eventFilterChain.doNext(binlogEvent)) {
-                if (System.currentTimeMillis() - lastHeartbeatTime > 60 * 1000 && binlogEvent.getBinlogInfo() != null) {
+                if (System.currentTimeMillis() - lastEventTime > 60 * 1000 && binlogEvent.getBinlogInfo() != null) {
                     RowChangedEvent heartbeatEvent = new RowChangedEvent();
                     heartbeatEvent.setDmlType(DMLType.NULL);
                     heartbeatEvent.setBinlogInfo(binlogEvent.getBinlogInfo());
                     heartbeatEvent.setDatabase("HeartbeatEvent");
                     heartbeatEvent.setTable("HeartbeatEvent");
                     heartbeatEvent.setColumns(new HashMap<String, RowChangedEvent.ColumnInfo>());
+                    lastEventTime = System.currentTimeMillis();
                     return heartbeatEvent;
                 } else {
                     continue;
                 }
             }
 
+            lastEventTime = System.currentTimeMillis();
             return binlogEvent;
         }
     }

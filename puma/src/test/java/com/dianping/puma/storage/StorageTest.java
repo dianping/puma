@@ -1,7 +1,7 @@
 package com.dianping.puma.storage;
 
 import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.utils.EventFactory;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.storage.channel.ChannelFactory;
@@ -9,6 +9,7 @@ import com.dianping.puma.storage.channel.ReadChannel;
 import com.dianping.puma.storage.channel.WriteChannel;
 import com.dianping.puma.storage.filesystem.FileSystem;
 import com.dianping.puma.storage.utils.DateUtils;
+import com.dianping.puma.utils.EventFactory;
 import com.google.common.collect.Lists;
 import org.junit.After;
 import org.junit.Before;
@@ -308,12 +309,32 @@ public class StorageTest extends StorageBaseTest {
         writeChannel.flush();
 
         readChannel.openOldest();
-        assertEquals(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT), readChannel.next());
-        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 1, "a", "b", false, false, DMLType.INSERT), getEventWithoutHeartbeat(readChannel));
+        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "b", false, false, DMLType.INSERT), getEventWithoutHeartbeat(readChannel));
 
-        assertNull(readChannel.next());
+        assertNull(getEventWithoutHeartbeat(readChannel));
 
         readChannel.stop();
+    }
+
+    public ChangedEvent getEventWithoutHeartbeat(ReadChannel readChannel) throws IOException {
+        while (true) {
+            ChangedEvent event = readChannel.next();
+            if (event == null) {
+                return null;
+            }
+
+            if (!(event instanceof RowChangedEvent)) {
+                return event;
+            }
+
+            RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
+            if (rowChangedEvent.getDmlType() == DMLType.NULL) {
+                continue;
+            }
+
+            return event;
+        }
     }
 
     @Test
@@ -330,10 +351,10 @@ public class StorageTest extends StorageBaseTest {
         writeChannel.flush();
 
         readChannel.openOldest();
-        assertEquals(EventFactory.dml(1, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT), readChannel.next());
-        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 2, "a", "b", false, false, DMLType.INSERT), getEventWithoutHeartbeat(readChannel));
+        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT), getEventWithoutHeartbeat(readChannel));
 
-        assertNull(readChannel.next());
+        assertNull(getEventWithoutHeartbeat(readChannel));
 
         readChannel.stop();
     }
@@ -354,10 +375,10 @@ public class StorageTest extends StorageBaseTest {
         writeChannel.flush();
 
         readChannel.openOldest();
-        assertEquals(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"), readChannel.next());
-        assertEquals(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"), readChannel.next());
+        assertEquals(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"), getEventWithoutHeartbeat(readChannel));
+        assertEquals(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"), getEventWithoutHeartbeat(readChannel));
 
-        assertNull(readChannel.next());
+        assertNull(getEventWithoutHeartbeat(readChannel));
 
         readChannel.stop();
     }
@@ -372,18 +393,18 @@ public class StorageTest extends StorageBaseTest {
         writeChannel.append(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"));
         writeChannel.append(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"));
         writeChannel.append(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT));
-        writeChannel.append(EventFactory.dml(1, 1, "f.1", 4, "a", "b", true, false, DMLType.NULL));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 4, "a", "b", true, false, DMLType.DELETE));
         writeChannel.append(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT));
-        writeChannel.append(EventFactory.dml(1, 1, "f.1", 6, "a", "b", false, true, DMLType.NULL));
+        writeChannel.append(EventFactory.dml(1, 1, "f.1", 6, "a", "b", false, true, DMLType.DELETE));
         writeChannel.flush();
 
         readChannel.openOldest();
-        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
-        assertEquals(EventFactory.dml(1, 1, "f.1", 4, "a", "b", true, false, DMLType.NULL), readChannel.next());
-        assertEquals(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT), readChannel.next());
-        assertEquals(EventFactory.dml(1, 1, "f.1", 6, "a", "b", false, true, DMLType.NULL), readChannel.next());
+        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT), getEventWithoutHeartbeat(readChannel));
+        assertEquals(EventFactory.dml(1, 1, "f.1", 4, "a", "b", true, false, DMLType.DELETE), getEventWithoutHeartbeat(readChannel));
+        assertEquals(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT), getEventWithoutHeartbeat(readChannel));
+        assertEquals(EventFactory.dml(1, 1, "f.1", 6, "a", "b", false, true, DMLType.DELETE), getEventWithoutHeartbeat(readChannel));
 
-        assertNull(readChannel.next());
+        assertNull(getEventWithoutHeartbeat(readChannel));
 
         readChannel.stop();
     }
@@ -404,12 +425,12 @@ public class StorageTest extends StorageBaseTest {
         writeChannel.flush();
 
         readChannel.openOldest();
-        assertEquals(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"), readChannel.next());
-        assertEquals(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"), readChannel.next());
-        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT), readChannel.next());
-        assertEquals(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT), readChannel.next());
+        assertEquals(EventFactory.ddl(1, 1, "f.1", 1, "a", "b"), getEventWithoutHeartbeat(readChannel));
+        assertEquals(EventFactory.ddl(1, 1, "f.1", 2, "a", "b"), getEventWithoutHeartbeat(readChannel));
+        assertEquals(EventFactory.dml(1, 1, "f.1", 3, "a", "c", false, false, DMLType.INSERT), getEventWithoutHeartbeat(readChannel));
+        assertEquals(EventFactory.dml(1, 1, "f.1", 5, "a", "c", false, false, DMLType.INSERT), getEventWithoutHeartbeat(readChannel));
 
-        assertNull(readChannel.next());
+        assertNull(getEventWithoutHeartbeat(readChannel));
 
         readChannel.stop();
     }

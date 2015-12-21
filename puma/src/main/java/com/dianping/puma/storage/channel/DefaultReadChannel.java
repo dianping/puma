@@ -2,7 +2,9 @@ package com.dianping.puma.storage.channel;
 
 import com.dianping.puma.common.AbstractLifeCycle;
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.filter.EventFilterChain;
 import com.dianping.puma.filter.EventFilterChainFactory;
 import com.dianping.puma.storage.Sequence;
@@ -14,6 +16,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel {
@@ -25,6 +28,8 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
     private SeriesReadIndexManager readIndexManager;
 
     private ReadDataManager<Sequence, ChangedEvent> readDataManager;
+
+    private long lastHeartbeatTime = 0;
 
     protected DefaultReadChannel(String database) {
         this.database = database;
@@ -91,7 +96,15 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
 
             eventFilterChain.reset();
             if (!eventFilterChain.doNext(binlogEvent)) {
-                continue;
+                if (System.currentTimeMillis() - lastHeartbeatTime > 60 * 1000 && binlogEvent.getBinlogInfo() != null) {
+                    RowChangedEvent heartbeatEvent = new RowChangedEvent();
+                    heartbeatEvent.setDmlType(DMLType.NULL);
+                    heartbeatEvent.setBinlogInfo(binlogEvent.getBinlogInfo());
+                    heartbeatEvent.setColumns(new HashMap<String, RowChangedEvent.ColumnInfo>());
+                    return heartbeatEvent;
+                } else {
+                    continue;
+                }
             }
 
             return binlogEvent;

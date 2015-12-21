@@ -112,7 +112,6 @@ public class RawEventCodec implements EventCodec {
 
                         break;
                     }
-                    case REPLACE:
                     case NULL:
                 }
             }
@@ -295,8 +294,6 @@ public class RawEventCodec implements EventCodec {
                     break;
                 case DELETE:
                     decodeColumnValues(buf, columns, false);
-                    break;
-                case REPLACE:
                     break;
                 case NULL:
                     break;

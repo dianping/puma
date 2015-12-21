@@ -73,7 +73,11 @@ public class DefaultAsyncBinlogChannel implements AsyncBinlogChannel {
         ReadChannel readChannel = ChannelFactory.newReadChannel(database, tables, dml, ddl, transaction);
         readChannel.start();
 
-        readChannel.open(binlogInfo);
+        if (binlogInfo == null) {
+            readChannel.openLatest();
+        } else {
+            readChannel.open(binlogInfo);
+        }
 
         return readChannel;
     }

@@ -100,6 +100,8 @@ public class DefaultReadChannel extends AbstractLifeCycle implements ReadChannel
                     RowChangedEvent heartbeatEvent = new RowChangedEvent();
                     heartbeatEvent.setDmlType(DMLType.NULL);
                     heartbeatEvent.setBinlogInfo(binlogEvent.getBinlogInfo());
+                    heartbeatEvent.setDatabase("HeartbeatEvent");
+                    heartbeatEvent.setTable("HeartbeatEvent");
                     heartbeatEvent.setColumns(new HashMap<String, RowChangedEvent.ColumnInfo>());
                     return heartbeatEvent;
                 } else {

@@ -6,7 +6,6 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.config.ConfigManager;
-import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import com.google.common.base.Optional;
@@ -106,7 +105,7 @@ public class ZebraInstanceManager implements InstanceManager {
             if (!write.isPresent()) {
                 continue;
             }
-            String writeJdbcUrl = configCache.getProperty(getSingleDataSourceKey("url", write.get().getKey()));
+            String writeJdbcUrl = configCache.getProperty(getSingleDataSourceKey(Constants.ELEMENT_JDBC_URL, write.get().getKey()));
             if (Strings.isNullOrEmpty(writeJdbcUrl)) {
                 continue;
             }
@@ -134,7 +133,11 @@ public class ZebraInstanceManager implements InstanceManager {
                 }
 
                 String jdbcUrl = configCache.getProperty(getSingleDataSourceKey(Constants.ELEMENT_JDBC_URL, entry.getKey()));
-                if (Strings.isNullOrEmpty(jdbcUrl)) {
+                String active = configCache.getProperty(getSingleDataSourceKey(Constants.ELEMENT_ACTIVE, entry.getKey()));
+
+                if (Strings.isNullOrEmpty(jdbcUrl) ||
+                        Strings.isNullOrEmpty(active) ||
+                        !"true".equals(active.toLowerCase())) {
                     continue;
                 }
                 Matcher matcher = JDBC_URL_PATTERN.matcher(jdbcUrl);

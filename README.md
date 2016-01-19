@@ -1,40 +1,182 @@
-#### 项目简介
+### 项目简介
 
 随着网站业务不断发展，各业务对数据的实时性，数据库的可用性要求越来越高。
 
 本系统可以实时获得数据库的变更并通过消息方式发布出来，供各业务线订阅。
 
-同时，本系统还会提供通用的数据同步平台，一些简单场景的数据同步可以不需要自己开发，只需要联系我们配置一下即可。
+同时，本系统还会实现数据库同步（同构和异构），以满足数据库冗余备份，数据迁移的需求。
+
+**企业QQ群：249942006**
 
 &nbsp;
 
-#### 使用文档和设计文档
+### 项目依赖
 
->使用文档：[传送门](http://puma-admin01.beta:8080/#/docs/readme)
+```
+<dependency>
+    <groupId>com.dianping.puma</groupId>
+    <artifactId>puma-client</artifactId>
+    <version>${version}</version>
+</dependency>
+```
 
->设计文档：[传送门](http://puma-admin01.beta:8080/#/docs/design)
-
-&nbsp;
-
-#### 业务案例
-
-##### DBA数据库迁移
-DBA在很多业务迁库的过程中，可以通过`mysql dump`、`Puma`和`Zebra    `的相互配置，来实现不停机的数据库迁移。
-其他业务如果有类似的需求，也可以利用`Puma`来实现。
+最新版本为`2.0.0`
 
 &nbsp;
 
-##### 优惠订单团队分库分表多维度同步
-优惠订单团队的统一订单项目使用了`Zebra`最新的分库分表组件，由于业务复杂不得不使用多个维度，需要将同一条数据按照不同规则写入多个数据源。
-此时如果在客户端写入数据，那么将会影响性能，也会涉及到复杂的分布式事务，会引发很多问题。
-因此该项目利用`Puma`监听主维度数据，然后实时同步到其他维度。
+### 接入申请
+发邮件给`yuyang.gong@dianping.com`和`xiaotian.li@dianping.com`。
+
+未申请的 ClientName 无法正常使用。
+
+邮件标题：PumaClient 申请
+
+邮件内容：
+
+* ClientName
+* 需要监听的库和表
+* 上线时间
 
 &nbsp;
 
-##### 广告平台技术引擎组通过`Puma`建索引
-广告数据是通过`lucene`索引数据提供的，一般每隔10分钟，索引`build`层会读取数据库中的所有数据生成全量的索引数据提供给`search`层，那么两次全量之间数据的改动就需要以增量的形式提供给`search`层，之前我们是通过监控数据。表`UpdateTime`字段来扫描数数据的改动，这种方案的缺陷是无法监控数据的删除，而且不能完全做到实时化。现在通过`Puma`，我们只需订阅相关库表的修改，不仅可以监控表删除，更重要的是做到了广告数据的实时化。
+**申请完成在本地开发时，可以用`test`结尾的`ClientName`来做开发，避免相互影响。**
 
 &nbsp;
 
-##### DW团队通过`Puma`将`MySQL`数据增量同步到`Hive`（开发中）
-DW团队之前每晚全量拉取数据到`Hive`，浪费了大量的时间、带宽和磁盘。后来虽然提供了增量方案，但还是不能完美解决这个问题。目前DW正在开发新版系统通过`Puma`增量同步数据，后续的性能将会大幅度提升。
+### 使用方法简介
+
+```
+PumaClient client = new PumaClientConfig()
+	.setClientName("your-client-name")
+	.setDatabase("database")
+	.setTables(Lists.newArrayList("table0", "table1"))
+	.buildClusterPumaClient();
+
+while(!Thread.currentThread().isInterrupted()) {
+	try {
+		BinlogMessage binlogMessage = client.get(10, 1, TimeUnit.SECOND);
+		//todo: 处理数据
+		client.ack(binlogMessage.getLastBinlogInfo());
+	} catch(Exception e) {
+		//这里的异常主要是用来打点的，便于及时发现问题
+	}
+}
+```
+
+`PumaClient`所有操作都是同步操作，并且线程不安全。
+
+**如果是`job`项目可以直接写上述代码。但是如果是在`service`或者`web`项目中，一定要新启一个线程来跑上述代码。**
+
+&nbsp;
+
+### PumaClientConfig API && PumaClient API
+
+代码即是文档。
+
+建议直接在项目中看源码，或者到这里看源码：
+
+* [PumaClientConfig](http://code.dianpingoa.com/arch/puma/blob/master/puma-client/src/main/java/com/dianping/puma/api/PumaClientConfig.java)
+* [PumaClient](http://code.dianpingoa.com/arch/puma/blob/master/puma-client/src/main/java/com/dianping/puma/api/PumaClient.java)
+
+&nbsp;
+
+### 最佳实践
+```
+import com.dianping.cat.Cat;
+import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.api.PumaClientConfig;
+import com.dianping.puma.api.PumaClientException;
+import com.dianping.puma.core.dto.BinlogMessage;
+import com.dianping.puma.core.event.Event;
+import com.dianping.puma.core.event.RowChangedEvent;
+import com.google.common.collect.Lists;
+
+import java.util.concurrent.TimeUnit;
+
+public class Example1 {
+
+    /**
+     * 假设这是一个 web 或 service 项目
+     * 可以尝试运行多个,并随机关掉其中正在运行的那个,来模拟 failover
+     *
+     * @param args
+     */
+    public static final void main(String... args) {
+
+        //不要阻塞主线程,需要自己令起线程
+        Thread pumaClientThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                PumaClient client = new PumaClientConfig()
+                        .setClientName("puma-client-example-test")
+                        .setDatabase("Puma")
+                        .setTables(Lists.newArrayList("PumaServer"))
+                        .buildClusterPumaClient();
+
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        BinlogMessage message = client.get(100, 1, TimeUnit.SECONDS);
+
+                        for (Event event : message.getBinlogEvents()) {
+                            if (event instanceof RowChangedEvent) {
+
+                                RowChangedEvent rowChangedEvent = (RowChangedEvent) event;
+                                System.out.println(rowChangedEvent.toString());
+
+                                //todo: 处理数据
+                            }
+                        }
+
+                        client.ack(message.getLastBinlogInfo());
+                    } catch (PumaClientException e) {
+                        Cat.logError(e.getMessage(), e);
+                    }
+                }
+            }
+        });
+
+
+        pumaClientThread.setName("puma-client-example-test");
+        pumaClientThread.setDaemon(true);
+        pumaClientThread.start();
+
+
+        while (true) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ignore) {
+            }
+        }
+    }
+}
+```
+
+&nbsp;
+
+### FAQ
+
+#### PumaClient 如何双机部署
+
+`PumaClient`只支持 failover，不支持 loadbalance。
+
+如果你担心自己的程序因为 bug 或者上线部署而停止，可以双机部署`PumaClient`，它们的`ClientName`必须相同。两台机器同时启动时，只有一台会收到数据，另外一台会阻塞。当其中一台挂掉后，另一台会开始消费数据。
+
+更多细节可以看设计文档。
+
+&nbsp;
+
+#### ack 方法有什么用
+
+`PumaClient`的同步进度会通过`ack`方法同步到云端，重启时，会读取最后一次`ack`的位置来进行同步。
+
+&nbsp;
+
+#### rollback 方法有什么用
+`rollback`方法可以用来强制定位后续数据的起始位置。
+
+例如 DW 团队不需要实时监听数据，而是需要在每天凌晨同步昨天的数据，那么可以在启动的时候调用`rollback`方法将任务的起始位置定位到昨天0点，然后开始同步。
+
+使用方法是：`client.rollback(new BinlogInfo().setTimestamp(1447800000))`
+
+备注：这里的`timestamp`是秒数，不是毫秒数。(`mysql`底层`binlog`只精确到秒)

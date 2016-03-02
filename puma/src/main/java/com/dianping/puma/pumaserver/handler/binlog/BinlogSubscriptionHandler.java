@@ -1,10 +1,14 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.cat.Cat;
+import com.dianping.puma.biz.model.ClientConfig;
+import com.dianping.puma.biz.model.ClientConnect;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
+import com.dianping.puma.core.util.AddressUtils;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
+import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
@@ -12,6 +16,9 @@ import com.dianping.puma.status.SystemStatusManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 @ChannelHandler.Sharable
 public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<BinlogSubscriptionRequest> {
@@ -19,6 +26,8 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
     private BinlogAckService binlogAckService;
 
     private ClientSessionService clientSessionService;
+
+    private ClientManager clientManager;
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
@@ -56,6 +65,22 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 binlogSubscriptionRequest.isTransaction(),
                 binlogSubscriptionRequest.getCodec()
         );
+
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setDatabaseName(binlogSubscriptionRequest.getDatabase());
+        clientConfig.setTableRegex(generateTableRegex(binlogSubscriptionRequest.getTables()));
+        clientConfig.setDml(binlogSubscriptionRequest.isDml());
+        clientConfig.setDdl(binlogSubscriptionRequest.isDdl());
+        clientManager.putConfig(clientName, clientConfig);
+
+        ClientConnect clientConnect = new ClientConnect();
+        clientConnect.setClientAddress(ctx.channel().remoteAddress().toString());
+        clientConnect.setServerAddress(AddressUtils.getHostIp());
+        clientManager.putConnect(clientName, clientConnect);
+    }
+
+    private String generateTableRegex(List<String> tables) {
+        return "/" + StringUtils.join(tables, "|") + "/g";
     }
 
     public void setBinlogAckService(BinlogAckService binlogAckService) {
@@ -64,5 +89,9 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     public void setClientSessionService(ClientSessionService clientSessionService) {
         this.clientSessionService = clientSessionService;
+    }
+
+    public void setClientManager(ClientManager clientManager) {
+        this.clientManager = clientManager;
     }
 }

@@ -1,5 +1,6 @@
 package com.dianping.puma.pumaserver;
 
+import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
 import com.dianping.puma.pumaserver.handler.binlog.*;
@@ -34,6 +35,9 @@ public class PumaServerManager {
     @Autowired
     protected DbBinlogAckService binlogAckService;
 
+    @Autowired
+    ClientManager clientManager;
+
     protected final ClientSessionService clientSessionService = new DefaultClientSessionService();
 
     protected final ChannelHolderHandler channelHolderHandler = new ChannelHolderHandler(new PumaClientsHolder());
@@ -60,6 +64,7 @@ public class PumaServerManager {
         final BinlogSubscriptionHandler binlogSubscriptionHandler = new BinlogSubscriptionHandler();
         binlogSubscriptionHandler.setBinlogAckService(binlogAckService);
         binlogSubscriptionHandler.setClientSessionService(clientSessionService);
+        binlogSubscriptionHandler.setClientManager(clientManager);
 
         final BinlogUnsubscriptionHandler binlogUnsubscriptionHandler = new BinlogUnsubscriptionHandler();
         binlogUnsubscriptionHandler.setClientSessionService(clientSessionService);

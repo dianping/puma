@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class ClusterPumaClientMainDebug {
+public class ClusterPumaClientDebug {
 
     public static void main(String[] args) throws InterruptedException, IOException {
 

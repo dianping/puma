@@ -15,12 +15,12 @@
  */
 package com.dianping.puma.parser.mysql.event;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.utils.PacketUtils;
 import com.google.common.primitives.UnsignedLong;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * TODO Comment of IntvarEvent

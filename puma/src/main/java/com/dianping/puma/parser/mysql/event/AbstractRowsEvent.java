@@ -15,47 +15,23 @@
  */
 package com.dianping.puma.parser.mysql.event;
 
+import com.dianping.puma.common.PumaContext;
+import com.dianping.puma.parser.mysql.BinlogConstants;
+import com.dianping.puma.parser.mysql.Metadata;
+import com.dianping.puma.parser.mysql.Row;
+import com.dianping.puma.parser.mysql.column.*;
+import com.dianping.puma.parser.mysql.utils.MySQLUtils;
+import com.dianping.puma.utils.CodecUtils;
+import com.dianping.puma.utils.PacketUtils;
+import com.google.common.primitives.UnsignedLong;
+import org.apache.commons.lang.exception.NestableRuntimeException;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-
-import com.google.common.primitives.UnsignedLong;
-
-import org.apache.commons.lang.exception.NestableRuntimeException;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.parser.mysql.BinlogConstants;
-import com.dianping.puma.parser.mysql.Metadata;
-import com.dianping.puma.parser.mysql.Row;
-import com.dianping.puma.parser.mysql.column.BitColumn;
-import com.dianping.puma.parser.mysql.column.BlobColumn;
-import com.dianping.puma.parser.mysql.column.Column;
-import com.dianping.puma.parser.mysql.column.DateColumn;
-import com.dianping.puma.parser.mysql.column.Datetime2Column;
-import com.dianping.puma.parser.mysql.column.DatetimeColumn;
-import com.dianping.puma.parser.mysql.column.DecimalColumn;
-import com.dianping.puma.parser.mysql.column.DoubleColumn;
-import com.dianping.puma.parser.mysql.column.EnumColumn;
-import com.dianping.puma.parser.mysql.column.FloatColumn;
-import com.dianping.puma.parser.mysql.column.Int24Column;
-import com.dianping.puma.parser.mysql.column.IntColumn;
-import com.dianping.puma.parser.mysql.column.LongLongColumn;
-import com.dianping.puma.parser.mysql.column.NullColumn;
-import com.dianping.puma.parser.mysql.column.SetColumn;
-import com.dianping.puma.parser.mysql.column.ShortColumn;
-import com.dianping.puma.parser.mysql.column.StringColumn;
-import com.dianping.puma.parser.mysql.column.Time2Column;
-import com.dianping.puma.parser.mysql.column.TimeColumn;
-import com.dianping.puma.parser.mysql.column.Timestamp2Column;
-import com.dianping.puma.parser.mysql.column.TimestampColumn;
-import com.dianping.puma.parser.mysql.column.TinyColumn;
-import com.dianping.puma.parser.mysql.column.YearColumn;
-import com.dianping.puma.parser.mysql.utils.MySQLUtils;
-import com.dianping.puma.utils.CodecUtils;
-import com.dianping.puma.utils.PacketUtils;
 
 /**
  * TODO Comment of AbstractRowsEvent

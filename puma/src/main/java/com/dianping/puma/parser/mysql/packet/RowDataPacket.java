@@ -1,12 +1,12 @@
 package com.dianping.puma.parser.mysql.packet;
 
+import com.dianping.puma.common.PumaContext;
+import com.dianping.puma.utils.PacketUtils;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.utils.PacketUtils;
 
 public class RowDataPacket extends AbstractResponsePacket {
 

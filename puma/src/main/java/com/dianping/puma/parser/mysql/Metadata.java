@@ -15,13 +15,13 @@
  */
 package com.dianping.puma.parser.mysql;
 
+import com.dianping.puma.utils.CodecUtils;
+import com.dianping.puma.utils.PacketUtils;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
-import com.dianping.puma.utils.CodecUtils;
-import com.dianping.puma.utils.PacketUtils;
 
 /**
  * TODO Comment of Metadata

@@ -15,25 +15,16 @@
  */
 package com.dianping.puma.parser.mysql.event;
 
+import com.dianping.puma.common.PumaContext;
+import com.dianping.puma.parser.mysql.BinlogConstants;
+import com.dianping.puma.parser.mysql.StatusVariable;
+import com.dianping.puma.parser.mysql.variable.status.*;
+import com.dianping.puma.utils.PacketUtils;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.parser.mysql.BinlogConstants;
-import com.dianping.puma.parser.mysql.StatusVariable;
-import com.dianping.puma.parser.mysql.variable.status.QAutoIncrement;
-import com.dianping.puma.parser.mysql.variable.status.QCatalogCode;
-import com.dianping.puma.parser.mysql.variable.status.QCatalogNZCode;
-import com.dianping.puma.parser.mysql.variable.status.QCharsetCode;
-import com.dianping.puma.parser.mysql.variable.status.QCharsetDatabaseCode;
-import com.dianping.puma.parser.mysql.variable.status.QFlags2Code;
-import com.dianping.puma.parser.mysql.variable.status.QLCTimeNamesCode;
-import com.dianping.puma.parser.mysql.variable.status.QSQLModeCode;
-import com.dianping.puma.parser.mysql.variable.status.QTableMapForUpdateCode;
-import com.dianping.puma.parser.mysql.variable.status.QTimeZoneCode;
-import com.dianping.puma.utils.PacketUtils;
 
 /**
  * TODO Comment of QueryEvent

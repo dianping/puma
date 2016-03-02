@@ -15,9 +15,9 @@
  */
 package com.dianping.puma.parser.mysql.column;
 
-import java.util.BitSet;
-
 import com.dianping.puma.utils.CodecUtils;
+
+import java.util.BitSet;
 
 /**
  * 

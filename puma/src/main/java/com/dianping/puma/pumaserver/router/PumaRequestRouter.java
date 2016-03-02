@@ -1,6 +1,6 @@
 package com.dianping.puma.pumaserver.router;
 
-import com.dianping.puma.pumaserver.router.decoder.*;
+import com.dianping.puma.pumaserver.router.decoder.RequestDecoder;
 import com.dianping.puma.pumaserver.router.decoder.binlog.*;
 import io.netty.handler.codec.http.FullHttpRequest;
 

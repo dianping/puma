@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import java.io.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
 public class LineReadBucketTest extends StorageBaseTest {
 

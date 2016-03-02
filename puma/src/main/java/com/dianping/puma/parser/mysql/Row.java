@@ -15,9 +15,9 @@
  */
 package com.dianping.puma.parser.mysql;
 
-import java.util.List;
-
 import com.dianping.puma.parser.mysql.column.Column;
+
+import java.util.List;
 
 /**
  * TODO Comment of Row

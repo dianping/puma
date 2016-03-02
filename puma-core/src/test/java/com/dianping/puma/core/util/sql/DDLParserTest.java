@@ -2,7 +2,6 @@ package com.dianping.puma.core.util.sql;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;

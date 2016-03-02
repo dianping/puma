@@ -12,13 +12,10 @@
  */
 package com.dianping.puma.utils;
 
-import java.nio.ByteBuffer;
-
 import junit.framework.Assert;
-
 import org.junit.Test;
 
-import com.dianping.puma.utils.PacketUtils;
+import java.nio.ByteBuffer;
 
 /**
  * @author Leo Liang

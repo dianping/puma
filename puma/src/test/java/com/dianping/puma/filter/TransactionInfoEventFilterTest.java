@@ -1,13 +1,12 @@
 package com.dianping.puma.filter;
 
-import java.util.List;
-
 import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.DdlEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.puma.core.event.DdlEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
+import java.util.List;
 
 public class TransactionInfoEventFilterTest {
 	public TransactionInfoEventFilter eventFilter = new TransactionInfoEventFilter();

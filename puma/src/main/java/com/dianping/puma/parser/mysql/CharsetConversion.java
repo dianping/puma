@@ -1,9 +1,9 @@
 package com.dianping.puma.parser.mysql;
 
-import java.nio.charset.Charset;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.charset.Charset;
 
 /**
  * An utility class implements MySQL/Java charsets conversion.  you can see com.mysql.jdbc.CharsetMapping.

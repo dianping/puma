@@ -15,18 +15,13 @@
  */
 package com.dianping.puma.parser.mysql.event;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.BinlogConstants;
-import com.dianping.puma.parser.mysql.variable.user.UserVariable;
-import com.dianping.puma.parser.mysql.variable.user.UserVariableDecimal;
-import com.dianping.puma.parser.mysql.variable.user.UserVariableInt;
-import com.dianping.puma.parser.mysql.variable.user.UserVariableReal;
-import com.dianping.puma.parser.mysql.variable.user.UserVariableRow;
-import com.dianping.puma.parser.mysql.variable.user.UserVariableString;
+import com.dianping.puma.parser.mysql.variable.user.*;
 import com.dianping.puma.utils.PacketUtils;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * TODO Comment of UserVarEvent

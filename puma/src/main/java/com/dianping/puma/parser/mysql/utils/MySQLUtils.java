@@ -12,6 +12,8 @@
  */
 package com.dianping.puma.parser.mysql.utils;
 
+import com.dianping.puma.utils.CodecUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
@@ -19,8 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
-import com.dianping.puma.utils.CodecUtils;
 
 /**
  * TODO Comment of MySQLUtils

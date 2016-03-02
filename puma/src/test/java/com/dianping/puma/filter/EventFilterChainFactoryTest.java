@@ -1,13 +1,12 @@
 package com.dianping.puma.filter;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-
+import com.dianping.puma.core.event.RowChangedEvent;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.puma.core.event.RowChangedEvent;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
 
 public class EventFilterChainFactoryTest {
 

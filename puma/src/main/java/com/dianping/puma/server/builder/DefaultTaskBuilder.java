@@ -1,7 +1,6 @@
 package com.dianping.puma.server.builder;
 
 import com.dianping.puma.biz.entity.PumaTaskStateEntity;
-import com.dianping.puma.utils.IPUtils;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.filter.*;
@@ -21,6 +20,7 @@ import com.dianping.puma.taskexecutor.DefaultTaskExecutor;
 import com.dianping.puma.taskexecutor.TaskExecutor;
 import com.dianping.puma.taskexecutor.task.DatabaseTask;
 import com.dianping.puma.taskexecutor.task.InstanceTask;
+import com.dianping.puma.utils.IPUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

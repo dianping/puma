@@ -1,19 +1,17 @@
 package com.dianping.puma.parser.type;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-
+import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
+import com.dianping.puma.parser.AbstractBaseDebug;
 import junit.framework.Assert;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.dianping.puma.core.event.ChangedEvent;
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.parser.AbstractBaseDebug;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 /***
  * timestamp type test

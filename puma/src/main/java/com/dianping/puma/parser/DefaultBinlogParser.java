@@ -15,8 +15,8 @@
  */
 package com.dianping.puma.parser;
 
-import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.annotation.ThreadSafe;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.event.*;
 import org.slf4j.Logger;

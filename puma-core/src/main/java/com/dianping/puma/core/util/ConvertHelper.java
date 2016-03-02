@@ -1,13 +1,12 @@
 package com.dianping.puma.core.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
 /**
  * Created by Dozer on 11/21/14.

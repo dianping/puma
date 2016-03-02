@@ -1,9 +1,9 @@
 package com.dianping.puma.parser.mysql.packet;
 
+import com.dianping.puma.common.PumaContext;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
-import com.dianping.puma.common.PumaContext;
 
 public class EofPacket extends AbstractResponsePacket {
 

@@ -12,12 +12,12 @@
  */
 package com.dianping.puma.parser.mysql.packet;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.MySQLCommunicationConstant;
 import com.dianping.puma.utils.PacketUtils;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * TODO Comment of ComBinlogDumpPacket

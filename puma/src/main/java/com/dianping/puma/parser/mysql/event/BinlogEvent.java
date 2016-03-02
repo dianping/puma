@@ -15,11 +15,11 @@
  */
 package com.dianping.puma.parser.mysql.event;
 
+import com.dianping.puma.common.PumaContext;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-
-import com.dianping.puma.common.PumaContext;
 
 /**
  * TODO Comment of BinlogEvent

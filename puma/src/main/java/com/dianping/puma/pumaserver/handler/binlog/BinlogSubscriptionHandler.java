@@ -9,7 +9,6 @@ import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.status.SystemStatusManager;
-import com.google.common.base.Strings;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

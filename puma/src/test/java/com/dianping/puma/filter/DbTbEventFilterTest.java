@@ -1,9 +1,8 @@
 package com.dianping.puma.filter;
 
+import com.dianping.puma.core.event.RowChangedEvent;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.dianping.puma.core.event.RowChangedEvent;
 
 public class DbTbEventFilterTest {
 

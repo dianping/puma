@@ -15,17 +15,17 @@
  */
 package com.dianping.puma.parser.mysql.event;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.List;
-
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.Row;
 import com.dianping.puma.utils.PacketUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.BitSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * TODO Comment of WriteRowsEvent

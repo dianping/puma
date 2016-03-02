@@ -12,13 +12,13 @@
  */
 package com.dianping.puma.parser.mysql.packet;
 
-import java.nio.ByteBuffer;
-
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.BinlogConstants;
 import com.dianping.puma.parser.mysql.MySQLCommunicationConstant;
 import com.dianping.puma.parser.mysql.utils.MySQLUtils;
 import com.dianping.puma.utils.PacketUtils;
+
+import java.nio.ByteBuffer;
 
 /**
  * 

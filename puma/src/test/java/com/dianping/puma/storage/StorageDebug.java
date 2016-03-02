@@ -2,7 +2,6 @@ package com.dianping.puma.storage;
 
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.Event;
-import com.dianping.puma.utils.EventFactory;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.puma.status.QpsCounter;
 import com.dianping.puma.storage.channel.ChannelFactory;
@@ -11,6 +10,7 @@ import com.dianping.puma.storage.channel.ReadChannel;
 import com.dianping.puma.storage.channel.WriteChannel;
 import com.dianping.puma.storage.filesystem.FileSystem;
 import com.dianping.puma.storage.utils.DateUtils;
+import com.dianping.puma.utils.EventFactory;
 import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
 import org.joda.time.DurationFieldType;

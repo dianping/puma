@@ -1,12 +1,11 @@
 package com.dianping.puma;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-
 import com.dianping.puma.parser.type.DateTime2TypeDebug;
 import com.dianping.puma.parser.type.Time2TypeDebug;
 import com.dianping.puma.parser.type.Timestamp2TypeDebug;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 
 /***

@@ -1,15 +1,13 @@
 package com.dianping.puma.filter;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.dianping.puma.core.event.DdlEvent;
 import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dianping.puma.core.event.DdlEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DefaultEventFilterChainTest {
 

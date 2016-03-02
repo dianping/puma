@@ -2,7 +2,6 @@ package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientConnectDao;
-import com.dianping.puma.biz.entity.ClientConfigEntity;
 import com.dianping.puma.biz.entity.ClientConnectEntity;
 import com.dianping.puma.biz.model.ClientConnect;
 import com.dianping.puma.biz.service.ClientConnectService;

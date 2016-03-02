@@ -1,9 +1,8 @@
 package com.dianping.puma.core.util;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.dianping.puma.core.util.constant.DdlEventSubType;
 import com.dianping.puma.core.util.constant.DdlEventType;
+import org.apache.commons.lang.StringUtils;
 
 public class SimpleDdlParser {
 

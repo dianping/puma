@@ -15,8 +15,9 @@
  */
 package com.dianping.puma.parser.mysql.column;
 
-import java.io.UnsupportedEncodingException;
 import com.dianping.puma.utils.PacketUtils;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * 

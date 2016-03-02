@@ -15,13 +15,12 @@
  */
 package com.dianping.puma.parser.mysql.event;
 
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.utils.PacketUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.io.Serializable;
+import java.nio.ByteBuffer;
 
 /**
  * TODO Comment of BinlogHeader

@@ -15,11 +15,11 @@
  */
 package com.dianping.puma.parser.mysql.variable.status;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import com.dianping.puma.parser.mysql.StatusVariable;
 import com.dianping.puma.utils.PacketUtils;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * 

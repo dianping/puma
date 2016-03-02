@@ -1,19 +1,13 @@
 package com.dianping.puma.parser.mysql;
 
+import com.dianping.puma.common.PumaContext;
+import com.dianping.puma.parser.mysql.packet.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.parser.mysql.packet.EofPacket;
-import com.dianping.puma.parser.mysql.packet.FieldPacket;
-import com.dianping.puma.parser.mysql.packet.PacketFactory;
-import com.dianping.puma.parser.mysql.packet.PacketType;
-import com.dianping.puma.parser.mysql.packet.QueryCommandPacket;
-import com.dianping.puma.parser.mysql.packet.RSHeaderPacket;
-import com.dianping.puma.parser.mysql.packet.RowDataPacket;
 
 public class QueryExecutor {
 

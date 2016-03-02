@@ -1,13 +1,12 @@
 package com.dianping.puma.filter;
 
+import com.dianping.puma.core.event.ChangedEvent;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.dianping.puma.core.event.ChangedEvent;
 
 public class DbTbEventFilter extends AbstractEventFilter {
 

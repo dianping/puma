@@ -15,9 +15,9 @@
  */
 package com.dianping.puma.datahandler;
 
-import java.io.Serializable;
-
 import com.dianping.puma.core.event.ChangedEvent;
+
+import java.io.Serializable;
 
 /**
  * 

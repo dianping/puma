@@ -12,10 +12,10 @@
  */
 package com.dianping.puma.parser.mysql.packet;
 
+import com.dianping.puma.common.PumaContext;
+
 import java.io.IOException;
 import java.io.InputStream;
-
-import com.dianping.puma.common.PumaContext;
 
 /**
  * TODO Comment of ResponsePacket

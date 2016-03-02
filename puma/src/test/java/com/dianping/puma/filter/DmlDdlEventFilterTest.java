@@ -1,10 +1,9 @@
 package com.dianping.puma.filter;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.dianping.puma.core.event.DdlEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class DmlDdlEventFilterTest {
 	public DmlDdlEventFilter eventfilter = new DmlDdlEventFilter();

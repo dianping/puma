@@ -1,14 +1,14 @@
 package com.dianping.puma.parser.mysql;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.packet.OKErrorPacket;
 import com.dianping.puma.parser.mysql.packet.PacketFactory;
 import com.dianping.puma.parser.mysql.packet.PacketType;
 import com.dianping.puma.parser.mysql.packet.QueryCommandPacket;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class UpdateExecutor {
 	

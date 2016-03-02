@@ -15,8 +15,8 @@
  */
 package com.dianping.puma.datahandler;
 
-import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.common.LifeCycle;
+import com.dianping.puma.common.PumaContext;
 import com.dianping.puma.parser.mysql.event.BinlogEvent;
 
 /**

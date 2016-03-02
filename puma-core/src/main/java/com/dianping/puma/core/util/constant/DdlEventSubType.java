@@ -1,8 +1,7 @@
 package com.dianping.puma.core.util.constant;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.dianping.puma.core.util.PatternUtils;
+import org.apache.commons.lang.StringUtils;
 
 public enum DdlEventSubType {
 	/* alter event */

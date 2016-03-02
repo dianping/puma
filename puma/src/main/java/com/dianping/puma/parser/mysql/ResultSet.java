@@ -1,9 +1,9 @@
 package com.dianping.puma.parser.mysql;
 
+import com.dianping.puma.parser.mysql.packet.FieldPacket;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.dianping.puma.parser.mysql.packet.FieldPacket;
 
 public class ResultSet {
 	

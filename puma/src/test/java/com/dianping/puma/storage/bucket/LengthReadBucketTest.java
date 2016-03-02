@@ -1,10 +1,6 @@
 package com.dianping.puma.storage.bucket;
 
-import com.dianping.puma.core.codec.RawEventCodec;
-import com.dianping.puma.core.event.Event;
-import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.storage.StorageBaseTest;
-import com.google.common.base.Objects;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

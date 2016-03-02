@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.ClientConnectDao">
+
+    <insert id="insert" parameterType="ClientConnectEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        ClientConnect
+        (
+        ClientName,
+        ClientAddress,
+        ServerAddress
+        )
+        VALUES
+        (
+        #{clientName},
+        #{clientAddress},
+        #{serverAddress}
+        )
+    </insert>
+
+    <update id="update" parameterType="ClientConnectEntity">
+        UPDATE
+        ClientConnect
+        SET
+        ClientAddress = #{clientAddress},
+        ServerAddress = #{serverAddress}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        ClientConnect
+        WHERE
+        ClientName = #{clientName}
+    </delete>
+
+</mapper>

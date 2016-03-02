@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.ClientConfigDao">
+
+    <insert id="insert" parameterType="ClientConfigEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        ClientConfig
+        (
+        ClientName,
+        DatabaseName,
+        TableRegex,
+        Dml,
+        Ddl
+        )
+        VALUES
+        (
+        #{clientName},
+        #{databaseName},
+        #{tableRegex},
+        #{dml},
+        #{ddl}
+        )
+    </insert>
+
+    <update id="update" parameterType="ClientConfigEntity">
+        UPDATE
+        ClientConfig
+        SET
+        DatabaseName = #{databaseName},
+        TableRegex = #{tableRegex},
+        Dml = #{dml},
+        Ddl = #{ddl}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        ClientConfig
+        WHERE
+        ClientName = #{clientName}
+    </delete>
+
+</mapper>

@@ -1,5 +1,6 @@
 package com.dianping.puma.pumaserver.client;
 
+import com.dianping.puma.biz.model.ClientAck;
 import com.dianping.puma.biz.model.ClientConfig;
 import com.dianping.puma.biz.model.ClientConnect;
 import com.dianping.puma.common.LifeCycle;
@@ -11,9 +12,11 @@ import com.dianping.puma.pumaserver.client.exception.PumaClientManageException;
  */
 public interface ClientManager extends LifeCycle {
 
-    void putConfig(String clientName, ClientConfig clientConfig) throws PumaClientManageException;
+    void addClientAck(String clientName, ClientAck clientAck) throws PumaClientManageException;
 
-    void putConnect(String clientName, ClientConnect clientConnect) throws PumaClientManageException;
+    void addClientConfig(String clientName, ClientConfig clientConfig) throws PumaClientManageException;
+
+    void addClientConnect(String clientName, ClientConnect clientConnect) throws PumaClientManageException;
 
     void remove(String clientName) throws PumaClientManageException;
 }

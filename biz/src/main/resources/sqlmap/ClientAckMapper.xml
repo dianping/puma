@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.ClientAckDao">
+
+    <insert id="insert" parameterType="ClientAckEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        ClientAck
+        (
+        ClientName,
+        ServerId,
+        Filename,
+        Position,
+        Timestamp
+        )
+        VALUES
+        (
+        #{clientName},
+        #{serverId},
+        #{filename},
+        #{position},
+        #{timestamp}
+        )
+    </insert>
+
+    <update id="update" parameterType="ClientAckEntity">
+        UPDATE
+        ClientAck
+        SET
+        ServerId = #{serverId},
+        Filename = #{filename},
+        Position = #{position},
+        Timestamp = #{timestamp}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        ClientAck
+        WHERE
+        ClientName = #{clientName}
+    </delete>
+
+</mapper>

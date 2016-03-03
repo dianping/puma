@@ -39,12 +39,12 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         clientConfig.setTableRegex(generateTableRegex(binlogSubscriptionRequest.getTables()));
         clientConfig.setDml(binlogSubscriptionRequest.isDml());
         clientConfig.setDdl(binlogSubscriptionRequest.isDdl());
-        clientManager.putConfig(clientName, clientConfig);
+        clientManager.addClientConfig(clientName, clientConfig);
 
         ClientConnect clientConnect = new ClientConnect();
         clientConnect.setClientAddress(ctx.channel().remoteAddress().toString());
         clientConnect.setServerAddress(AddressUtils.getHostIp());
-        clientManager.putConnect(clientName, clientConnect);
+        clientManager.addClientConnect(clientName, clientConnect);
 
         BinlogAck binlogAck = binlogAckService.load(clientName);
 

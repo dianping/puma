@@ -18,6 +18,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.SocketAddress;
 import java.util.List;
 
 @ChannelHandler.Sharable
@@ -42,7 +43,11 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         clientManager.addClientConfig(clientName, clientConfig);
 
         ClientConnect clientConnect = new ClientConnect();
-        clientConnect.setClientAddress(ctx.channel().remoteAddress().toString());
+        String clientAddress = ctx.channel().remoteAddress().toString();
+        if (StringUtils.startsWith(clientAddress, "/")) {
+            clientAddress = StringUtils.substring(clientAddress, 1);
+        }
+        clientConnect.setClientAddress(clientAddress);
         clientConnect.setServerAddress(AddressUtils.getHostIp());
         clientManager.addClientConnect(clientName, clientConnect);
 

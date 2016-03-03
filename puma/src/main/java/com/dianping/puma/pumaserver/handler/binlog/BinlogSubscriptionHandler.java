@@ -34,6 +34,18 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         String clientName = binlogSubscriptionRequest.getClientName();
         Cat.logEvent("Client.Subscription", String.format("%s %s", clientName, ctx.channel().remoteAddress().toString()));
 
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setDatabaseName(binlogSubscriptionRequest.getDatabase());
+        clientConfig.setTableRegex(generateTableRegex(binlogSubscriptionRequest.getTables()));
+        clientConfig.setDml(binlogSubscriptionRequest.isDml());
+        clientConfig.setDdl(binlogSubscriptionRequest.isDdl());
+        clientManager.putConfig(clientName, clientConfig);
+
+        ClientConnect clientConnect = new ClientConnect();
+        clientConnect.setClientAddress(ctx.channel().remoteAddress().toString());
+        clientConnect.setServerAddress(AddressUtils.getHostIp());
+        clientManager.putConnect(clientName, clientConnect);
+
         BinlogAck binlogAck = binlogAckService.load(clientName);
 
         binlogAckService.checkAck(clientName,binlogAck);
@@ -65,18 +77,6 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
                 binlogSubscriptionRequest.isTransaction(),
                 binlogSubscriptionRequest.getCodec()
         );
-
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setDatabaseName(binlogSubscriptionRequest.getDatabase());
-        clientConfig.setTableRegex(generateTableRegex(binlogSubscriptionRequest.getTables()));
-        clientConfig.setDml(binlogSubscriptionRequest.isDml());
-        clientConfig.setDdl(binlogSubscriptionRequest.isDdl());
-        clientManager.putConfig(clientName, clientConfig);
-
-        ClientConnect clientConnect = new ClientConnect();
-        clientConnect.setClientAddress(ctx.channel().remoteAddress().toString());
-        clientConnect.setServerAddress(AddressUtils.getHostIp());
-        clientManager.putConnect(clientName, clientConnect);
     }
 
     private String generateTableRegex(List<String> tables) {

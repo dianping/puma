@@ -4,6 +4,10 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.ClientPositionDao">
 
+    <select id="findAll" resultType="ClientPositionEntity">
+        SELECT * FROM ClientPosition
+    </select>
+
     <select id="findByClientName" resultType="ClientPositionEntity">
         SELECT * FROM ClientPosition where ClientName = #{clientName}
     </select>

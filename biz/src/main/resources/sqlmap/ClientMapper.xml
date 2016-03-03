@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.ClientDao">
+
+    <select id="findAll" resultType="ClientEntity">
+        SELECT
+        *
+        FROM
+        Client
+        JOIN
+        ClientAddition
+        ON
+        Client.ClientName = ClientAddition.ClientName
+        JOIN
+        ClientConfig
+        ON
+        Client.ClientName = ClientConfig.ClientName
+        JOIN
+        ClientConnect
+        ON
+        Client.ClientName = ClientConnect.ClientName
+        JOIN
+        ClientAck
+        ON
+        Client.ClientName = ClientAck.ClientName
+    </select>
+
+    <insert id="insert" parameterType="ClientEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        Client
+        (
+        ClientName
+        )
+        VALUES
+        (
+        #{clientName}
+        )
+    </insert>
+
+</mapper>

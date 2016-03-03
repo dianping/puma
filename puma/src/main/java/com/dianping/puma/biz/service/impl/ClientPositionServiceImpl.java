@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +29,11 @@ public class ClientPositionServiceImpl implements ClientPositionService {
     private ClientPositionDao clientPositionDao;
 
     private Map<String, ClientPositionEntity> positionEntityMap = new ConcurrentHashMap<String, ClientPositionEntity>();
+
+    @Override
+    public List<ClientPositionEntity> findAll() {
+        return clientPositionDao.findAll();
+    }
 
     @Override
     public ClientPositionEntity find(String clientName) {

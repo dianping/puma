@@ -46,6 +46,7 @@ public class PumaServerManager {
     @PostConstruct
     public synchronized void init() {
         clientSessionService.init();
+        clientManager.start();
 
         ServerConfig consoleConfig = new ServerConfig();
         consoleConfig.setPort(4040);
@@ -99,6 +100,7 @@ public class PumaServerManager {
     public synchronized void close() {
         if (server != null) {
             server.close();
+            clientManager.stop();
         }
     }
 }

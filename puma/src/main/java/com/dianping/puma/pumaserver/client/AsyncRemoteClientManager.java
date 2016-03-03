@@ -3,9 +3,7 @@ package com.dianping.puma.pumaserver.client;
 import com.dianping.puma.biz.model.ClientAck;
 import com.dianping.puma.biz.model.ClientConfig;
 import com.dianping.puma.biz.model.ClientConnect;
-import com.dianping.puma.biz.service.ClientAckService;
-import com.dianping.puma.biz.service.ClientConfigService;
-import com.dianping.puma.biz.service.ClientConnectService;
+import com.dianping.puma.biz.service.*;
 import com.dianping.puma.core.util.NamedThreadFactory;
 import com.dianping.puma.pumaserver.client.exception.PumaClientManageException;
 import com.google.common.collect.MapMaker;
@@ -25,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * Created by xiaotian.li on 16/3/2.
  * Email: lixiaotian07@gmail.com
  */
-@Service
+@Service("asyncRemoteClientManager")
 public class AsyncRemoteClientManager extends AbstractClientManager {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -38,6 +36,12 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
 
     @Autowired
     ClientConnectService clientConnectService;
+
+    @Autowired
+    ClientPositionService clientPositionService;
+
+    @Autowired
+    ClientService clientService;
 
     private ConcurrentMap<String, ClientAck> clientAckMap = new MapMaker().makeMap();
 
@@ -54,7 +58,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
     protected void doStart() {
         super.doStart();
 
-        executor.schedule(new Runnable() {
+        executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -65,7 +69,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
                     logger.error("Failed to periodically flush puma client info.", t);
                 }
             }
-        }, flushIntervalInSecond, TimeUnit.SECONDS);
+        }, 0, flushIntervalInSecond, TimeUnit.SECONDS);
     }
 
     private void flushClientAck(Map<String, ClientAck> clientAckMap) {
@@ -74,9 +78,9 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             Map.Entry<String, ClientAck> entry = it.next();
             String clientName = entry.getKey();
             ClientAck clientAck = entry.getValue();
-            it.remove();
             try {
                 clientAckService.replace(clientName, clientAck);
+                it.remove();
             } catch (Throwable t) {
                 logger.error("Failed to flush puma client[{}] ack[{}].", clientName, clientAck, t);
             }
@@ -89,9 +93,9 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             Map.Entry<String, ClientConfig> entry = it.next();
             String clientName = entry.getKey();
             ClientConfig clientConfig = entry.getValue();
-            it.remove();
             try {
                 clientConfigService.replace(clientName, clientConfig);
+                it.remove();
             } catch (Throwable t) {
                 logger.error("Failed to flush puma client[{}] config[{}].", clientName, clientConfig, t);
             }
@@ -104,9 +108,9 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             Map.Entry<String, ClientConnect> entry = it.next();
             String clientName = entry.getKey();
             ClientConnect clientConnect = entry.getValue();
-            it.remove();
             try {
                 clientConnectService.replace(clientName, clientConnect);
+                it.remove();
             } catch (Throwable t) {
                 logger.error("Failed to flush puma client[{}] connect[{}].", clientName, clientConnect, t);
             }

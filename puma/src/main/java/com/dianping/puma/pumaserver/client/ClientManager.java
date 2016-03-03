@@ -17,6 +17,4 @@ public interface ClientManager extends LifeCycle {
     void addClientConfig(String clientName, ClientConfig clientConfig) throws PumaClientManageException;
 
     void addClientConnect(String clientName, ClientConnect clientConnect) throws PumaClientManageException;
-
-    void remove(String clientName) throws PumaClientManageException;
 }

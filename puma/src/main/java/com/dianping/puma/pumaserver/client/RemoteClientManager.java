@@ -43,7 +43,7 @@ public class RemoteClientManager extends AbstractClientManager {
             clientConfigService.replace(clientName, clientConfig);
         } catch (Throwable t) {
             throw new PumaClientManageException(
-                    "Failed to put puma client[%s] config[%s]", clientName, clientConfig, t);
+                    "Failed to add puma client[%s] config[%s]", clientName, clientConfig, t);
         }
     }
 
@@ -54,18 +54,7 @@ public class RemoteClientManager extends AbstractClientManager {
             clientConnectService.replace(clientName, clientConnect);
         } catch (Throwable t) {
             throw new PumaClientManageException(
-                    "Failed to put puma client[%s] connect[%s]", clientName, clientConnect, t);
-        }
-    }
-
-    @Override
-    public void remove(String clientName) throws PumaClientManageException {
-        try {
-            clientConfigService.remove(clientName);
-            clientConnectService.remove(clientName);
-        } catch (Throwable t) {
-            throw new PumaClientManageException(
-                    "Failed to remove puma client[%s] config and connect.", clientName, t);
+                    "Failed to add puma client[%s] connect[%s]", clientName, clientConnect, t);
         }
     }
 

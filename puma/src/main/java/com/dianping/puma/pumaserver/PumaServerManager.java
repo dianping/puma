@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class PumaServerManager {
     @Autowired
     protected DbBinlogAckService binlogAckService;
 
-    @Autowired
+    @Resource(name = "asyncRemoteClientManager")
     ClientManager clientManager;
 
     protected final ClientSessionService clientSessionService = new DefaultClientSessionService();

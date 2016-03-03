@@ -1,9 +1,12 @@
 package com.dianping.puma.biz.model;
 
+import lombok.ToString;
+
 /**
  * Created by xiaotian.li on 16/3/2.
  * Email: lixiaotian07@gmail.com
  */
+@ToString
 public class ClientConfig {
 
     private String databaseName;

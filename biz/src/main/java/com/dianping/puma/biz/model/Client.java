@@ -39,7 +39,7 @@ public class Client {
 
     private Long position;
 
-    private Date timestamp;
+    private Long timestamp;
 
     public String getClientName() {
         return clientName;
@@ -129,11 +129,11 @@ public class Client {
         this.position = position;
     }
 
-    public Date getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 }

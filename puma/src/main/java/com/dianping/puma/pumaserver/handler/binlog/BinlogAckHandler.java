@@ -35,7 +35,7 @@ public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckReque
         clientAck.setServerId(binlogAck.getBinlogInfo().getServerId());
         clientAck.setFilename(binlogAck.getBinlogInfo().getBinlogFile());
         clientAck.setPosition(binlogAck.getBinlogInfo().getBinlogPosition());
-        clientAck.setTimestamp(new Date(binlogAck.getBinlogInfo().getTimestamp()));
+        clientAck.setTimestamp(binlogAck.getBinlogInfo().getTimestamp());
 
         clientManager.addClientAck(clientName, clientAck);
 

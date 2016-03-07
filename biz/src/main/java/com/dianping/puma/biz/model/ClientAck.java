@@ -17,7 +17,7 @@ public class ClientAck {
 
     private Long position;
 
-    private Date timestamp;
+    private Long timestamp;
 
     public Long getServerId() {
         return serverId;
@@ -43,11 +43,11 @@ public class ClientAck {
         this.position = position;
     }
 
-    public Date getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 }

@@ -2,8 +2,6 @@ package com.dianping.puma.biz.model;
 
 import lombok.ToString;
 
-import java.sql.Date;
-
 /**
  * Created by xiaotian.li on 16/3/3.
  * Email: lixiaotian07@gmail.com

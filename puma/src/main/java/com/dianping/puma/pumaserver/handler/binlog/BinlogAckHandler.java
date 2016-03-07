@@ -13,8 +13,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.sql.Date;
-
 @ChannelHandler.Sharable
 public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckRequest> {
 

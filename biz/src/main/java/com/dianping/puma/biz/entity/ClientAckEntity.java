@@ -1,7 +1,5 @@
 package com.dianping.puma.biz.entity;
 
-import java.sql.Date;
-
 /**
  * Created by xiaotian.li on 16/3/1.
  * Email: lixiaotian07@gmail.com

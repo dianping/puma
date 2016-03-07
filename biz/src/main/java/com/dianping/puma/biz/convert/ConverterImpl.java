@@ -1,6 +1,7 @@
 package com.dianping.puma.biz.convert;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
@@ -12,10 +13,19 @@ import java.lang.reflect.Type;
 @Service
 public class ConverterImpl implements Converter {
 
-    private ModelMapper modelMapper = new ModelMapper();
+    private ModelMapper modelMapper;
+
+    private void init() {
+        modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+    }
 
     @Override
     public <S, D> D convert(S source, Class<D> clazz) {
+        if (modelMapper == null) {
+            init();
+        }
+
         if (source == null) {
             return null;
         }
@@ -25,6 +35,10 @@ public class ConverterImpl implements Converter {
 
     @Override
     public <S, D> D convert(S source, Type type) {
+        if (modelMapper == null) {
+            init();
+        }
+
         if (source == null) {
             return null;
         }

@@ -18,7 +18,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.commons.lang3.StringUtils;
 
-import java.net.SocketAddress;
 import java.util.List;
 
 @ChannelHandler.Sharable

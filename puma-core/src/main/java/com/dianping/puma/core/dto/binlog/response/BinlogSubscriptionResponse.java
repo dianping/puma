@@ -1,6 +1,6 @@
 package com.dianping.puma.core.dto.binlog.response;
 
-public class BinlogSubscriptionResponse {
+public class BinlogSubscriptionResponse extends BinlogResponse {
     private String token;
 
     public String getToken() {

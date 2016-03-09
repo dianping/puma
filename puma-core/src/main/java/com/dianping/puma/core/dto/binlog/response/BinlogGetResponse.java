@@ -1,9 +1,9 @@
 package com.dianping.puma.core.dto.binlog.response;
 
-import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
+import com.dianping.puma.core.dto.BinlogMessage;
 
-public class BinlogGetResponse {
+public class BinlogGetResponse extends BinlogResponse {
 
     private BinlogMessage binlogMessage;
 

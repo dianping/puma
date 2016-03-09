@@ -13,6 +13,7 @@
         <module>puma-core</module>
         <module>common</module>
         <module>biz</module>
+        <module>alarm</module>
     </modules>
     <description>puma-parent</description>
     <properties>

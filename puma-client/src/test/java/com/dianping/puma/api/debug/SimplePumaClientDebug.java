@@ -19,13 +19,14 @@ public class SimplePumaClientDebug {
         PumaClient client = new PumaClientConfig()
                 .setClientName("lixt_test")
                 .setDatabase("Puma")
-                .setTables(Lists.newArrayList("Client", "ClientAck"))
+                .setTables(Lists.newArrayList("ClientPosition"))
                 .setServerHost("127.0.0.1:4040")
                 .buildSimplePumaClient();
 
         while (true) {
             try {
                 BinlogMessage message = client.get(1, 1, TimeUnit.SECONDS);
+                System.out.println(message);
             } catch (Throwable t) {
                 t.printStackTrace();
             }

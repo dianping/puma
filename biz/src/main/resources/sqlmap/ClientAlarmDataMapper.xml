@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.ClientAlarmDataDao">
+
+    <insert id="insert" parameterType="ClientAlarmDataEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        ClientAlarmData
+        (
+        ClientName,
+        PullTimestamp,
+        PushTimestamp
+        )
+        VALUES
+        (
+        #{clientName},
+        #{pullTimestamp},
+        #{pushTimestamp}
+        )
+    </insert>
+
+    <update id="updatePullTimestamp" parameterType="ClientAlarmDataEntity">
+        UPDATE
+        ClientAlarmData
+        SET
+        PullTimestamp = #{pullTimestamp}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <update id="updatePushTimestamp" parameterType="ClientAlarmDataEntity">
+        UPDATE
+        ClientAlarmData
+        SET
+        PushTimestamp = #{pushTimestamp}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        ClientAlarmData
+        WHERE
+        ClientName = #{clientName}
+    </delete>
+
+</mapper>

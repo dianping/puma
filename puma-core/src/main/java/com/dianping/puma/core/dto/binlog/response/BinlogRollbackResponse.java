@@ -5,5 +5,5 @@ package com.dianping.puma.core.dto.binlog.response;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class BinlogRollbackResponse {
+public class BinlogRollbackResponse extends BinlogResponse {
 }

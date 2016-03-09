@@ -1,6 +1,8 @@
 package com.dianping.puma.core.dto.binlog.request;
 
-public abstract class BinlogRequest {
+import com.dianping.puma.core.dto.BinlogHttpMessage;
+
+public abstract class BinlogRequest extends BinlogHttpMessage {
 
 	private String clientName;
 

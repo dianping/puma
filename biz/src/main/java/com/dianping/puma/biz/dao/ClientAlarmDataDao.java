@@ -8,7 +8,13 @@ import com.dianping.puma.biz.entity.ClientAlarmDataEntity;
  */
 public interface ClientAlarmDataDao {
 
-    int updatePullTimestamp(ClientAlarmDataEntity entity);
+    void create(ClientAlarmDataEntity entity);
 
-    int updatePushTimestamp(ClientAlarmDataEntity entity);
+    int updatePullTime(ClientAlarmDataEntity entity);
+
+    int updatePushTime(ClientAlarmDataEntity entity);
+
+    void replacePullTime(ClientAlarmDataEntity entity);
+
+    void replacePushTime(ClientAlarmDataEntity entity);
 }

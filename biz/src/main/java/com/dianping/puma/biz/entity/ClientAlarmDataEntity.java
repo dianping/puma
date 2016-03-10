@@ -8,9 +8,9 @@ public class ClientAlarmDataEntity {
 
     private String clientName;
 
-    private Long pushTimestamp;
+    private Long pushTime;
 
-    private Long pullTimestamp;
+    private Long pullTime;
 
     public String getClientName() {
         return clientName;
@@ -20,19 +20,19 @@ public class ClientAlarmDataEntity {
         this.clientName = clientName;
     }
 
-    public Long getPushTimestamp() {
-        return pushTimestamp;
+    public Long getPushTime() {
+        return pushTime;
     }
 
-    public void setPushTimestamp(Long pushTimestamp) {
-        this.pushTimestamp = pushTimestamp;
+    public void setPushTime(Long pushTime) {
+        this.pushTime = pushTime;
     }
 
-    public Long getPullTimestamp() {
-        return pullTimestamp;
+    public Long getPullTime() {
+        return pullTime;
     }
 
-    public void setPullTimestamp(Long pullTimestamp) {
-        this.pullTimestamp = pullTimestamp;
+    public void setPullTime(Long pullTime) {
+        this.pullTime = pullTime;
     }
 }

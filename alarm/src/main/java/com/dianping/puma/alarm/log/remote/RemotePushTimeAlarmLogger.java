@@ -3,6 +3,7 @@ package com.dianping.puma.alarm.log.remote;
 import com.dianping.puma.biz.service.ClientAlarmDataService;
 import com.dianping.puma.common.intercept.AbstractPumaInterceptor;
 import com.dianping.puma.common.intercept.exception.PumaInterceptException;
+import com.dianping.puma.common.model.ClientAlarmData;
 import com.dianping.puma.core.dto.BinlogHttpMessage;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
@@ -61,7 +62,9 @@ public class RemotePushTimeAlarmLogger extends AbstractPumaInterceptor<BinlogHtt
             iterator.remove();
 
             try {
-                clientAlarmDataService.updatePushTimestamp(clientName, pushTime);
+                ClientAlarmData clientAlarmData = new ClientAlarmData();
+                clientAlarmData.setPushTime(pushTime);
+                clientAlarmDataService.replacePushTime(clientName, clientAlarmData);
             } catch (Throwable t) {
                 logger.error("Failed to flush push time[{}] for client[{}].",
                         pushTime, clientName, t);

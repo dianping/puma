@@ -9,34 +9,68 @@
         ClientAlarmData
         (
         ClientName,
-        PullTimestamp,
-        PushTimestamp
+        PullTime,
+        PushTime
         )
         VALUES
         (
         #{clientName},
-        #{pullTimestamp},
-        #{pushTimestamp}
+        #{pullTime},
+        #{pushTime}
         )
     </insert>
 
-    <update id="updatePullTimestamp" parameterType="ClientAlarmDataEntity">
+    <update id="updatePullTime" parameterType="ClientAlarmDataEntity">
         UPDATE
         ClientAlarmData
         SET
-        PullTimestamp = #{pullTimestamp}
+        PullTime = #{pullTime}
         WHERE
         ClientName = #{clientName}
     </update>
 
-    <update id="updatePushTimestamp" parameterType="ClientAlarmDataEntity">
+    <update id="updatePushTime" parameterType="ClientAlarmDataEntity">
         UPDATE
         ClientAlarmData
         SET
-        PushTimestamp = #{pushTimestamp}
+        PushTime = #{pushTime}
         WHERE
         ClientName = #{clientName}
     </update>
+
+    <insert id="replacePullTime" parameterType="ClientAlarmDataEntity">
+        INSERT INTO
+        ClientAlarmData
+        (
+        ClientName,
+        PullTime
+        )
+        VALUES
+        (
+        #{clientName},
+        #{pullTime}
+        )
+        ON DUPLICATE KEY UPDATE
+        ClientName = #{clientName},
+        PullTime = #{pullTime}
+    </insert>
+
+    <insert id="replacePushTime" parameterType="ClientAlarmDataEntity">
+        INSERT INTO
+        ClientAlarmData
+        (
+        ClientName,
+        PushTime
+        )
+        VALUES
+        (
+        #{clientName},
+        #{pushTime}
+        )
+        ON DUPLICATE KEY UPDATE
+        ClientName = #{clientName},
+        PushTime = #{pushTime}
+    </insert>
 
     <delete id="delete">
         DELETE FROM

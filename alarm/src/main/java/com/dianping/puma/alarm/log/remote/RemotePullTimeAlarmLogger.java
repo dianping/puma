@@ -1,4 +1,4 @@
-package com.dianping.puma.alarm.log;
+package com.dianping.puma.alarm.log.remote;
 
 import com.dianping.puma.biz.service.ClientAlarmDataService;
 import com.dianping.puma.common.intercept.AbstractPumaInterceptor;

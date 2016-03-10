@@ -47,11 +47,11 @@ public class ZebraInstanceManager implements InstanceManager {
     @Override
     @PostConstruct
     public void init() {
-//        try {
-//            buildConfigFromZebra();
-//        } catch (IOException e) {
-//            Cat.logError(e.getMessage(), e);
-//        }
+        try {
+            buildConfigFromZebra();
+        } catch (IOException e) {
+            Cat.logError(e.getMessage(), e);
+        }
 
         configCache.addChange(new ConfigChange() {
             @Override

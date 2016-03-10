@@ -3,6 +3,7 @@ package com.dianping.puma.pumaserver.handler;
 import com.dianping.puma.common.intercept.PumaInterceptor;
 import com.dianping.puma.core.dto.BinlogHttpMessage;
 import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 
@@ -10,6 +11,7 @@ import io.netty.channel.ChannelPromise;
  * Created by xiaotian.li on 16/3/9.
  * Email: lixiaotian07@gmail.com
  */
+@ChannelHandler.Sharable
 public class InterceptorHandler extends ChannelDuplexHandler {
 
     private PumaInterceptor<BinlogHttpMessage> pumaInterceptor;

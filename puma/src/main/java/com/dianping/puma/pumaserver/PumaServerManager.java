@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver;
 
 import com.dianping.puma.alarm.log.RemotePullTimeAlarmLogger;
-import com.dianping.puma.alarm.service.PumaAlarmService;
+import com.dianping.puma.alarm.log.remote.RemotePushTimeAlarmLogger;
 import com.dianping.puma.biz.service.ClientAlarmDataService;
 import com.dianping.puma.common.intercept.ChainedInterceptor;
 import com.dianping.puma.common.intercept.PumaInterceptor;
@@ -67,9 +67,15 @@ public class PumaServerManager {
         // Initialize sharable handlers.
         final InterceptorHandler interceptorHandler = new InterceptorHandler();
         List<PumaInterceptor<BinlogHttpMessage>> interceptors = Lists.newArrayList();
+
         RemotePullTimeAlarmLogger remotePullTimeAlarmLogger = new RemotePullTimeAlarmLogger();
         remotePullTimeAlarmLogger.setClientAlarmDataService(clientAlarmDataService);
         interceptors.add(remotePullTimeAlarmLogger);
+
+        RemotePushTimeAlarmLogger remotePushTimeAlarmLogger = new RemotePushTimeAlarmLogger();
+        remotePushTimeAlarmLogger.setClientAlarmDataService(clientAlarmDataService);
+        interceptors.add(remotePushTimeAlarmLogger);
+
         chainedInterceptor = new ChainedInterceptor<BinlogHttpMessage>();
         chainedInterceptor.setInterceptors(interceptors);
         chainedInterceptor.start();

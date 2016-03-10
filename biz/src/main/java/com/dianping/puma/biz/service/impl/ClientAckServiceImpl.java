@@ -3,7 +3,7 @@ package com.dianping.puma.biz.service.impl;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAckDao;
 import com.dianping.puma.biz.entity.ClientAckEntity;
-import com.dianping.puma.biz.model.ClientAck;
+import com.dianping.puma.common.model.ClientAck;
 import com.dianping.puma.biz.service.ClientAckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

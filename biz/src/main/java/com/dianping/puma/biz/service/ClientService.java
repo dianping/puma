@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.model.Client;
+import com.dianping.puma.common.model.Client;
 
 import java.util.List;
 

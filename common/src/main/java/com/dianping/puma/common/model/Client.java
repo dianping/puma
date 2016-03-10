@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.model;
+package com.dianping.puma.common.model;
 
 /**
  * Created by xiaotian.li on 16/3/3.

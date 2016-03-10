@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.model.ClientAck;
+import com.dianping.puma.common.model.ClientAck;
 
 /**
  * Created by xiaotian.li on 16/3/3.

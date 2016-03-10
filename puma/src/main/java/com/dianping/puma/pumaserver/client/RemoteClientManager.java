@@ -1,8 +1,8 @@
 package com.dianping.puma.pumaserver.client;
 
-import com.dianping.puma.biz.model.ClientAck;
-import com.dianping.puma.biz.model.ClientConfig;
-import com.dianping.puma.biz.model.ClientConnect;
+import com.dianping.puma.common.model.ClientAck;
+import com.dianping.puma.common.model.ClientConfig;
+import com.dianping.puma.common.model.ClientConnect;
 import com.dianping.puma.biz.service.ClientAckService;
 import com.dianping.puma.biz.service.ClientConfigService;
 import com.dianping.puma.biz.service.ClientConnectService;

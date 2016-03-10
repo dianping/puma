@@ -3,7 +3,7 @@ package com.dianping.puma.biz.service.impl;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.*;
 import com.dianping.puma.biz.entity.*;
-import com.dianping.puma.biz.model.Client;
+import com.dianping.puma.common.model.Client;
 import com.dianping.puma.biz.service.ClientService;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;

@@ -7,6 +7,7 @@
     <version>2.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>puma-parent</name>
+
     <modules>
         <module>puma</module>
         <module>puma-client</module>
@@ -15,7 +16,9 @@
         <module>biz</module>
         <module>alarm</module>
     </modules>
+
     <description>puma-parent</description>
+
     <properties>
 	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>4.2.0.RELEASE</spring.version>

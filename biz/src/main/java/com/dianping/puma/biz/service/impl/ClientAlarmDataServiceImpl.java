@@ -25,7 +25,7 @@ public class ClientAlarmDataServiceImpl implements ClientAlarmDataService {
     public void create(String clientName, ClientAlarmData clientAlarmData) {
         ClientAlarmDataEntity entity = converter.convert(clientAlarmData, ClientAlarmDataEntity.class);
         entity.setClientName(clientName);
-        clientAlarmDataDao.create(entity);
+        clientAlarmDataDao.insert(entity);
     }
 
     @Override
@@ -44,15 +44,25 @@ public class ClientAlarmDataServiceImpl implements ClientAlarmDataService {
 
     @Override
     public void replacePullTime(String clientName, ClientAlarmData clientAlarmData) {
-        ClientAlarmDataEntity entity = converter.convert(clientAlarmData, ClientAlarmDataEntity.class);
-        entity.setClientName(clientName);
-        clientAlarmDataDao.replacePullTime(entity);
+        int result = updatePullTime(clientName, clientAlarmData);
+        if (result == 0) {
+            try {
+                create(clientName, clientAlarmData);
+            } catch (Throwable ignore) {
+                updatePullTime(clientName, clientAlarmData);
+            }
+        }
     }
 
     @Override
     public void replacePushTime(String clientName, ClientAlarmData clientAlarmData) {
-        ClientAlarmDataEntity entity = converter.convert(clientAlarmData, ClientAlarmDataEntity.class);
-        entity.setClientName(clientName);
-        clientAlarmDataDao.replacePushTime(entity);
+        int result = updatePushTime(clientName, clientAlarmData);
+        if (result == 0) {
+            try {
+                create(clientName, clientAlarmData);
+            } catch (Throwable ignore) {
+                updatePushTime(clientName, clientAlarmData);
+            }
+        }
     }
 }

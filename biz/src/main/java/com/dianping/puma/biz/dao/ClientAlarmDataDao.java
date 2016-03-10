@@ -8,13 +8,11 @@ import com.dianping.puma.biz.entity.ClientAlarmDataEntity;
  */
 public interface ClientAlarmDataDao {
 
-    void create(ClientAlarmDataEntity entity);
+    void insert(ClientAlarmDataEntity entity);
 
     int updatePullTime(ClientAlarmDataEntity entity);
 
     int updatePushTime(ClientAlarmDataEntity entity);
 
-    void replacePullTime(ClientAlarmDataEntity entity);
-
-    void replacePushTime(ClientAlarmDataEntity entity);
+    void delete(String clientName);
 }

@@ -38,40 +38,6 @@
         ClientName = #{clientName}
     </update>
 
-    <insert id="replacePullTime" parameterType="ClientAlarmDataEntity">
-        INSERT INTO
-        ClientAlarmData
-        (
-        ClientName,
-        PullTime
-        )
-        VALUES
-        (
-        #{clientName},
-        #{pullTime}
-        )
-        ON DUPLICATE KEY UPDATE
-        ClientName = #{clientName},
-        PullTime = #{pullTime}
-    </insert>
-
-    <insert id="replacePushTime" parameterType="ClientAlarmDataEntity">
-        INSERT INTO
-        ClientAlarmData
-        (
-        ClientName,
-        PushTime
-        )
-        VALUES
-        (
-        #{clientName},
-        #{pushTime}
-        )
-        ON DUPLICATE KEY UPDATE
-        ClientName = #{clientName},
-        PushTime = #{pushTime}
-    </insert>
-
     <delete id="delete">
         DELETE FROM
         ClientAlarmData

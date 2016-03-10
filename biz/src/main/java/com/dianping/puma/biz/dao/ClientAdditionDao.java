@@ -9,4 +9,8 @@ import com.dianping.puma.biz.entity.ClientAdditionEntity;
 public interface ClientAdditionDao {
 
     void insert(ClientAdditionEntity entity);
+
+    int update(ClientAdditionEntity entity);
+
+    int delete(String clientName);
 }

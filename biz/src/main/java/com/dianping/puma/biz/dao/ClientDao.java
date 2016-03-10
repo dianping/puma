@@ -10,7 +10,13 @@ import java.util.List;
  */
 public interface ClientDao {
 
+    ClientEntity find(String clientName);
+
     List<ClientEntity> findAll();
 
     void insert(ClientEntity entity);
+
+    int update(ClientEntity entity);
+
+    int delete(String clientName);
 }

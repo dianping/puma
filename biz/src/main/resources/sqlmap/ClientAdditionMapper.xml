@@ -18,4 +18,20 @@
         )
     </insert>
 
+    <update id="update" parameterType="ClientAdditionEntity">
+        UPDATE
+        ClientAddition
+        SET
+        GroupName = #{groupName}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        ClientAddition
+        WHERE
+        ClientName = #{clientName}
+    </delete>
+
 </mapper>

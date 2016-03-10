@@ -10,7 +10,13 @@ import java.util.List;
  */
 public interface ClientService {
 
+    Client findByClientName(String clientName);
+
     List<Client> findAll();
 
     void create(Client client);
+
+    void update(Client client);
+
+    int remove(String clientName);
 }

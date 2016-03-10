@@ -4,24 +4,49 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.ClientDao">
 
+    <select id="find" resultType="ClientEntity">
+        SELECT
+        *
+        FROM
+        Client
+        LEFT JOIN
+        ClientAddition
+        ON
+        Client.ClientName = ClientAddition.ClientName
+        LEFT JOIN
+        ClientConfig
+        ON
+        Client.ClientName = ClientConfig.ClientName
+        LEFT JOIN
+        ClientConnect
+        ON
+        Client.ClientName = ClientConnect.ClientName
+        LEFT JOIN
+        ClientAck
+        ON
+        Client.ClientName = ClientAck.ClientName
+        WHERE
+        Client.ClientName = #{clientName}
+    </select>
+
     <select id="findAll" resultType="ClientEntity">
         SELECT
         *
         FROM
         Client
-        JOIN
+        LEFT JOIN
         ClientAddition
         ON
         Client.ClientName = ClientAddition.ClientName
-        JOIN
+        LEFT JOIN
         ClientConfig
         ON
         Client.ClientName = ClientConfig.ClientName
-        JOIN
+        LEFT JOIN
         ClientConnect
         ON
         Client.ClientName = ClientConnect.ClientName
-        JOIN
+        LEFT JOIN
         ClientAck
         ON
         Client.ClientName = ClientAck.ClientName
@@ -38,5 +63,21 @@
         #{clientName}
         )
     </insert>
+
+    <update id="update" parameterType="ClientEntity" useGeneratedKeys="true" keyProperty="id">
+        UPDATE
+        Client
+        SET
+        ClientName = #{clientName}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        Client
+        WHERE
+        ClientName = #{clientName}
+    </delete>
 
 </mapper>

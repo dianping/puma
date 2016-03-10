@@ -7,7 +7,7 @@ import com.dianping.puma.common.model.ClientAlarmData;
 import com.dianping.puma.common.utils.Clock;
 import com.dianping.puma.core.dto.BinlogHttpMessage;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
-import com.dianping.puma.core.util.NamedThreadFactory;
+import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.google.common.collect.MapMaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -4,7 +4,7 @@ import com.dianping.puma.biz.model.ClientAck;
 import com.dianping.puma.biz.model.ClientConfig;
 import com.dianping.puma.biz.model.ClientConnect;
 import com.dianping.puma.biz.service.*;
-import com.dianping.puma.core.util.NamedThreadFactory;
+import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.dianping.puma.pumaserver.client.exception.PumaClientManageException;
 import com.google.common.collect.MapMaker;
 import org.slf4j.Logger;

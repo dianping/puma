@@ -8,7 +8,7 @@ import com.dianping.puma.core.dto.BinlogHttpMessage;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.core.util.NamedThreadFactory;
+import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.google.common.collect.MapMaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

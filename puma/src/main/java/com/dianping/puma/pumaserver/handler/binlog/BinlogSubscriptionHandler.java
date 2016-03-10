@@ -6,7 +6,7 @@ import com.dianping.puma.biz.model.ClientConnect;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
-import com.dianping.puma.core.util.AddressUtils;
+import com.dianping.puma.common.utils.AddressUtils;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.ClientSession;

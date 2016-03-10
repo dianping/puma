@@ -1,4 +1,4 @@
-package com.dianping.puma.core.util;
+package com.dianping.puma.common.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

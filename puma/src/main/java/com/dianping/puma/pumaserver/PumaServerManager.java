@@ -1,6 +1,6 @@
 package com.dianping.puma.pumaserver;
 
-import com.dianping.puma.alarm.log.remote.RemotePullTimeAlarmLogger;
+import com.dianping.puma.alarm.log.RemotePullTimeAlarmLogger;
 import com.dianping.puma.alarm.log.remote.RemotePushTimeAlarmLogger;
 import com.dianping.puma.biz.service.ClientAlarmDataService;
 import com.dianping.puma.common.intercept.ChainedInterceptor;

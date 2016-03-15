@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.service;
+package com.dianping.puma.common.service;
 
 import com.dianping.puma.common.model.Client;
 
@@ -13,6 +13,8 @@ public interface ClientService {
     Client findByClientName(String clientName);
 
     List<Client> findAll();
+
+    List<String> findAllClientNames();
 
     void create(Client client);
 

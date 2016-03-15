@@ -3,10 +3,11 @@ package com.dianping.puma.biz.service.impl;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.*;
 import com.dianping.puma.biz.entity.*;
-import com.dianping.puma.biz.service.ClientService;
+import com.dianping.puma.common.service.ClientService;
 import com.dianping.puma.common.model.Client;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +59,11 @@ public class ClientServiceImpl implements ClientService {
                         return converter.convert(clientEntity, Client.class);
                     }
                 }).toList();
+    }
+
+    @Override
+    public List<String> findAllClientNames() {
+        return Lists.newArrayList();
     }
 
     @Override

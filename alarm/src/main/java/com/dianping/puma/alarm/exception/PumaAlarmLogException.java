@@ -1,12 +1,10 @@
 package com.dianping.puma.alarm.exception;
 
-import com.dianping.puma.common.exception.PumaException;
-
 /**
  * Created by xiaotian.li on 16/3/8.
  * Email: lixiaotian07@gmail.com
  */
-public class PumaAlarmLogException extends PumaException {
+public class PumaAlarmLogException extends PumaAlarmException {
 
     public PumaAlarmLogException() {
     }

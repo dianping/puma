@@ -1,4 +1,4 @@
-package com.dianping.puma.alarm.service;
+package com.dianping.puma.alarm.core;
 
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 

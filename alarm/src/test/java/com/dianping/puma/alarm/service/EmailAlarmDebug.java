@@ -1,5 +1,6 @@
 package com.dianping.puma.alarm.service;
 
+import com.dianping.puma.alarm.core.EmailAlarmService;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 

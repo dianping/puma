@@ -1,5 +1,6 @@
 package com.dianping.puma.server.netty.decode;
 
+import com.dianping.puma.server.exception.PumaEventRequestDecodeException;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 /**
@@ -8,5 +9,5 @@ import io.netty.handler.codec.http.FullHttpRequest;
  */
 public interface EventRequestDecoder {
 
-    Object decode(FullHttpRequest request);
+    Object decode(FullHttpRequest request) throws PumaEventRequestDecodeException;
 }

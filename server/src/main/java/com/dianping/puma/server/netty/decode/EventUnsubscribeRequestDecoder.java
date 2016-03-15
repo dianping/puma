@@ -1,7 +1,7 @@
 package com.dianping.puma.server.netty.decode;
 
 import com.dianping.puma.common.model.message.EventUnsubscribeRequest;
-import com.dianping.puma.server.exception.PumaEventRequestDecoderException;
+import com.dianping.puma.server.exception.PumaEventRequestDecodeException;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
@@ -21,7 +21,7 @@ public class EventUnsubscribeRequestDecoder implements EventRequestDecoder {
     public Object decode(FullHttpRequest request) {
         String uri = request.getUri();
         if (!uriPattern.matcher(uri).matches()) {
-            throw new PumaEventRequestDecoderException("Illegal event unsubscribe request[%s].", request);
+            throw new PumaEventRequestDecodeException("Illegal event unsubscribe request[%s].", request);
         }
 
         EventUnsubscribeRequest eventUnsubscribeRequest = new EventUnsubscribeRequest();

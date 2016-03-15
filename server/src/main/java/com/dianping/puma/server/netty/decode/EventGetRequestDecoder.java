@@ -1,7 +1,7 @@
 package com.dianping.puma.server.netty.decode;
 
 import com.dianping.puma.common.model.message.EventGetRequest;
-import com.dianping.puma.server.exception.PumaEventRequestDecoderException;
+import com.dianping.puma.server.exception.PumaEventRequestDecodeException;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
@@ -30,7 +30,7 @@ public class EventGetRequestDecoder implements EventRequestDecoder {
     public Object decode(FullHttpRequest request) {
         String uri = request.getUri();
         if (!uriPattern.matcher(uri).matches()) {
-            throw new PumaEventRequestDecoderException("Illegal event get request[%s].", request);
+            throw new PumaEventRequestDecodeException("Illegal event get request[%s].", request);
         }
 
         EventGetRequest eventGetRequest = new EventGetRequest();

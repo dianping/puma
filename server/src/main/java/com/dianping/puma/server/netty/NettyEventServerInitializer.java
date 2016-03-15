@@ -1,5 +1,7 @@
 package com.dianping.puma.server.netty;
 
+import com.dianping.puma.server.netty.decode.EventRequestDecoder;
+import com.dianping.puma.server.netty.handler.HttpRequestHandler;
 import com.dianping.puma.server.netty.handler.InterceptorHandler;
 import com.dianping.puma.server.netty.handler.TestHandler;
 import io.netty.channel.ChannelInitializer;
@@ -14,14 +16,30 @@ import io.netty.handler.codec.http.HttpServerCodec;
  */
 public class NettyEventServerInitializer extends ChannelInitializer<SocketChannel> {
 
+    private EventRequestDecoder eventRequestDecoder;
+
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         ChannelPipeline channelPipeline = socketChannel.pipeline();
 
-        channelPipeline.addLast(new HttpServerCodec());
-        channelPipeline.addLast(new HttpObjectAggregator(1024 * 1024 * 32));
+        // Http request decode and response encode.
+        HttpServerCodec httpServerCodec = new HttpServerCodec();
+        channelPipeline.addLast(httpServerCodec);
+
+        // Http object aggregator.
+        HttpObjectAggregator httpObjectAggregator = new HttpObjectAggregator(1024 * 1024 * 32);
+        channelPipeline.addLast(httpObjectAggregator);
+
+        // Http request handler.
+        HttpRequestHandler httpRequestHandler = new HttpRequestHandler();
+        httpRequestHandler.setDecoder(eventRequestDecoder);
+        channelPipeline.addLast(httpRequestHandler);
 
         TestHandler testHandler = new TestHandler();
         channelPipeline.addLast(testHandler);
+    }
+
+    public void setEventRequestDecoder(EventRequestDecoder eventRequestDecoder) {
+        this.eventRequestDecoder = eventRequestDecoder;
     }
 }

@@ -1,12 +1,10 @@
 package com.dianping.puma.server.exception;
 
-import com.dianping.puma.common.exception.PumaException;
-
 /**
  * Created by xiaotian.li on 16/3/14.
  * Email: lixiaotian07@gmail.com
  */
-public class PumaEventRequestUriException extends PumaException {
+public class PumaEventRequestUriException extends PumaEventRequestDecodeException {
 
     public PumaEventRequestUriException() {
     }

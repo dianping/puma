@@ -12,6 +12,6 @@ public class EventSubscribeHandler extends SimpleChannelInboundHandler<EventSubs
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, EventSubscribeRequest msg) throws Exception {
-
+        String clientName = msg.getClientName();
     }
 }

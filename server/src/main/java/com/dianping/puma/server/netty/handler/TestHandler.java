@@ -13,10 +13,7 @@ public class TestHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof FullHttpRequest) {
-            FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
-            System.out.println(fullHttpRequest);
-            ReferenceCountUtil.release(msg);
-        }
+        System.out.println(msg);
+        ReferenceCountUtil.release(msg);
     }
 }

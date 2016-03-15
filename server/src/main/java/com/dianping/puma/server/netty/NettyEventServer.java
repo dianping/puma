@@ -45,6 +45,8 @@ public class NettyEventServer extends AbstractPumaEventServer {
         bootstrap.group(bossGroup, workGroup);
         bootstrap.channel(epoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class);
 
+        bootstrap.childHandler(new NettyEventServerInitializer());
+
         bootstrap.childOption(ChannelOption.SO_REUSEADDR, true);
         bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
         bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -54,7 +56,9 @@ public class NettyEventServer extends AbstractPumaEventServer {
         logger.info("Start to bootstrap puma netty event server on port[{}].", port);
 
         ChannelFuture channelFuture = bootstrap.bind(port).awaitUninterruptibly();
-        if (!channelFuture.isSuccess()) {
+        if (channelFuture.isSuccess()) {
+            logger.info("Success to bootstrap puma netty event server on port[{}]", port);
+        } else {
             throw new PumaEventServerException("Failed to bootstrap puma netty " +
                     "event server on port[%s].", port, channelFuture.cause());
         }
@@ -66,5 +70,17 @@ public class NettyEventServer extends AbstractPumaEventServer {
 
         bossGroup.shutdownGracefully();
         workGroup.shutdownGracefully();
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setConnectTimeoutInSecond(int connectTimeoutInSecond) {
+        this.connectTimeoutInSecond = connectTimeoutInSecond;
+    }
+
+    public void setEpoll(boolean epoll) {
+        this.epoll = epoll;
     }
 }

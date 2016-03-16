@@ -59,9 +59,14 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         ClientAck clientAck = clientAckService.find(clientName);
         if (clientAck != null) {
-            binlogInfo.setServerId(clientAck.getServerId());
+            Long serverId = clientAck.getServerId();
+            binlogInfo.setServerId(serverId == null ? 0 : serverId);
+
             binlogInfo.setBinlogFile(clientAck.getFilename());
-            binlogInfo.setBinlogPosition(clientAck.getPosition());
+
+            Long position = clientAck.getPosition();
+            binlogInfo.setBinlogPosition(position == null ? 0 : position);
+
             binlogInfo.setTimestamp(clientAck.getTimestamp());
         } else {
             BinlogAck binlogAck = binlogAckService.load(clientName);

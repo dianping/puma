@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.service;
+package com.dianping.puma.common.service;
 
 import com.dianping.puma.common.model.ClientAck;
 
@@ -7,6 +7,8 @@ import com.dianping.puma.common.model.ClientAck;
  * Email: lixiaotian07@gmail.com
  */
 public interface ClientAckService {
+
+    ClientAck find(String clientName);
 
     void create(String clientName, ClientAck clientAck);
 

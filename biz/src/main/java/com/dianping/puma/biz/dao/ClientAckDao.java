@@ -8,6 +8,8 @@ import com.dianping.puma.biz.entity.ClientAckEntity;
  */
 public interface ClientAckDao {
 
+    ClientAckEntity find(String clientName);
+
     void insert(ClientAckEntity entity);
 
     int update(ClientAckEntity entity);

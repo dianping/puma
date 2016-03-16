@@ -4,6 +4,15 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.ClientAckDao">
 
+    <select id="find" resultType="ClientAckEntity">
+        SELECT
+        *
+        FROM
+        ClientAck
+        WHERE
+        ClientName = #{clientName}
+    </select>
+
     <insert id="insert" parameterType="ClientAckEntity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         ClientAck

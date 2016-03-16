@@ -4,7 +4,7 @@ import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAckDao;
 import com.dianping.puma.biz.entity.ClientAckEntity;
 import com.dianping.puma.common.model.ClientAck;
-import com.dianping.puma.biz.service.ClientAckService;
+import com.dianping.puma.common.service.ClientAckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +20,12 @@ public class ClientAckServiceImpl implements ClientAckService {
 
     @Autowired
     ClientAckDao clientAckDao;
+
+    @Override
+    public ClientAck find(String clientName) {
+        ClientAckEntity entity = clientAckDao.find(clientName);
+        return converter.convert(entity, ClientAck.class);
+    }
 
     @Override
     public void create(String clientName, ClientAck clientAck) {

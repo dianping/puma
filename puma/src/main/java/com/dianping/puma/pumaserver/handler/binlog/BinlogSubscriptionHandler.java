@@ -1,12 +1,15 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.cat.Cat;
+import com.dianping.puma.common.service.ClientAckService;
+import com.dianping.puma.common.model.ClientAck;
 import com.dianping.puma.common.model.ClientConfig;
 import com.dianping.puma.common.model.ClientConnect;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.common.utils.AddressUtils;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
 import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.ClientSession;
@@ -29,6 +32,8 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     private ClientManager clientManager;
 
+    private ClientAckService clientAckService;
+
     @Override
     public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
         String clientName = binlogSubscriptionRequest.getClientName();
@@ -50,13 +55,23 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         clientConnect.setServerAddress(AddressUtils.getHostIp());
         clientManager.addClientConnect(clientName, clientConnect);
 
-        BinlogAck binlogAck = binlogAckService.load(clientName);
+        BinlogInfo binlogInfo = new BinlogInfo();
 
-        binlogAckService.checkAck(clientName,binlogAck);
+        ClientAck clientAck = clientAckService.find(clientName);
+        if (clientAck != null) {
+            binlogInfo.setServerId(clientAck.getServerId());
+            binlogInfo.setBinlogFile(clientAck.getFilename());
+            binlogInfo.setBinlogPosition(clientAck.getPosition());
+            binlogInfo.setTimestamp(clientAck.getTimestamp());
+        } else {
+            BinlogAck binlogAck = binlogAckService.load(clientName);
+            binlogAckService.checkAck(clientName,binlogAck);
+            binlogInfo = binlogAck.getBinlogInfo();
+        }
 
         DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel(clientName);
         defaultAsyncBinlogChannel.init(
-                binlogAck == null ? null : binlogAck.getBinlogInfo(),
+                binlogInfo,
                 binlogSubscriptionRequest.getDatabase(),
                 binlogSubscriptionRequest.getTables(),
                 binlogSubscriptionRequest.isDml(),
@@ -93,6 +108,10 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     public void setClientSessionService(ClientSessionService clientSessionService) {
         this.clientSessionService = clientSessionService;
+    }
+
+    public void setClientAckService(ClientAckService clientAckService) {
+        this.clientAckService = clientAckService;
     }
 
     public void setClientManager(ClientManager clientManager) {

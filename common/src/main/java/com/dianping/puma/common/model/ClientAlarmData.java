@@ -1,10 +1,12 @@
 package com.dianping.puma.common.model;
 
+import com.dianping.puma.common.model.alarm.data.AlarmData;
+
 /**
  * Created by xiaotian.li on 16/3/10.
  * Email: lixiaotian07@gmail.com
  */
-public class ClientAlarmData {
+public class ClientAlarmData extends AlarmData {
 
     private Long pullTime;
 

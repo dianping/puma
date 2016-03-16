@@ -8,6 +8,8 @@ import com.dianping.puma.common.model.ClientAlarmData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Created by xiaotian.li on 16/3/9.
  * Email: lixiaotian07@gmail.com
@@ -20,6 +22,11 @@ public class ClientAlarmDataServiceImpl implements ClientAlarmDataService {
 
     @Autowired
     ClientAlarmDataDao clientAlarmDataDao;
+
+    @Override
+    public List<ClientAlarmData> findAll() {
+        return null;
+    }
 
     @Override
     public void create(String clientName, ClientAlarmData clientAlarmData) {

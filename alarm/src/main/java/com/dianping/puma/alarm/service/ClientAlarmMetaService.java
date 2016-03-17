@@ -9,4 +9,10 @@ import com.dianping.puma.common.model.alarm.meta.AlarmMeta;
 public interface ClientAlarmMetaService {
 
     AlarmMeta find(String clientName);
+
+    void create(AlarmMeta alarmMeta);
+
+    int update(AlarmMeta alarmMeta);
+
+    void remove(String clientName);
 }

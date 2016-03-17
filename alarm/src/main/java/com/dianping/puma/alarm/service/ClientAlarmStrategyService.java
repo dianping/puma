@@ -9,4 +9,10 @@ import com.dianping.puma.common.model.alarm.strategy.AlarmStrategy;
 public interface ClientAlarmStrategyService {
 
     AlarmStrategy find(String clientName);
+
+    void create(AlarmStrategy strategy);
+
+    int update(AlarmStrategy strategy);
+
+    void remove(String clientName);
 }

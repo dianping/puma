@@ -6,10 +6,10 @@ import com.dianping.puma.alarm.service.ClientAlarmDataService;
 import com.dianping.puma.alarm.service.ClientAlarmMetaService;
 import com.dianping.puma.alarm.service.ClientAlarmStrategyService;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
-import com.dianping.puma.common.model.alarm.benchmark.AlarmBenchmark;
-import com.dianping.puma.common.model.alarm.data.AlarmData;
-import com.dianping.puma.common.model.alarm.meta.AlarmMeta;
-import com.dianping.puma.common.model.alarm.strategy.AlarmStrategy;
+import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
+import com.dianping.puma.alarm.model.data.AlarmData;
+import com.dianping.puma.alarm.model.meta.AlarmMeta;
+import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 
 /**
  * Created by xiaotian.li on 16/3/16.

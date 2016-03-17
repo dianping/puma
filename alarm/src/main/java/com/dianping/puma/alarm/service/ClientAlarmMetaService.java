@@ -1,6 +1,6 @@
 package com.dianping.puma.alarm.service;
 
-import com.dianping.puma.common.model.alarm.meta.AlarmMeta;
+import com.dianping.puma.alarm.model.meta.AlarmMeta;
 
 /**
  * Created by xiaotian.li on 16/3/15.

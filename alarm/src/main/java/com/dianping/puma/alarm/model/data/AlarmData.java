@@ -1,4 +1,4 @@
-package com.dianping.puma.common.model.alarm.data;
+package com.dianping.puma.alarm.model.data;
 
 /**
  * Created by xiaotian.li on 16/3/16.

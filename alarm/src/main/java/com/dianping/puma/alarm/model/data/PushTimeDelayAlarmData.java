@@ -1,10 +1,13 @@
-package com.dianping.puma.common.model.alarm.benchmark;
+package com.dianping.puma.alarm.model.data;
+
+import lombok.ToString;
 
 /**
  * Created by xiaotian.li on 16/3/17.
  * Email: lixiaotian07@gmail.com
  */
-public class PushTimeDelayAlarmBenchmark extends AlarmBenchmark {
+@ToString(callSuper = true)
+public class PushTimeDelayAlarmData extends AlarmData {
 
     private long pushTimeDelayInSecond;
 

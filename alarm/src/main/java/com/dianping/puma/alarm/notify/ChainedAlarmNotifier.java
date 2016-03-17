@@ -3,8 +3,8 @@ package com.dianping.puma.alarm.notify;
 import com.dianping.puma.alarm.exception.PumaAlarmNotifyException;
 import com.dianping.puma.alarm.exception.PumaAlarmNotifyUnsupportedException;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
-import com.dianping.puma.common.model.alarm.meta.AlarmMeta;
-import com.dianping.puma.common.model.alarm.result.AlarmResult;
+import com.dianping.puma.alarm.model.meta.AlarmMeta;
+import com.dianping.puma.alarm.model.result.AlarmResult;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
  * Created by xiaotian.li on 16/3/16.
  * Email: lixiaotian07@gmail.com
  */
-public class FilterAlarmNotifier extends AbstractPumaLifeCycle implements PumaAlarmNotifier {
+public class ChainedAlarmNotifier extends AbstractPumaLifeCycle implements PumaAlarmNotifier {
 
     private List<PumaAlarmNotifier> notifiers;
 
@@ -35,10 +35,10 @@ public class FilterAlarmNotifier extends AbstractPumaLifeCycle implements PumaAl
     }
 
     @Override
-    public void alarm(AlarmResult result, AlarmMeta meta) throws PumaAlarmNotifyException {
+    public void notify(AlarmResult result, AlarmMeta meta) throws PumaAlarmNotifyException {
         for (PumaAlarmNotifier notifier: notifiers) {
             try {
-                notifier.alarm(result, meta);
+                notifier.notify(result, meta);
             } catch (PumaAlarmNotifyUnsupportedException ignore) {
             }
         }

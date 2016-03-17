@@ -1,6 +1,6 @@
 package com.dianping.puma.alarm.service;
 
-import com.dianping.puma.common.model.alarm.benchmark.AlarmBenchmark;
+import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 
 /**
  * Created by xiaotian.li on 16/3/15.

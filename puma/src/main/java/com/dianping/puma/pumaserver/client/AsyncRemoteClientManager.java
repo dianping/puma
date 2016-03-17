@@ -1,12 +1,12 @@
 package com.dianping.puma.pumaserver.client;
 
-import com.dianping.puma.common.service.ClientConfigService;
-import com.dianping.puma.common.service.ClientConnectService;
 import com.dianping.puma.biz.service.ClientPositionService;
 import com.dianping.puma.common.model.ClientAck;
 import com.dianping.puma.common.model.ClientConfig;
 import com.dianping.puma.common.model.ClientConnect;
 import com.dianping.puma.common.service.ClientAckService;
+import com.dianping.puma.common.service.ClientConfigService;
+import com.dianping.puma.common.service.ClientConnectService;
 import com.dianping.puma.common.service.ClientService;
 import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.dianping.puma.pumaserver.client.exception.PumaClientManageException;

@@ -1,4 +1,6 @@
-package com.dianping.puma.common.model.alarm.meta;
+package com.dianping.puma.alarm.model.meta;
+
+import lombok.ToString;
 
 import java.util.List;
 
@@ -6,6 +8,7 @@ import java.util.List;
  * Created by xiaotian.li on 16/3/16.
  * Email: lixiaotian07@gmail.com
  */
+@ToString
 public class AlarmMeta {
 
     private List<String> emails;

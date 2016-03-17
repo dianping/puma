@@ -3,12 +3,11 @@ package com.dianping.puma.alarm.arbitrate;
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateException;
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateUnsupportedException;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
-import com.dianping.puma.common.model.alarm.benchmark.AlarmBenchmark;
-import com.dianping.puma.common.model.alarm.benchmark.PullTimeDelayAlarmBenchmark;
-import com.dianping.puma.common.model.alarm.data.AlarmData;
-import com.dianping.puma.common.model.alarm.data.PullTimeDelayAlarmData;
-import com.dianping.puma.common.model.alarm.result.AlarmResult;
-import com.dianping.puma.common.model.alarm.result.PullTimeDelayAlarmResult;
+import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
+import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
+import com.dianping.puma.alarm.model.data.AlarmData;
+import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
+import com.dianping.puma.alarm.model.result.AlarmResult;
 
 /**
  * Created by xiaotian.li on 16/3/15.
@@ -26,9 +25,9 @@ public class PullTimeDelayAlarmArbiter extends AbstractPumaLifeCycle implements 
             throw new PumaAlarmArbitrateUnsupportedException("unsupported benchmark[%s]", benchmark);
         }
 
-        PullTimeDelayAlarmResult result = new PullTimeDelayAlarmResult();
+        AlarmResult result = new AlarmResult();
 
-        if (!benchmark.isAlarm()) {
+        if (!((PullTimeDelayAlarmBenchmark) benchmark).isPullTimeDelayAlarm()) {
             result.setAlarm(false);
         } else {
             PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark = (PullTimeDelayAlarmBenchmark) benchmark;

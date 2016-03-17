@@ -4,9 +4,9 @@ import com.dianping.puma.alarm.service.ClientAlarmDataService;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAlarmDataDao;
 import com.dianping.puma.biz.entity.ClientAlarmDataEntity;
-import com.dianping.puma.common.model.alarm.data.AlarmData;
-import com.dianping.puma.common.model.alarm.data.PullTimeDelayAlarmData;
-import com.dianping.puma.common.model.alarm.data.PushTimeDelayAlarmData;
+import com.dianping.puma.alarm.model.data.AlarmData;
+import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
+import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

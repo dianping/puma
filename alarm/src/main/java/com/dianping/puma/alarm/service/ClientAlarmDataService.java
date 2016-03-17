@@ -1,8 +1,8 @@
 package com.dianping.puma.alarm.service;
 
-import com.dianping.puma.common.model.alarm.data.AlarmData;
-import com.dianping.puma.common.model.alarm.data.PullTimeDelayAlarmData;
-import com.dianping.puma.common.model.alarm.data.PushTimeDelayAlarmData;
+import com.dianping.puma.alarm.model.data.AlarmData;
+import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
+import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
 
 /**
  * Created by xiaotian.li on 16/3/8.

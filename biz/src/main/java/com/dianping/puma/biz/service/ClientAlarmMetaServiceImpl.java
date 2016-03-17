@@ -4,7 +4,7 @@ import com.dianping.puma.alarm.service.ClientAlarmMetaService;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAlarmMetaDao;
 import com.dianping.puma.biz.entity.ClientAlarmMetaEntity;
-import com.dianping.puma.common.model.alarm.meta.AlarmMeta;
+import com.dianping.puma.alarm.model.meta.AlarmMeta;
 
 /**
  * Created by xiaotian.li on 16/3/17.

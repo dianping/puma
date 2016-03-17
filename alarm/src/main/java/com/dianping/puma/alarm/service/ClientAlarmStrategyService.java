@@ -1,6 +1,6 @@
 package com.dianping.puma.alarm.service;
 
-import com.dianping.puma.common.model.alarm.strategy.AlarmStrategy;
+import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 
 /**
  * Created by xiaotian.li on 16/3/16.

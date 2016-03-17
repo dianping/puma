@@ -1,9 +1,12 @@
-package com.dianping.puma.common.model.alarm.data;
+package com.dianping.puma.alarm.model.data;
+
+import lombok.ToString;
 
 /**
  * Created by xiaotian.li on 16/3/16.
  * Email: lixiaotian07@gmail.com
  */
+@ToString(callSuper = true)
 public class PullTimeDelayAlarmData extends AlarmData {
 
     private long pullTimeDelayInSecond;

@@ -4,7 +4,7 @@ import com.dianping.puma.alarm.log.PullAlarmLogger;
 import com.dianping.puma.alarm.service.ClientAlarmDataService;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.intercept.exception.PumaInterceptException;
-import com.dianping.puma.common.model.alarm.data.PullTimeDelayAlarmData;
+import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.common.utils.Clock;
 import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.dianping.puma.core.dto.BinlogHttpMessage;

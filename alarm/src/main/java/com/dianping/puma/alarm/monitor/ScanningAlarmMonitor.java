@@ -1,15 +1,16 @@
 package com.dianping.puma.alarm.monitor;
 
 import com.dianping.puma.alarm.arbitrate.PumaAlarmArbiter;
-import com.dianping.puma.alarm.control.PumaAlarmController;
+import com.dianping.puma.alarm.regulate.PumaAlarmRegulator;
 import com.dianping.puma.alarm.exception.PumaAlarmMonitorException;
 import com.dianping.puma.alarm.notify.PumaAlarmNotifier;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
-import com.dianping.puma.common.model.alarm.benchmark.AlarmBenchmark;
-import com.dianping.puma.common.model.alarm.data.AlarmData;
-import com.dianping.puma.common.model.alarm.meta.AlarmMeta;
-import com.dianping.puma.common.model.alarm.result.AlarmResult;
-import com.dianping.puma.common.model.alarm.strategy.AlarmStrategy;
+import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
+import com.dianping.puma.alarm.model.data.AlarmData;
+import com.dianping.puma.alarm.model.meta.AlarmMeta;
+import com.dianping.puma.alarm.model.result.AlarmResult;
+import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
+import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
 import com.dianping.puma.common.service.ClientService;
 import com.dianping.puma.common.utils.NamedThreadFactory;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     private PumaAlarmArbiter arbiter;
 
-    private PumaAlarmController controller;
+    private PumaAlarmRegulator controller;
 
     private PumaAlarmNotifier notifier;
 
@@ -95,8 +96,8 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
                         AlarmStrategy strategy = monitor.monitorStrategy(clientName);
 
                         AlarmResult result = arbiter.arbitrate(data, benchmark);
-                        result = controller.control(clientName, result, strategy);
-                        notifier.alarm(result, meta);
+                        result = controller.regulate(clientName, result, strategy);
+                        notifier.notify(result, meta);
 
                     } catch (Throwable t) {
                         logger.error("Failed to scan client[{}] alarm info.", clientName, t);
@@ -124,7 +125,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
     }
 
     @Override
-    public AlarmStrategy monitorStrategy(String clientName) throws PumaAlarmMonitorException {
+    public LinearAlarmStrategy monitorStrategy(String clientName) throws PumaAlarmMonitorException {
         throw new PumaAlarmMonitorException("unsupported operation");
     }
 
@@ -132,7 +133,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
         this.arbiter = arbiter;
     }
 
-    public void setController(PumaAlarmController controller) {
+    public void setController(PumaAlarmRegulator controller) {
         this.controller = controller;
     }
 

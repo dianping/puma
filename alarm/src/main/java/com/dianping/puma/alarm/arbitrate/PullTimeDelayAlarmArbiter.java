@@ -4,10 +4,10 @@ import com.dianping.puma.alarm.exception.PumaAlarmArbitrateException;
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateUnsupportedException;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.model.alarm.benchmark.AlarmBenchmark;
-import com.dianping.puma.common.model.alarm.data.AlarmData;
-import com.dianping.puma.common.model.alarm.result.AlarmResult;
 import com.dianping.puma.common.model.alarm.benchmark.PullTimeDelayAlarmBenchmark;
+import com.dianping.puma.common.model.alarm.data.AlarmData;
 import com.dianping.puma.common.model.alarm.data.PullTimeDelayAlarmData;
+import com.dianping.puma.common.model.alarm.result.AlarmResult;
 import com.dianping.puma.common.model.alarm.result.PullTimeDelayAlarmResult;
 
 /**

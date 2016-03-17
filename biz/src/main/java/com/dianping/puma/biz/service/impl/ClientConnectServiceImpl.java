@@ -3,8 +3,8 @@ package com.dianping.puma.biz.service.impl;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientConnectDao;
 import com.dianping.puma.biz.entity.ClientConnectEntity;
-import com.dianping.puma.common.model.ClientConnect;
 import com.dianping.puma.biz.service.ClientConnectService;
+import com.dianping.puma.common.model.ClientConnect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

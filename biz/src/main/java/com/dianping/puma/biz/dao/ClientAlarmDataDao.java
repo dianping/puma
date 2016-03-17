@@ -10,9 +10,9 @@ public interface ClientAlarmDataDao {
 
     void insert(ClientAlarmDataEntity entity);
 
-    int updatePullTime(ClientAlarmDataEntity entity);
+    int updatePullTimeDelay(ClientAlarmDataEntity entity);
 
-    int updatePushTime(ClientAlarmDataEntity entity);
+    int updatePushTimeDelay(ClientAlarmDataEntity entity);
 
     void delete(String clientName);
 }

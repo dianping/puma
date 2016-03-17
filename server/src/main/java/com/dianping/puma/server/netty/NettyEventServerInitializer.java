@@ -2,7 +2,6 @@ package com.dianping.puma.server.netty;
 
 import com.dianping.puma.server.netty.decode.EventRequestDecoder;
 import com.dianping.puma.server.netty.handler.HttpRequestHandler;
-import com.dianping.puma.server.netty.handler.InterceptorHandler;
 import com.dianping.puma.server.netty.handler.TestHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;

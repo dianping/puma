@@ -9,31 +9,31 @@
         ClientAlarmData
         (
         ClientName,
-        PullTime,
-        PushTime
+        PullTimeDelay,
+        PushTimeDelay
         )
         VALUES
         (
         #{clientName},
-        #{pullTime},
-        #{pushTime}
+        #{pullTimeDelay},
+        #{pushTimeDelay}
         )
     </insert>
 
-    <update id="updatePullTime" parameterType="ClientAlarmDataEntity">
+    <update id="updatePullTimeDelay" parameterType="ClientAlarmDataEntity">
         UPDATE
         ClientAlarmData
         SET
-        PullTime = #{pullTime}
+        PullTimeDelay = #{pullTimeDelay}
         WHERE
         ClientName = #{clientName}
     </update>
 
-    <update id="updatePushTime" parameterType="ClientAlarmDataEntity">
+    <update id="updatePushTimeDelay" parameterType="ClientAlarmDataEntity">
         UPDATE
         ClientAlarmData
         SET
-        PushTime = #{pushTime}
+        PushTimeDelay = #{pushTimeDelay}
         WHERE
         ClientName = #{clientName}
     </update>

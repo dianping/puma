@@ -1,9 +1,9 @@
 package com.dianping.puma.pumaserver.client;
 
+import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.common.model.ClientAck;
 import com.dianping.puma.common.model.ClientConfig;
 import com.dianping.puma.common.model.ClientConnect;
-import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.pumaserver.client.exception.PumaClientManageException;
 
 /**

@@ -3,17 +3,17 @@ package com.dianping.puma.alarm.log.remote;
 import com.dianping.puma.alarm.service.ClientAlarmDataService;
 import com.dianping.puma.common.intercept.AbstractPumaInterceptor;
 import com.dianping.puma.common.intercept.exception.PumaInterceptException;
-import com.dianping.puma.common.model.ClientAlarmData;
+import com.dianping.puma.common.model.alarm.data.PushTimeDelayAlarmData;
+import com.dianping.puma.common.utils.Clock;
+import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.dianping.puma.core.dto.BinlogHttpMessage;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.dto.binlog.response.BinlogGetResponse;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.google.common.collect.MapMaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -29,6 +29,8 @@ public class RemotePushTimeDelayAlarmLogger extends AbstractPumaInterceptor<Binl
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ConcurrentMap<String, Long> pushTimeMap = new MapMaker().makeMap();
+
+    private Clock clock = new Clock();
 
     private ClientAlarmDataService clientAlarmDataService;
 
@@ -54,19 +56,18 @@ public class RemotePushTimeDelayAlarmLogger extends AbstractPumaInterceptor<Binl
     }
 
     private void flush() {
-        Iterator<Map.Entry<String, Long>> iterator = pushTimeMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Long> entry = iterator.next();
+        for (Map.Entry<String, Long> entry: pushTimeMap.entrySet()) {
             String clientName = entry.getKey();
-            Long pushTime = entry.getValue();
-            iterator.remove();
+            long pushTime = entry.getValue();
+            long pushTimeDelayInSecond = clock.getTimestamp() - pushTime;
+
+            PushTimeDelayAlarmData data = new PushTimeDelayAlarmData();
+            data.setPushTimeDelayInSecond(pushTimeDelayInSecond);
 
             try {
-                ClientAlarmData clientAlarmData = new ClientAlarmData();
-                clientAlarmData.setPushTime(pushTime);
-                clientAlarmDataService.replacePushTime(clientName, clientAlarmData);
+                clientAlarmDataService.replacePushTimeDelay(clientName, data);
             } catch (Throwable t) {
-                logger.error("Failed to flush push time[{}] for client[{}].",
+                logger.error("Failed to flush push time delay[{}] for client[{}].",
                         pushTime, clientName, t);
             }
         }

@@ -8,6 +8,8 @@ import com.dianping.puma.biz.entity.ClientAlarmDataEntity;
  */
 public interface ClientAlarmDataDao {
 
+    ClientAlarmDataEntity find(String clientName);
+
     void insert(ClientAlarmDataEntity entity);
 
     int updatePullTimeDelay(ClientAlarmDataEntity entity);

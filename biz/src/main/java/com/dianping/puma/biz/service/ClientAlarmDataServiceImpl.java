@@ -25,12 +25,14 @@ public class ClientAlarmDataServiceImpl implements ClientAlarmDataService {
 
     @Override
     public AlarmData findPullTimeDelay(String clientName) {
-        return null;
+        ClientAlarmDataEntity entity = clientAlarmDataDao.find(clientName);
+        return converter.convert(entity, PullTimeDelayAlarmData.class);
     }
 
     @Override
     public AlarmData findPushTimeDelay(String clientName) {
-        return null;
+        ClientAlarmDataEntity entity = clientAlarmDataDao.find(clientName);
+        return converter.convert(entity, PushTimeDelayAlarmData.class);
     }
 
     @Override

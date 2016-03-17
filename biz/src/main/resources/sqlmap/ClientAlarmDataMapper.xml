@@ -4,6 +4,15 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.ClientAlarmDataDao">
 
+    <select id="find" resultType="ClientAlarmDataEntity">
+        SELECT
+        *
+        FROM
+        ClientAlarmData
+        WHERE
+        ClientName = #{clientName}
+    </select>
+
     <insert id="insert" parameterType="ClientAlarmDataEntity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         ClientAlarmData

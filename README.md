@@ -6,8 +6,6 @@
 
 同时，本系统还会实现数据库同步（同构和异构），以满足数据库冗余备份，数据迁移的需求。
 
-**企业QQ群：249942006**
-
 &nbsp;
 
 ### 项目依赖
@@ -25,7 +23,7 @@
 &nbsp;
 
 ### 接入申请
-发邮件给`yuyang.gong@dianping.com`和`xiaotian.li@dianping.com`。
+发邮件给`xiaotian.li@dianping.com`。
 
 未申请的 ClientName 无法正常使用。
 
@@ -155,14 +153,6 @@ public class Example1 {
 &nbsp;
 
 ### FAQ
-
-#### PumaClient 如何双机部署
-
-`PumaClient`只支持 failover，不支持 loadbalance。
-
-如果你担心自己的程序因为 bug 或者上线部署而停止，可以双机部署`PumaClient`，它们的`ClientName`必须相同。两台机器同时启动时，只有一台会收到数据，另外一台会阻塞。当其中一台挂掉后，另一台会开始消费数据。
-
-更多细节可以看设计文档。
 
 &nbsp;
 

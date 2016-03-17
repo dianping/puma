@@ -9,4 +9,6 @@ import com.dianping.puma.common.model.alarm.benchmark.AlarmBenchmark;
 public interface ClientAlarmBenchmarkService {
 
     AlarmBenchmark findPullTimeDelay(String clientName);
+
+    AlarmBenchmark findPushTimeDelay(String clientName);
 }

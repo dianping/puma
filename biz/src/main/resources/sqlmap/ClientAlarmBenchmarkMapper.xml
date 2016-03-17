@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.ClientAlarmBenchmarkDao">
+
+    <select id="find" resultType="ClientAlarmBenchmarkEntity">
+        SELECT
+        *
+        FROM
+        ClientAlarmBenchmark
+        WHERE
+        ClientName = #{clientName}
+    </select>
+
+    <insert id="insert" parameterType="ClientAlarmBenchmarkEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        ClientAlarmBenchmark
+        (
+        ClientName,
+        PullTimeDelayAlarm,
+        MaxPullTimeDelayInSecond,
+        PushTimeDelayAlarm,
+        MaxPushTimeDelayInSecond
+        )
+        VALUES
+        (
+        #{clientName},
+        #{pullTimeDelayAlarm}
+        #{maxPullTimeDelayInSecond},
+        #{pushTimeDelayAlarm},
+        #{maxPushTimeDelayInSecond}
+        )
+    </insert>
+
+    <update id="updatePullTimeDelay" parameterType="ClientAlarmBenchmarkEntity">
+        UPDATE
+        ClientAlarmBenchmark
+        SET
+        PullTimeDelayAlarm = #{pullTimeDelayAlarm},
+        MaxPullTimeDelayInSecond = #{maxPullTimeDelayInSecond}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <update id="updatePushTimeDelay" parameterType="ClientAlarmBenchmarkEntity">
+        UPDATE
+        ClientAlarmBenchmark
+        SET
+        PushTimeDelayAlarm = #{pushTimeDelayAlarm},
+        maxPushTimeDelayInSecond = #{maxPushTimeDelayInSecond}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        ClientAlarmBenchmark
+        WHERE
+        ClientName = #{clientName}
+    </delete>
+
+</mapper>

@@ -7,6 +7,7 @@ import com.dianping.puma.biz.entity.ClientAlarmDataEntity;
 import com.dianping.puma.common.model.ClientAlarmData;
 import com.dianping.puma.common.model.alarm.data.AlarmData;
 import com.dianping.puma.common.model.alarm.data.PullTimeDelayAlarmData;
+import com.dianping.puma.common.model.alarm.data.PushTimeDelayAlarmData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,12 +35,27 @@ public class ClientAlarmDataServiceImpl implements ClientAlarmDataService {
     }
 
     @Override
+    public void createPushTimeDelay(String clientName, PushTimeDelayAlarmData data) {
+
+    }
+
+    @Override
     public int updatePullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
         return 0;
     }
 
     @Override
+    public int updatePushTimeDelay(String clientName, PushTimeDelayAlarmData data) {
+        return 0;
+    }
+
+    @Override
     public void replacePullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
+
+    }
+
+    @Override
+    public void replacePushTimeDelay(String clientName, PushTimeDelayAlarmData data) {
 
     }
 

@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.service.impl;
+package com.dianping.puma.biz.service;
 
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.*;

@@ -12,6 +12,8 @@ public interface ClientAlarmDataService {
 
     AlarmData findPullTimeDelay(String clientName);
 
+    AlarmData findPushTimeDelay(String clientName);
+
     void createPullTimeDelay(String clientName, PullTimeDelayAlarmData data);
 
     void createPushTimeDelay(String clientName, PushTimeDelayAlarmData data);

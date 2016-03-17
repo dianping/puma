@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.service;
+package com.dianping.puma.common.service;
 
 import com.dianping.puma.common.model.ClientConfig;
 

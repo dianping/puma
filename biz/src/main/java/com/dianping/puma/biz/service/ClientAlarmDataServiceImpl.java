@@ -29,6 +29,11 @@ public class ClientAlarmDataServiceImpl implements ClientAlarmDataService {
     }
 
     @Override
+    public AlarmData findPushTimeDelay(String clientName) {
+        return null;
+    }
+
+    @Override
     public void createPullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
         ClientAlarmDataEntity entity = converter.convert(data, ClientAlarmDataEntity.class);
         entity.setClientName(clientName);

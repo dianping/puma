@@ -1,14 +1,14 @@
-package com.dianping.puma.biz.service.impl;
+package com.dianping.puma.biz.service;
 
+import com.dianping.puma.alarm.service.ClientAlarmDataService;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAlarmDataDao;
 import com.dianping.puma.biz.entity.ClientAlarmDataEntity;
-import com.dianping.puma.biz.service.ClientAlarmDataService;
 import com.dianping.puma.common.model.ClientAlarmData;
+import com.dianping.puma.common.model.alarm.data.AlarmData;
+import com.dianping.puma.common.model.alarm.data.PullTimeDelayAlarmData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Created by xiaotian.li on 16/3/9.
@@ -24,8 +24,23 @@ public class ClientAlarmDataServiceImpl implements ClientAlarmDataService {
     ClientAlarmDataDao clientAlarmDataDao;
 
     @Override
-    public List<ClientAlarmData> findAll() {
+    public AlarmData findPullTimeDelay(String clientName) {
         return null;
+    }
+
+    @Override
+    public void createPullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
+
+    }
+
+    @Override
+    public int updatePullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
+        return 0;
+    }
+
+    @Override
+    public void replacePullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
+
     }
 
     @Override

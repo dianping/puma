@@ -1,18 +1,18 @@
 package com.dianping.puma.alarm.log.remote;
 
-import com.dianping.puma.biz.service.ClientAlarmDataService;
-import com.dianping.puma.common.intercept.AbstractPumaInterceptor;
+import com.dianping.puma.alarm.log.PullAlarmLogger;
+import com.dianping.puma.alarm.service.ClientAlarmDataService;
+import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.intercept.exception.PumaInterceptException;
-import com.dianping.puma.common.model.ClientAlarmData;
+import com.dianping.puma.common.model.alarm.data.PullTimeDelayAlarmData;
 import com.dianping.puma.common.utils.Clock;
+import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.dianping.puma.core.dto.BinlogHttpMessage;
 import com.dianping.puma.core.dto.binlog.request.BinlogGetRequest;
-import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.google.common.collect.MapMaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * Created by xiaotian.li on 16/3/8.
  * Email: lixiaotian07@gmail.com
  */
-public class RemotePullTimeAlarmLogger extends AbstractPumaInterceptor<BinlogHttpMessage> {
+public class RemotePullTimeDelayAlarmLogger extends AbstractPumaLifeCycle implements PullAlarmLogger<BinlogHttpMessage> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -36,7 +36,7 @@ public class RemotePullTimeAlarmLogger extends AbstractPumaInterceptor<BinlogHtt
     private long flushIntervalInSecond = 5;
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(
-            1, new NamedThreadFactory("remote-pull-delay-alarm-interceptor-executor", true));
+            1, new NamedThreadFactory("remote-pull-delay-alarm-logger-executor", true));
 
     @Override
     public void start() {
@@ -82,19 +82,19 @@ public class RemotePullTimeAlarmLogger extends AbstractPumaInterceptor<BinlogHtt
     }
 
     private void flush() {
-        Iterator<Map.Entry<String, Long>> iterator = pullTimeMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Long> entry = iterator.next();
+        for (Map.Entry<String, Long> entry: pullTimeMap.entrySet()) {
             String clientName = entry.getKey();
-            Long pullTime = entry.getValue();
-            iterator.remove();
+            long pullTime = entry.getValue();
+            long pullTimeDelayInSecond = clock.getTimestamp() - pullTime;
+
+            PullTimeDelayAlarmData data = new PullTimeDelayAlarmData();
+            data.setPullTimeDelayInSecond(pullTimeDelayInSecond);
 
             try {
-                ClientAlarmData clientAlarmData = new ClientAlarmData();
-                clientAlarmData.setPullTime(pullTime);
-                clientAlarmDataService.replacePullTime(clientName, clientAlarmData);
+                clientAlarmDataService.replacePullTimeDelay(clientName, data);
             } catch (Throwable t) {
-                logger.error("Failed to flush pull time[{}] for client[{}].", pullTime, clientName, t);
+                logger.error("Failed to flush pull time delay[{}] for client[{}].",
+                        pullTimeDelayInSecond, clientName, t);
             }
         }
     }

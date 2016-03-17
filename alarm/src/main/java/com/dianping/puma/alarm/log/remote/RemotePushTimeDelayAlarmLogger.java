@@ -1,6 +1,6 @@
 package com.dianping.puma.alarm.log.remote;
 
-import com.dianping.puma.biz.service.ClientAlarmDataService;
+import com.dianping.puma.alarm.service.ClientAlarmDataService;
 import com.dianping.puma.common.intercept.AbstractPumaInterceptor;
 import com.dianping.puma.common.intercept.exception.PumaInterceptException;
 import com.dianping.puma.common.model.ClientAlarmData;
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * Created by xiaotian.li on 16/3/9.
  * Email: lixiaotian07@gmail.com
  */
-public class RemotePushTimeAlarmLogger extends AbstractPumaInterceptor<BinlogHttpMessage> {
+public class RemotePushTimeDelayAlarmLogger extends AbstractPumaInterceptor<BinlogHttpMessage> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

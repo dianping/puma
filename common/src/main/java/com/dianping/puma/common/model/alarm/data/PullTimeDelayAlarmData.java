@@ -1,7 +1,5 @@
 package com.dianping.puma.common.model.alarm.data;
 
-import com.dianping.puma.common.model.alarm.data.AlarmData;
-
 /**
  * Created by xiaotian.li on 16/3/16.
  * Email: lixiaotian07@gmail.com

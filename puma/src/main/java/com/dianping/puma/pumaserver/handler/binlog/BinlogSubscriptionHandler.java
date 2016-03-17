@@ -71,7 +71,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         } else {
             BinlogAck binlogAck = binlogAckService.load(clientName);
             binlogAckService.checkAck(clientName,binlogAck);
-            binlogInfo = binlogAck.getBinlogInfo();
+            binlogInfo = (binlogAck == null) ? null : binlogAck.getBinlogInfo();
         }
 
         DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel(clientName);

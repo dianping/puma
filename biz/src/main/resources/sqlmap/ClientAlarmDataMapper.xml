@@ -9,14 +9,14 @@
         ClientAlarmData
         (
         ClientName,
-        PullTimeDelay,
-        PushTimeDelay
+        PullTimeDelayInSecond,
+        PushTimeDelayInSecond
         )
         VALUES
         (
         #{clientName},
-        #{pullTimeDelay},
-        #{pushTimeDelay}
+        #{pullTimeDelayInSecond},
+        #{pushTimeDelayInSecond}
         )
     </insert>
 
@@ -24,7 +24,7 @@
         UPDATE
         ClientAlarmData
         SET
-        PullTimeDelay = #{pullTimeDelay}
+        PullTimeDelayInSecond = #{pullTimeDelayInSecond}
         WHERE
         ClientName = #{clientName}
     </update>
@@ -33,7 +33,7 @@
         UPDATE
         ClientAlarmData
         SET
-        PushTimeDelay = #{pushTimeDelay}
+        PushTimeDelayInSecond = #{pushTimeDelayInSecond}
         WHERE
         ClientName = #{clientName}
     </update>

@@ -32,7 +32,8 @@ public class EmailAlarmNotifier extends AbstractPumaLifeCycle implements PumaAla
             return;
         }
 
-        List<String> emails = meta.getRecipients();
+        EmailAlarmMeta emailAlarmMeta = (EmailAlarmMeta) meta;
+        List<String> emails = emailAlarmMeta.getEmailRecipients();
         if (emails != null) {
             for (String email: emails) {
                 try {

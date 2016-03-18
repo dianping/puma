@@ -1,17 +1,15 @@
 package com.dianping.puma.alarm.monitor;
 
 import com.dianping.puma.alarm.arbitrate.PumaAlarmArbiter;
-import com.dianping.puma.alarm.regulate.PumaAlarmRegulator;
-import com.dianping.puma.alarm.exception.PumaAlarmMonitorException;
-import com.dianping.puma.alarm.notify.PumaAlarmNotifier;
-import com.dianping.puma.alarm.service.ClientAlarmService;
-import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
 import com.dianping.puma.alarm.model.meta.AlarmMeta;
 import com.dianping.puma.alarm.model.result.AlarmResult;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
-import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
+import com.dianping.puma.alarm.notify.PumaAlarmNotifier;
+import com.dianping.puma.alarm.regulate.PumaAlarmRegulator;
+import com.dianping.puma.alarm.service.ClientAlarmService;
+import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.service.ClientService;
 import com.dianping.puma.common.utils.NamedThreadFactory;
 import org.slf4j.Logger;

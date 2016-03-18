@@ -1,9 +1,9 @@
 package com.dianping.puma.alarm.notify;
 
 import com.dianping.puma.alarm.exception.PumaAlarmNotifyException;
-import com.dianping.puma.common.PumaLifeCycle;
 import com.dianping.puma.alarm.model.meta.AlarmMeta;
 import com.dianping.puma.alarm.model.result.AlarmResult;
+import com.dianping.puma.common.PumaLifeCycle;
 
 /**
  * Created by xiaotian.li on 16/3/8.

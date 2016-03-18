@@ -13,7 +13,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 /**
  * Created by xiaotian.li on 16/3/18.
@@ -89,12 +88,5 @@ public class PumaClientRegistryUtils {
         } catch (IOException e) {
             throw new PumaClientRegisterException("Failed to register puma client.", e);
         }
-    }
-
-    public static void main(String[] args) {
-        PumaClientRegistryEntity entity = new PumaClientRegistryEntity();
-        entity.setClientName("client_acc");
-        entity.setGroupName("group_abc");
-        PumaClientRegistryUtils.register(entity);
     }
 }

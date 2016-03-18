@@ -16,6 +16,7 @@
         <module>biz</module>
         <module>extension</module>
         <module>alarm</module>
+        <module>utils</module>
     </modules>
 
     <description>puma-parent</description>

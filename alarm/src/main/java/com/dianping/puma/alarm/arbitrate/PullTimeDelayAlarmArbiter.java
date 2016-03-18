@@ -25,16 +25,17 @@ public class PullTimeDelayAlarmArbiter extends AbstractPumaLifeCycle implements 
             throw new PumaAlarmArbitrateUnsupportedException("unsupported benchmark[%s]", benchmark);
         }
 
+        PullTimeDelayAlarmData pullTimeDelayAlarmData = (PullTimeDelayAlarmData) data;
+        PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark = (PullTimeDelayAlarmBenchmark) benchmark;
+
         AlarmResult result = new AlarmResult();
 
-        if (!((PullTimeDelayAlarmBenchmark) benchmark).isPullTimeDelayAlarm()) {
+        if (!pullTimeDelayAlarmBenchmark.isPullTimeDelayAlarm()) {
             result.setAlarm(false);
         } else {
-            PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark = (PullTimeDelayAlarmBenchmark) benchmark;
             long minPullTimeDelayInSecond = pullTimeDelayAlarmBenchmark.getMinPullTimeDelayInSecond();
             long maxPullTimeDelayInSecond = pullTimeDelayAlarmBenchmark.getMaxPullTimeDelayInSecond();
 
-            PullTimeDelayAlarmData pullTimeDelayAlarmData = (PullTimeDelayAlarmData) data;
             long pullTimeDelayInSecond = pullTimeDelayAlarmData.getPullTimeDelayInSecond();
 
             if (pullTimeDelayInSecond >= minPullTimeDelayInSecond

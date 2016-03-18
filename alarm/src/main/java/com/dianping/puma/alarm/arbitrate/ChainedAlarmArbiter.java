@@ -13,7 +13,7 @@ import java.util.List;
  * Created by xiaotian.li on 16/3/15.
  * Email: lixiaotian07@gmail.com
  */
-public class FilterAlarmArbiter extends AbstractPumaLifeCycle implements PumaAlarmArbiter {
+public class ChainedAlarmArbiter extends AbstractPumaLifeCycle implements PumaAlarmArbiter {
 
     private List<PumaAlarmArbiter> arbiters;
 

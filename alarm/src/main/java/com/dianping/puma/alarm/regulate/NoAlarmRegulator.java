@@ -1,8 +1,10 @@
 package com.dianping.puma.alarm.regulate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateException;
+import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
 import com.dianping.puma.alarm.model.result.AlarmResult;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
+import com.dianping.puma.alarm.model.strategy.NoAlarmStrategy;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 
 /**
@@ -14,6 +16,11 @@ public class NoAlarmRegulator extends AbstractPumaLifeCycle implements PumaAlarm
     @Override
     public AlarmResult regulate(String clientName, AlarmResult result, AlarmStrategy strategy)
             throws PumaAlarmRegulateException {
-        return null;
+        if (!(strategy instanceof NoAlarmStrategy)) {
+            throw new PumaAlarmRegulateUnsupportedException("unsupported alarm strategy[%s]", strategy);
+        }
+
+        result.setAlarm(false);
+        return result;
     }
 }

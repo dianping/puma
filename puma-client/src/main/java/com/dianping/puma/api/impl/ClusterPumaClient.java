@@ -4,10 +4,6 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.api.PumaClientException;
 import com.dianping.puma.api.PumaServerRouter;
-import com.dianping.puma.api.cleanup.CleanUp;
-import com.dianping.puma.api.cleanup.CleanUpHelper;
-import com.dianping.puma.api.lock.PumaClientLock;
-import com.dianping.puma.api.lock.ZkPumaClientLock;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -34,8 +30,6 @@ public class ClusterPumaClient implements PumaClient {
 
     private final boolean transaction;
 
-    private final PumaClientLock lock;
-
     private final PumaServerRouter router;
 
     protected int retryTimes = 3; // 3 times.
@@ -44,7 +38,7 @@ public class ClusterPumaClient implements PumaClient {
 
     protected SimplePumaClient client;
 
-    protected ClusterPumaClient(PumaClientConfig config, PumaClientLock lock) {
+    public ClusterPumaClient(PumaClientConfig config) {
         this.clientName = config.getClientName();
         this.database = config.getDatabase();
         this.tables = config.getTables();
@@ -52,12 +46,6 @@ public class ClusterPumaClient implements PumaClient {
         this.ddl = config.isDdl();
         this.transaction = config.isTransaction();
         this.router = config.getRouter();
-        this.lock = lock;
-        CleanUpHelper.register(this, new ClusterPumaClientCleanUp(this.lock));
-    }
-
-    public ClusterPumaClient(PumaClientConfig config) {
-        this(config, new ZkPumaClientLock(config.getClientName()));
     }
 
     protected SimplePumaClient newClient() throws PumaClientException {
@@ -87,8 +75,6 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public BinlogMessage get(int batchSize, long timeout, TimeUnit timeUnit) throws PumaClientException {
-        lock();
-
         if (needNewClient()) {
             client = newClient();
         }
@@ -133,8 +119,6 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public void ack(BinlogInfo binlogInfo) throws PumaClientException {
-        lock();
-
         if (needNewClient()) {
             client = newClient();
         }
@@ -166,8 +150,6 @@ public class ClusterPumaClient implements PumaClient {
 
     @Override
     public void rollback(BinlogInfo binlogInfo) throws PumaClientException {
-        lock();
-
         if (needNewClient()) {
             client = newClient();
         }
@@ -200,45 +182,5 @@ public class ClusterPumaClient implements PumaClient {
 
     protected boolean needNewClient() {
         return client == null || !router.exist(client.getServerHost());
-    }
-
-    protected void lock() throws PumaClientException {
-        int waitTime = 0;
-
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-
-                if (lock.lock(1, TimeUnit.SECONDS)) {
-                    return;
-                }
-
-                if (waitTime++ % 60 == 0) {
-                    LOG.info("[{}] another client got the lock, please wait.", clientName);
-                }
-
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            } catch (Exception e) {
-                throw new PumaClientException("Lock failed!", e);
-            }
-        }
-        throw new PumaClientException("Thread has been interrupted!");
-    }
-
-    static class ClusterPumaClientCleanUp implements CleanUp {
-        private final PumaClientLock lock;
-
-        public ClusterPumaClientCleanUp(PumaClientLock lock) {
-            this.lock = lock;
-        }
-
-        @Override
-        public void cleanUp() {
-            try {
-                lock.unlock();
-            } catch (Exception ignore) {
-            }
-        }
     }
 }

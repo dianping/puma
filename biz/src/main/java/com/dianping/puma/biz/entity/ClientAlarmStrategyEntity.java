@@ -8,6 +8,8 @@ public class ClientAlarmStrategyEntity extends BaseEntity {
 
     private String clientName;
 
+    private boolean noAlarm;
+
     private boolean linearAlarm;
 
     private long linearAlarmIntervalInSecond;
@@ -24,6 +26,14 @@ public class ClientAlarmStrategyEntity extends BaseEntity {
 
     public void setClientName(String clientName) {
         this.clientName = clientName;
+    }
+
+    public boolean isNoAlarm() {
+        return noAlarm;
+    }
+
+    public void setNoAlarm(boolean noAlarm) {
+        this.noAlarm = noAlarm;
     }
 
     public boolean isLinearAlarm() {

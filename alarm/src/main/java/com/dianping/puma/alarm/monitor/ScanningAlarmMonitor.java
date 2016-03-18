@@ -4,6 +4,7 @@ import com.dianping.puma.alarm.arbitrate.PumaAlarmArbiter;
 import com.dianping.puma.alarm.regulate.PumaAlarmRegulator;
 import com.dianping.puma.alarm.exception.PumaAlarmMonitorException;
 import com.dianping.puma.alarm.notify.PumaAlarmNotifier;
+import com.dianping.puma.alarm.service.ClientAlarmService;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,13 +33,13 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     private PumaAlarmArbiter arbiter;
 
-    private PumaAlarmRegulator controller;
+    private PumaAlarmRegulator regulator;
 
     private PumaAlarmNotifier notifier;
 
     private ClientService clientService;
 
-    private List<PumaAlarmMonitor> monitors;
+    private ClientAlarmService clientAlarmService;
 
     private long scanIntervalInSecond = 5;
 
@@ -49,12 +51,8 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
         super.start();
 
         arbiter.start();
-        controller.start();
+        regulator.start();
         notifier.start();
-
-        for (PumaAlarmMonitor monitor: monitors) {
-            monitor.start();
-        }
 
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -74,12 +72,8 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
         executor.shutdownNow();
 
-        for (PumaAlarmMonitor monitor: monitors) {
-            monitor.stop();
-        }
-
         notifier.stop();
-        controller.stop();
+        regulator.stop();
         arbiter.stop();
     }
 
@@ -88,19 +82,20 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
             List<String> clientNames = clientService.findAllClientNames();
 
             for (String clientName : clientNames) {
-                for (PumaAlarmMonitor monitor : monitors) {
-                    try {
-                        AlarmData data = monitor.monitorData(clientName);
-                        AlarmBenchmark benchmark = monitor.monitorBenchmark(clientName);
-                        AlarmMeta meta = monitor.monitorMeta(clientName);
-                        AlarmStrategy strategy = monitor.monitorStrategy(clientName);
+                Map<AlarmData, AlarmBenchmark> dataAndBenchmarks =
+                        clientAlarmService.findDataAndBenchmark(clientName);
+                AlarmStrategy strategy = clientAlarmService.findStrategy(clientName);
+                List<AlarmMeta> metas = clientAlarmService.findMeta(clientName);
 
-                        AlarmResult result = arbiter.arbitrate(data, benchmark);
-                        result = controller.regulate(clientName, result, strategy);
+                for (Map.Entry<AlarmData, AlarmBenchmark> entry : dataAndBenchmarks.entrySet()) {
+                    AlarmData data = entry.getKey();
+                    AlarmBenchmark benchmark = entry.getValue();
+
+                    AlarmResult result = arbiter.arbitrate(data, benchmark);
+                    result = regulator.regulate(clientName, result, strategy);
+
+                    for (AlarmMeta meta : metas) {
                         notifier.notify(result, meta);
-
-                    } catch (Throwable t) {
-                        logger.error("Failed to scan client[{}] alarm info.", clientName, t);
                     }
                 }
             }
@@ -109,32 +104,12 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
         }
     }
 
-    @Override
-    public AlarmData monitorData(String clientName) throws PumaAlarmMonitorException {
-        throw new PumaAlarmMonitorException("unsupported operation");
-    }
-
-    @Override
-    public AlarmBenchmark monitorBenchmark(String clientName) throws PumaAlarmMonitorException {
-        throw new PumaAlarmMonitorException("unsupported operation");
-    }
-
-    @Override
-    public AlarmMeta monitorMeta(String clientName) throws PumaAlarmMonitorException {
-        throw new PumaAlarmMonitorException("unsupported operation");
-    }
-
-    @Override
-    public LinearAlarmStrategy monitorStrategy(String clientName) throws PumaAlarmMonitorException {
-        throw new PumaAlarmMonitorException("unsupported operation");
-    }
-
     public void setArbiter(PumaAlarmArbiter arbiter) {
         this.arbiter = arbiter;
     }
 
-    public void setController(PumaAlarmRegulator controller) {
-        this.controller = controller;
+    public void setRegulator(PumaAlarmRegulator regulator) {
+        this.regulator = regulator;
     }
 
     public void setNotifier(PumaAlarmNotifier notifier) {
@@ -145,8 +120,8 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
         this.clientService = clientService;
     }
 
-    public void setMonitors(List<PumaAlarmMonitor> monitors) {
-        this.monitors = monitors;
+    public void setClientAlarmService(ClientAlarmService clientAlarmService) {
+        this.clientAlarmService = clientAlarmService;
     }
 
     public void setScanIntervalInSecond(long scanIntervalInSecond) {

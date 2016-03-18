@@ -10,9 +10,13 @@ public class ClientAlarmBenchmarkEntity extends BaseEntity {
 
     private boolean alarmPullTimeDelay;
 
+    private long minPullTimeDelayInSecond;
+
     private long maxPullTimeDelayInSecond;
 
     private boolean alarmPushTimeDelay;
+
+    private long minPushTimeDelayInSecond;
 
     private long maxPushTimeDelayInSecond;
 
@@ -32,6 +36,14 @@ public class ClientAlarmBenchmarkEntity extends BaseEntity {
         this.alarmPullTimeDelay = alarmPullTimeDelay;
     }
 
+    public long getMinPullTimeDelayInSecond() {
+        return minPullTimeDelayInSecond;
+    }
+
+    public void setMinPullTimeDelayInSecond(long minPullTimeDelayInSecond) {
+        this.minPullTimeDelayInSecond = minPullTimeDelayInSecond;
+    }
+
     public long getMaxPullTimeDelayInSecond() {
         return maxPullTimeDelayInSecond;
     }
@@ -46,6 +58,14 @@ public class ClientAlarmBenchmarkEntity extends BaseEntity {
 
     public void setAlarmPushTimeDelay(boolean alarmPushTimeDelay) {
         this.alarmPushTimeDelay = alarmPushTimeDelay;
+    }
+
+    public long getMinPushTimeDelayInSecond() {
+        return minPushTimeDelayInSecond;
+    }
+
+    public void setMinPushTimeDelayInSecond(long minPushTimeDelayInSecond) {
+        this.minPushTimeDelayInSecond = minPushTimeDelayInSecond;
     }
 
     public long getMaxPushTimeDelayInSecond() {

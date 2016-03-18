@@ -2,6 +2,7 @@ package com.dianping.puma.alarm.notify;
 
 import com.dianping.puma.alarm.exception.PumaAlarmNotifyException;
 import com.dianping.puma.alarm.exception.PumaAlarmNotifyUnsupportedException;
+import com.dianping.puma.alarm.model.meta.EmailAlarmMeta;
 import com.dianping.puma.alarm.service.EmailService;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.alarm.model.meta.AlarmMeta;
@@ -23,7 +24,7 @@ public class EmailAlarmNotifier extends AbstractPumaLifeCycle implements PumaAla
 
     @Override
     public void notify(AlarmResult result, AlarmMeta meta) throws PumaAlarmNotifyException {
-        if (meta.isAlarmByEmail()) {
+        if (!(meta instanceof EmailAlarmMeta)) {
             throw new PumaAlarmNotifyUnsupportedException("unsupported alarm meta[%s]", meta);
         }
 
@@ -31,7 +32,7 @@ public class EmailAlarmNotifier extends AbstractPumaLifeCycle implements PumaAla
             return;
         }
 
-        List<String> emails = meta.getEmails();
+        List<String> emails = meta.getRecipients();
         if (emails != null) {
             for (String email: emails) {
                 try {

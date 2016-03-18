@@ -26,7 +26,7 @@
         VALUES
         (
         #{clientName},
-        #{emails},
+        #{recipients},
         #{alarmByEmail},
         #{alarmByWeChat},
         #{alarmBySms}
@@ -37,7 +37,7 @@
         UPDATE
         ClientAlarmMeta
         SET
-        Emails = #{emails},
+        Emails = #{recipients},
         AlarmByEmail = #{alarmByEmail},
         AlarmByWeChat = #{alarmByWeChat},
         AlarmBySms = #{alarmBySms}

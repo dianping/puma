@@ -7,7 +7,7 @@ import com.dianping.puma.common.model.ClientConnect;
 import com.dianping.puma.common.service.ClientAckService;
 import com.dianping.puma.common.service.ClientConfigService;
 import com.dianping.puma.common.service.ClientConnectService;
-import com.dianping.puma.common.service.ClientService;
+import com.dianping.puma.common.service.PumaClientService;
 import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.dianping.puma.pumaserver.client.exception.PumaClientManageException;
 import com.google.common.collect.MapMaker;
@@ -45,7 +45,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
     ClientPositionService clientPositionService;
 
     @Autowired
-    ClientService clientService;
+    PumaClientService clientService;
 
     private ConcurrentMap<String, ClientAck> clientAckMap = new MapMaker().makeMap();
 

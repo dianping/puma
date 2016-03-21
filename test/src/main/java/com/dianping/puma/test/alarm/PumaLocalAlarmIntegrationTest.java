@@ -1,6 +1,10 @@
 package com.dianping.puma.test.alarm;
 
 import com.dianping.puma.alarm.monitor.PumaAlarmMonitor;
+import com.dianping.puma.biz.service.memory.MemoryClientAlarmBenchmarkService;
+import com.dianping.puma.biz.service.memory.MemoryClientAlarmDataService;
+import com.dianping.puma.biz.service.memory.MemoryClientAlarmMetaService;
+import com.dianping.puma.biz.service.memory.MemoryClientAlarmStrategyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -19,6 +23,18 @@ public class PumaLocalAlarmIntegrationTest {
     public static void main(String[] args) throws IOException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:spring/alarm/local.xml");
         final PumaAlarmMonitor monitor = (PumaAlarmMonitor) ctx.getBean("pumaAlarmMonitor");
+
+        MemoryClientAlarmDataService dataService
+                = (MemoryClientAlarmDataService) ctx.getBean("memoryClientAlarmDataService");
+
+        MemoryClientAlarmBenchmarkService benchmarkService
+                = (MemoryClientAlarmBenchmarkService) ctx.getBean("memoryClientAlarmBenchmarkService");
+
+        MemoryClientAlarmStrategyService strategyService
+                = (MemoryClientAlarmStrategyService) ctx.getBean("memoryClientAlarmStrategyService");
+
+        MemoryClientAlarmMetaService metaService
+                = (MemoryClientAlarmMetaService) ctx.getBean("memoryClientAlarmMetaService");
 
         Thread thread = new Thread(new Runnable() {
             @Override

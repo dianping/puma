@@ -20,7 +20,7 @@ import com.dianping.puma.alarm.service.PumaClientAlarmDataService;
 import com.dianping.puma.alarm.service.PumaClientAlarmMetaService;
 import com.dianping.puma.alarm.service.PumaClientAlarmStrategyService;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
-import com.dianping.puma.common.service.ClientService;
+import com.dianping.puma.common.service.PumaClientService;
 import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -47,7 +47,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     private PumaAlarmNotifier notifier;
 
-    private ClientService clientService;
+    private PumaClientService pumaClientService;
 
     private PumaClientAlarmDataService pumaClientAlarmDataService;
 
@@ -99,7 +99,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     private void scan() {
         try {
-            List<String> clientNames = clientService.findAllClientNames();
+            List<String> clientNames = pumaClientService.findAllClientNames();
 
             for (String clientName: clientNames) {
                 Map<AlarmData, AlarmBenchmark> pairs = generatePairs(clientName);
@@ -197,6 +197,10 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     public void setNotifier(PumaAlarmNotifier notifier) {
         this.notifier = notifier;
+    }
+
+    public void setPumaClientService(PumaClientService pumaClientService) {
+        this.pumaClientService = pumaClientService;
     }
 
     public void setPumaClientAlarmDataService(PumaClientAlarmDataService pumaClientAlarmDataService) {

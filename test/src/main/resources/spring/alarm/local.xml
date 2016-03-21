@@ -6,6 +6,9 @@
 
     <bean id="converter" class="com.dianping.puma.biz.convert.ConverterImpl" />
 
+    <bean id="memoryClientService"
+          class="com.dianping.puma.biz.service.memory.MemoryClientService" />
+
     <bean id="memoryClientAlarmDataService"
           class="com.dianping.puma.biz.service.memory.MemoryClientAlarmDataService" />
 
@@ -58,6 +61,7 @@
     </bean>
 
     <bean id="pumaAlarmMonitor" class="com.dianping.puma.alarm.monitor.ScanningAlarmMonitor" init-method="start">
+        <property name="pumaClientService" ref="memoryClientService" />
         <property name="pumaClientAlarmDataService" ref="memoryClientAlarmDataService" />
         <property name="pumaClientAlarmBenchmarkService" ref="memoryClientAlarmBenchmarkService" />
         <property name="pumaClientAlarmStrategyService" ref="memoryClientAlarmStrategyService" />

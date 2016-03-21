@@ -8,7 +8,7 @@ import java.util.List;
  * Created by xiaotian.li on 16/2/22.
  * Email: lixiaotian07@gmail.com
  */
-public interface ClientService {
+public interface PumaClientService {
 
     Client findByClientName(String clientName);
 

@@ -4,7 +4,7 @@ import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.*;
 import com.dianping.puma.biz.entity.*;
 import com.dianping.puma.common.model.Client;
-import com.dianping.puma.common.service.ClientService;
+import com.dianping.puma.common.service.PumaClientService;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.util.List;
  * Email: lixiaotian07@gmail.com
  */
 @Service
-public class ClientServiceImpl implements ClientService {
+public class ClientServiceImpl implements PumaClientService {
 
     @Autowired
     Converter converter;

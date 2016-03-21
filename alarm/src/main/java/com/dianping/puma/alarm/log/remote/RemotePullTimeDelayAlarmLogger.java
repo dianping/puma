@@ -2,7 +2,6 @@ package com.dianping.puma.alarm.log.remote;
 
 import com.dianping.puma.alarm.log.PullAlarmLogger;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
-import com.dianping.puma.alarm.service.ClientAlarmDataService;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.intercept.exception.PumaInterceptException;
 import com.dianping.puma.common.utils.Clock;
@@ -28,8 +27,6 @@ public class RemotePullTimeDelayAlarmLogger extends AbstractPumaLifeCycle implem
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ConcurrentMap<String, Long> pullTimeMap = new MapMaker().makeMap();
-
-    private ClientAlarmDataService clientAlarmDataService;
 
     private Clock clock = new Clock();
 
@@ -91,15 +88,11 @@ public class RemotePullTimeDelayAlarmLogger extends AbstractPumaLifeCycle implem
             data.setPullTimeDelayInSecond(pullTimeDelayInSecond);
 
             try {
-                clientAlarmDataService.replacePullTimeDelay(clientName, data);
+                //clientAlarmDataService.replacePullTimeDelay(clientName, data);
             } catch (Throwable t) {
                 logger.error("Failed to flush pull time delay[{}] for client[{}].",
                         pullTimeDelayInSecond, clientName, t);
             }
         }
-    }
-
-    public void setClientAlarmDataService(ClientAlarmDataService clientAlarmDataService) {
-        this.clientAlarmDataService = clientAlarmDataService;
     }
 }

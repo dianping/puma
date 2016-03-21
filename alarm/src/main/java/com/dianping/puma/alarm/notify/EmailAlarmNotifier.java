@@ -5,7 +5,7 @@ import com.dianping.puma.alarm.exception.PumaAlarmNotifyUnsupportedException;
 import com.dianping.puma.alarm.model.meta.AlarmMeta;
 import com.dianping.puma.alarm.model.meta.EmailAlarmMeta;
 import com.dianping.puma.alarm.model.result.AlarmResult;
-import com.dianping.puma.alarm.service.EmailService;
+import com.dianping.puma.alarm.service.PumaEmailService;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class EmailAlarmNotifier extends AbstractPumaLifeCycle implements PumaAla
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private EmailService emailService;
+    private PumaEmailService emailService;
 
     @Override
     public void notify(AlarmResult result, AlarmMeta meta) throws PumaAlarmNotifyException {
@@ -45,7 +45,7 @@ public class EmailAlarmNotifier extends AbstractPumaLifeCycle implements PumaAla
         }
     }
 
-    public void setEmailService(EmailService emailService) {
+    public void setEmailService(PumaEmailService emailService) {
         this.emailService = emailService;
     }
 }

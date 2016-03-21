@@ -1,7 +1,7 @@
 package com.dianping.puma.extension.notify;
 
 import com.dianping.puma.alarm.exception.PumaAlarmNotifyException;
-import com.dianping.puma.alarm.service.EmailService;
+import com.dianping.puma.alarm.service.PumaEmailService;
 import com.google.common.collect.Lists;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -20,7 +20,7 @@ import java.util.List;
  * Created by xiaotian.li on 16/3/16.
  * Email: lixiaotian07@gmail.com
  */
-public class DPEmailService implements EmailService {
+public class DPEmailService implements PumaEmailService {
 
     private String httpPath = "http://web.paas.dp/mail/send";
 

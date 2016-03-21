@@ -2,7 +2,6 @@ package com.dianping.puma.pumaserver;
 
 import com.dianping.puma.alarm.log.remote.RemotePullTimeDelayAlarmLogger;
 import com.dianping.puma.alarm.log.remote.RemotePushTimeDelayAlarmLogger;
-import com.dianping.puma.alarm.service.ClientAlarmDataService;
 import com.dianping.puma.common.intercept.ChainedInterceptor;
 import com.dianping.puma.common.intercept.PumaInterceptor;
 import com.dianping.puma.common.service.ClientAckService;
@@ -49,9 +48,6 @@ public class PumaServerManager {
     ClientManager clientManager;
 
     @Autowired
-    ClientAlarmDataService clientAlarmDataService;
-
-    @Autowired
     ClientAckService clientAckService;
 
     private ChainedInterceptor<BinlogHttpMessage> chainedInterceptor;
@@ -73,11 +69,9 @@ public class PumaServerManager {
         List<PumaInterceptor<BinlogHttpMessage>> interceptors = Lists.newArrayList();
 
         RemotePullTimeDelayAlarmLogger remotePullTimeAlarmLogger = new RemotePullTimeDelayAlarmLogger();
-        remotePullTimeAlarmLogger.setClientAlarmDataService(clientAlarmDataService);
         interceptors.add(remotePullTimeAlarmLogger);
 
         RemotePushTimeDelayAlarmLogger remotePushTimeAlarmLogger = new RemotePushTimeDelayAlarmLogger();
-        remotePushTimeAlarmLogger.setClientAlarmDataService(clientAlarmDataService);
         interceptors.add(remotePushTimeAlarmLogger);
 
         chainedInterceptor = new ChainedInterceptor<BinlogHttpMessage>();

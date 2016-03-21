@@ -1,0 +1,32 @@
+package com.dianping.puma.alarm.service;
+
+import com.dianping.puma.alarm.model.strategy.ExponentialAlarmStrategy;
+import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
+import com.dianping.puma.alarm.model.strategy.NoAlarmStrategy;
+
+import java.util.Map;
+
+/**
+ * Created by xiaotian.li on 16/3/20.
+ * Email: lixiaotian07@gmail.com
+ */
+public interface PumaClientAlarmStrategyService {
+
+    NoAlarmStrategy findNo(String clientName);
+
+    LinearAlarmStrategy findLinear(String clientName);
+
+    ExponentialAlarmStrategy findExponential(String clientName);
+
+    Map<String, NoAlarmStrategy> findNoAll();
+
+    Map<String, LinearAlarmStrategy> findLinearAll();
+
+    Map<String, ExponentialAlarmStrategy> findExponentailAll();
+
+    void replaceNo(String clientName, NoAlarmStrategy strategy);
+
+    void replaceLinear(String clientName, LinearAlarmStrategy strategy);
+
+    void replaceExponential(String clientName, ExponentialAlarmStrategy strategy);
+}

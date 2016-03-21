@@ -7,7 +7,6 @@ import com.dianping.puma.common.model.Client;
 import com.dianping.puma.common.service.ClientService;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,7 +62,14 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<String> findAllClientNames() {
-        return Lists.newArrayList();
+        return FluentIterable
+                .from(findAll())
+                .transform(new Function<Client, String>() {
+                    @Override
+                    public String apply(Client client) {
+                        return client.getClientName();
+                    }
+                }).toList();
     }
 
     @Override
@@ -125,5 +131,9 @@ public class ClientServiceImpl implements ClientService {
         clientAckDao.delete(clientName);
 
         return result;
+    }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
     }
 }

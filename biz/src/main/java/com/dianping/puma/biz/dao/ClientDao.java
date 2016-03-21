@@ -1,5 +1,6 @@
 package com.dianping.puma.biz.dao;
 
+import com.dianping.puma.biz.entity.ClientAlarmEntity;
 import com.dianping.puma.biz.entity.ClientEntity;
 
 import java.util.List;
@@ -13,6 +14,8 @@ public interface ClientDao {
     ClientEntity find(String clientName);
 
     List<ClientEntity> findAll();
+
+    List<ClientAlarmEntity> findAlarmAll();
 
     void insert(ClientEntity entity);
 

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="converter" class="com.dianping.puma.biz.convert.ConverterImpl" />
+
+    <bean id="clientService" class="com.dianping.puma.biz.service.ClientServiceImpl" autowire="byName">
+        <property name="converter" ref="converter" />
+    </bean>
+
+    <bean id="clientAlarmService" class="com.dianping.puma.biz.service.ClientAlarmServiceImpl" autowire="byName">
+        <property name="converter" ref="converter" />
+    </bean>
+
+    <bean id="pullTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.PullTimeDelayAlarmArbiter" />
+    <bean id="alarmArbiter" class="com.dianping.puma.alarm.arbitrate.ChainedAlarmArbiter">
+        <property name="arbiters">
+            <list>
+                <ref bean="pullTimeDelayAlarmArbiter" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="noAlarmRegulator" class="com.dianping.puma.alarm.regulate.NoAlarmRegulator" />
+    <bean id="linearAlarmRegulator" class="com.dianping.puma.alarm.regulate.LinearAlarmRegulator" />
+    <bean id="alarmRegulator" class="com.dianping.puma.alarm.regulate.ChainedAlarmRegulator">
+        <property name="regulators">
+            <list>
+                <ref bean="noAlarmRegulator" />
+                <ref bean="linearAlarmRegulator" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="emailAlarmNotifier" class="com.dianping.puma.alarm.notify.EmailAlarmNotifier" />
+    <bean id="weChatAlarmNotifier" class="com.dianping.puma.alarm.notify.WeChatAlarmNotifier" />
+    <bean id="smsAlarmNotifier" class="com.dianping.puma.alarm.notify.SmsAlarmNotifier" />
+    <bean id="alarmNotifier" class="com.dianping.puma.alarm.notify.ChainedAlarmNotifier">
+        <property name="notifiers">
+            <list>
+                <ref bean="emailAlarmNotifier" />
+                <ref bean="weChatAlarmNotifier" />
+                <ref bean="smsAlarmNotifier" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="alarmMonitor" class="com.dianping.puma.alarm.monitor.ScanningAlarmMonitor" init-method="start">
+        <property name="clientService" ref="clientService" />
+        <property name="clientAlarmService" ref="clientAlarmService" />
+        <property name="arbiter" ref="alarmArbiter" />
+        <property name="regulator" ref="alarmRegulator" />
+        <property name="notifier" ref="alarmNotifier" />
+    </bean>
+
+</beans>

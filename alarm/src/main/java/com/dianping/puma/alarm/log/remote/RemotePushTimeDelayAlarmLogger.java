@@ -1,7 +1,6 @@
 package com.dianping.puma.alarm.log.remote;
 
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
-import com.dianping.puma.alarm.service.ClientAlarmDataService;
 import com.dianping.puma.common.intercept.AbstractPumaInterceptor;
 import com.dianping.puma.common.intercept.exception.PumaInterceptException;
 import com.dianping.puma.common.utils.Clock;
@@ -31,8 +30,6 @@ public class RemotePushTimeDelayAlarmLogger extends AbstractPumaInterceptor<Binl
     private ConcurrentMap<String, Long> pushTimeMap = new MapMaker().makeMap();
 
     private Clock clock = new Clock();
-
-    private ClientAlarmDataService clientAlarmDataService;
 
     private long flushIntervalInSecond = 5;
 
@@ -65,7 +62,7 @@ public class RemotePushTimeDelayAlarmLogger extends AbstractPumaInterceptor<Binl
             data.setPushTimeDelayInSecond(pushTimeDelayInSecond);
 
             try {
-                clientAlarmDataService.replacePushTimeDelay(clientName, data);
+                //clientAlarmDataService.replacePushTimeDelay(clientName, data);
             } catch (Throwable t) {
                 logger.error("Failed to flush push time delay[{}] for client[{}].",
                         pushTime, clientName, t);
@@ -104,10 +101,6 @@ public class RemotePushTimeDelayAlarmLogger extends AbstractPumaInterceptor<Binl
     @Override
     public void error(BinlogHttpMessage data) throws PumaInterceptException {
         // do nothing.
-    }
-
-    public void setClientAlarmDataService(ClientAlarmDataService clientAlarmDataService) {
-        this.clientAlarmDataService = clientAlarmDataService;
     }
 
     public void setFlushIntervalInSecond(long flushIntervalInSecond) {

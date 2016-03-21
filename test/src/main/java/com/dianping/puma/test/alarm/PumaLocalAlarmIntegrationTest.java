@@ -1,10 +1,7 @@
 package com.dianping.puma.test.alarm;
 
 import com.dianping.puma.alarm.monitor.PumaAlarmMonitor;
-import com.dianping.puma.biz.service.memory.MemoryClientAlarmBenchmarkService;
-import com.dianping.puma.biz.service.memory.MemoryClientAlarmDataService;
-import com.dianping.puma.biz.service.memory.MemoryClientAlarmMetaService;
-import com.dianping.puma.biz.service.memory.MemoryClientAlarmStrategyService;
+import com.dianping.puma.biz.service.memory.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -23,6 +20,9 @@ public class PumaLocalAlarmIntegrationTest {
     public static void main(String[] args) throws IOException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:spring/alarm/local.xml");
         final PumaAlarmMonitor monitor = (PumaAlarmMonitor) ctx.getBean("pumaAlarmMonitor");
+
+        MemoryClientService clientService
+                = (MemoryClientService) ctx.getBean("memoryClientService");
 
         MemoryClientAlarmDataService dataService
                 = (MemoryClientAlarmDataService) ctx.getBean("memoryClientAlarmDataService");

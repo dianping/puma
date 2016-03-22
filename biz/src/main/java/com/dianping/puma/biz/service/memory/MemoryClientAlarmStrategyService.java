@@ -51,7 +51,7 @@ public class MemoryClientAlarmStrategyService implements PumaClientAlarmStrategy
     }
 
     @Override
-    public Map<String, ExponentialAlarmStrategy> findExponentailAll() {
+    public Map<String, ExponentialAlarmStrategy> findExponentialAll() {
         return ImmutableMap.copyOf(exponentialAlarmStrategyMap);
     }
 

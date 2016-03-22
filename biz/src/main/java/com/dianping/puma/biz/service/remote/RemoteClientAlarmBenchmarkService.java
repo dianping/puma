@@ -5,6 +5,7 @@ import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.service.PumaClientAlarmBenchmarkService;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAlarmBenchmarkDao;
+import com.dianping.puma.biz.entity.ClientAlarmBenchmarkEntity;
 
 import java.util.Map;
 
@@ -20,12 +21,14 @@ public class RemoteClientAlarmBenchmarkService implements PumaClientAlarmBenchma
 
     @Override
     public PullTimeDelayAlarmBenchmark findPullTimeDelay(String clientName) {
-        return null;
+        ClientAlarmBenchmarkEntity entity = clientAlarmBenchmarkDao.find(clientName);
+        return converter.convert(entity, PullTimeDelayAlarmBenchmark.class);
     }
 
     @Override
     public PushTimeDelayAlarmBenchmark findPushTimeDelay(String clientName) {
-        return null;
+        ClientAlarmBenchmarkEntity entity = clientAlarmBenchmarkDao.find(clientName);
+        return converter.convert(entity, PushTimeDelayAlarmBenchmark.class);
     }
 
     @Override
@@ -46,5 +49,13 @@ public class RemoteClientAlarmBenchmarkService implements PumaClientAlarmBenchma
     @Override
     public void replacePushTimeDelay(String clientName, PushTimeDelayAlarmBenchmark benchmark) {
 
+    }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public void setClientAlarmBenchmarkDao(ClientAlarmBenchmarkDao clientAlarmBenchmarkDao) {
+        this.clientAlarmBenchmarkDao = clientAlarmBenchmarkDao;
     }
 }

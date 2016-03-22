@@ -22,7 +22,7 @@ public interface PumaClientAlarmStrategyService {
 
     Map<String, LinearAlarmStrategy> findLinearAll();
 
-    Map<String, ExponentialAlarmStrategy> findExponentailAll();
+    Map<String, ExponentialAlarmStrategy> findExponentialAll();
 
     void replaceNo(String clientName, NoAlarmStrategy strategy);
 

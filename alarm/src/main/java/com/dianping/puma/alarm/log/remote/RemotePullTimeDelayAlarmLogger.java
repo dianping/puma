@@ -1,6 +1,6 @@
 package com.dianping.puma.alarm.log.remote;
 
-import com.dianping.puma.alarm.log.PullAlarmLogger;
+import com.dianping.puma.alarm.log.DeprecatedPullAlarmLogger;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.intercept.exception.PumaInterceptException;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * Created by xiaotian.li on 16/3/8.
  * Email: lixiaotian07@gmail.com
  */
-public class RemotePullTimeDelayAlarmLogger extends AbstractPumaLifeCycle implements PullAlarmLogger<BinlogHttpMessage> {
+public class RemotePullTimeDelayAlarmLogger extends AbstractPumaLifeCycle implements DeprecatedPullAlarmLogger<BinlogHttpMessage> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

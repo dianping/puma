@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class LinearAlarmRegulator extends AbstractPumaLifeCycle implements PumaAlarmRegulator {
 
-    private Clock clock;
+    private Clock clock = new Clock();
 
     private ConcurrentMap<String, Long> lastAlarmTimeMap = new MapMaker().makeMap();
 

@@ -1,7 +1,12 @@
 package com.dianping.puma.test.alarm;
 
+import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
+import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
+import com.dianping.puma.alarm.model.meta.LogAlarmMeta;
+import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
 import com.dianping.puma.alarm.monitor.PumaAlarmMonitor;
 import com.dianping.puma.biz.service.memory.*;
+import com.dianping.puma.common.model.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -21,25 +26,44 @@ public class PumaLocalAlarmIntegrationTest {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:spring/alarm/local.xml");
         final PumaAlarmMonitor monitor = (PumaAlarmMonitor) ctx.getBean("pumaAlarmMonitor");
 
-        MemoryClientService clientService
+        final MemoryClientService clientService
                 = (MemoryClientService) ctx.getBean("memoryClientService");
 
-        MemoryClientAlarmDataService dataService
+        final MemoryClientAlarmDataService dataService
                 = (MemoryClientAlarmDataService) ctx.getBean("memoryClientAlarmDataService");
 
-        MemoryClientAlarmBenchmarkService benchmarkService
+        final MemoryClientAlarmBenchmarkService benchmarkService
                 = (MemoryClientAlarmBenchmarkService) ctx.getBean("memoryClientAlarmBenchmarkService");
 
-        MemoryClientAlarmStrategyService strategyService
+        final MemoryClientAlarmStrategyService strategyService
                 = (MemoryClientAlarmStrategyService) ctx.getBean("memoryClientAlarmStrategyService");
 
-        MemoryClientAlarmMetaService metaService
+        final MemoryClientAlarmMetaService metaService
                 = (MemoryClientAlarmMetaService) ctx.getBean("memoryClientAlarmMetaService");
 
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                Client client = new Client();
+                client.setClientName("test0");
+                clientService.create(client);
 
+                PullTimeDelayAlarmData pullTimeDelayAlarmData = new PullTimeDelayAlarmData();
+                pullTimeDelayAlarmData.setPullTimeDelayInSecond(10);
+                dataService.replacePullTimeDelay("test0", pullTimeDelayAlarmData);
+
+                PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark = new PullTimeDelayAlarmBenchmark();
+                pullTimeDelayAlarmBenchmark.setPullTimeDelayAlarm(true);
+                pullTimeDelayAlarmBenchmark.setMinPullTimeDelayInSecond(5);
+                pullTimeDelayAlarmBenchmark.setMaxPullTimeDelayInSecond(9);
+                benchmarkService.replacePullTimeDelay("test0", pullTimeDelayAlarmBenchmark);
+
+                LinearAlarmStrategy linearAlarmStrategy = new LinearAlarmStrategy();
+                linearAlarmStrategy.setLinearAlarmIntervalInSecond(10);
+                strategyService.replaceLinear("test0", linearAlarmStrategy);
+
+                LogAlarmMeta logAlarmMeta = new LogAlarmMeta();
+                metaService.replaceLog("test0", logAlarmMeta);
             }
         });
         thread.setDaemon(false);

@@ -33,7 +33,8 @@ public class MemoryClientService implements PumaClientService {
 
     @Override
     public void create(Client client) {
-
+        String clientName = client.getClientName();
+        clientMap.putIfAbsent(clientName, client);
     }
 
     @Override

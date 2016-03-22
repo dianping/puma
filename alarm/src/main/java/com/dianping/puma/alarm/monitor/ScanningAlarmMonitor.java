@@ -131,13 +131,17 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
                 = pumaClientAlarmDataService.findPullTimeDelay(clientName);
         PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark
                 = pumaClientAlarmBenchmarkService.findPullTimeDelay(clientName);
-        pairs.put(pullTimeDelayAlarmData, pullTimeDelayAlarmBenchmark);
+        if (pullTimeDelayAlarmData != null && pullTimeDelayAlarmBenchmark != null) {
+            pairs.put(pullTimeDelayAlarmData, pullTimeDelayAlarmBenchmark);
+        }
 
         PushTimeDelayAlarmData pushTimeDelayAlarmData
                 = pumaClientAlarmDataService.findPushTimeDelay(clientName);
         PushTimeDelayAlarmBenchmark pushTimeDelayAlarmBenchmark
                 = pumaClientAlarmBenchmarkService.findPushTimeDelay(clientName);
-        pairs.put(pushTimeDelayAlarmData, pushTimeDelayAlarmBenchmark);
+        if (pushTimeDelayAlarmData != null && pushTimeDelayAlarmBenchmark != null) {
+            pairs.put(pushTimeDelayAlarmData, pushTimeDelayAlarmBenchmark);
+        }
 
         return pairs;
     }

@@ -37,9 +37,9 @@ public class ChainedAlarmRegulator extends AbstractPumaLifeCycle implements Puma
     @Override
     public AlarmResult regulate(String clientName, AlarmResult result, AlarmStrategy strategy)
             throws PumaAlarmRegulateException {
-        for (PumaAlarmRegulator controller: regulators) {
+        for (PumaAlarmRegulator regulator: regulators) {
             try {
-                return controller.regulate(clientName, result, strategy);
+                return regulator.regulate(clientName, result, strategy);
             } catch (PumaAlarmRegulateUnsupportedException ignore) {
             }
         }

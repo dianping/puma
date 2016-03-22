@@ -1,8 +1,6 @@
 package com.dianping.puma.alarm.log;
 
 import com.dianping.puma.alarm.exception.PumaAlarmLogException;
-import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
-import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
 import com.dianping.puma.common.PumaLifeCycle;
 
 /**
@@ -11,7 +9,7 @@ import com.dianping.puma.common.PumaLifeCycle;
  */
 public interface PumaAlarmLogger extends PumaLifeCycle {
 
-    void logPullTimeDelay(String clientName, PullTimeDelayAlarmData data) throws PumaAlarmLogException;
+    void logPullTime(String clientName, long pullTime) throws PumaAlarmLogException;
 
-    void logPushTimeDelay(String clientName, PushTimeDelayAlarmData data) throws PumaAlarmLogException;
+    void logPushTime(String clientName, long pushTime) throws PumaAlarmLogException;
 }

@@ -1,11 +1,6 @@
 package com.dianping.puma.pumaserver;
 
-import com.dianping.puma.alarm.log.remote.RemotePullTimeDelayAlarmLogger;
-import com.dianping.puma.alarm.log.remote.RemotePushTimeDelayAlarmLogger;
-import com.dianping.puma.common.intercept.ChainedInterceptor;
-import com.dianping.puma.common.intercept.PumaInterceptor;
 import com.dianping.puma.common.service.ClientAckService;
-import com.dianping.puma.core.dto.BinlogHttpMessage;
 import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
@@ -15,7 +10,7 @@ import com.dianping.puma.pumaserver.server.TcpServer;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
 import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
-import com.google.common.collect.Lists;
+import com.dianping.puma.server.intercept.PumaEventServerInterceptor;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpContentDecompressor;
@@ -28,7 +23,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,7 +44,8 @@ public class PumaServerManager {
     @Autowired
     ClientAckService clientAckService;
 
-    private ChainedInterceptor<BinlogHttpMessage> chainedInterceptor;
+    @Autowired
+    private PumaEventServerInterceptor pumaEventServerInterceptor;
 
     protected final ClientSessionService clientSessionService = new DefaultClientSessionService();
 
@@ -66,18 +61,8 @@ public class PumaServerManager {
 
         // Initialize sharable handlers.
         final InterceptorHandler interceptorHandler = new InterceptorHandler();
-        List<PumaInterceptor<BinlogHttpMessage>> interceptors = Lists.newArrayList();
-
-        RemotePullTimeDelayAlarmLogger remotePullTimeAlarmLogger = new RemotePullTimeDelayAlarmLogger();
-        interceptors.add(remotePullTimeAlarmLogger);
-
-        RemotePushTimeDelayAlarmLogger remotePushTimeAlarmLogger = new RemotePushTimeDelayAlarmLogger();
-        interceptors.add(remotePushTimeAlarmLogger);
-
-        chainedInterceptor = new ChainedInterceptor<BinlogHttpMessage>();
-        chainedInterceptor.setInterceptors(interceptors);
-        chainedInterceptor.start();
-        interceptorHandler.setPumaInterceptor(chainedInterceptor);
+        pumaEventServerInterceptor.start();
+        interceptorHandler.setPumaInterceptor(pumaEventServerInterceptor);
 
         final BinlogRollbackHandler binlogRollbackHandler = new BinlogRollbackHandler();
         binlogRollbackHandler.setClientSessionService(clientSessionService);
@@ -131,7 +116,19 @@ public class PumaServerManager {
         if (server != null) {
             server.close();
             clientManager.stop();
-            chainedInterceptor.stop();
+            pumaEventServerInterceptor.stop();
         }
+    }
+
+    public void setBinlogAckService(DbBinlogAckService binlogAckService) {
+        this.binlogAckService = binlogAckService;
+    }
+
+    public void setClientManager(ClientManager clientManager) {
+        this.clientManager = clientManager;
+    }
+
+    public void setClientAckService(ClientAckService clientAckService) {
+        this.clientAckService = clientAckService;
     }
 }

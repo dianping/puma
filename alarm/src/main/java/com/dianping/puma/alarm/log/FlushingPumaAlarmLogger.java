@@ -5,6 +5,7 @@ import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
 import com.dianping.puma.alarm.service.PumaClientAlarmDataService;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
+import com.dianping.puma.common.utils.Clock;
 import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.google.common.collect.MapMaker;
 import org.slf4j.Logger;
@@ -26,16 +27,16 @@ public class FlushingPumaAlarmLogger extends AbstractPumaLifeCycle implements Pu
 
     private PumaClientAlarmDataService pumaClientAlarmDataService;
 
+    private Clock clock = new Clock();
+
     private long flushIntervalInSecond = 5;
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(
             1, new NamedThreadFactory("flushing-puma-alarm-logger-executor", false));
 
-    private ConcurrentMap<String, PullTimeDelayAlarmData> pullTimeDelayAlarmDataMap
-            = new MapMaker().makeMap();
+    private ConcurrentMap<String, Long> pullTimeMap = new MapMaker().makeMap();
 
-    private ConcurrentMap<String, PushTimeDelayAlarmData> pushTimeDelayAlarmDataMap
-            = new MapMaker().makeMap();
+    private ConcurrentMap<String, Long> pushTimeMap = new MapMaker().makeMap();
 
     @Override
     public void start() {
@@ -66,29 +67,35 @@ public class FlushingPumaAlarmLogger extends AbstractPumaLifeCycle implements Pu
     }
 
     private void flushPullTimeDelay() {
-        for (Map.Entry<String, PullTimeDelayAlarmData> entry: pullTimeDelayAlarmDataMap.entrySet()) {
+        for (Map.Entry<String, Long> entry: pullTimeMap.entrySet()) {
             String clientName = entry.getKey();
-            PullTimeDelayAlarmData data = entry.getValue();
-            pumaClientAlarmDataService.replacePullTimeDelay(clientName, data);
+            long pullTime = entry.getValue();
+            long pullTimeDelayInSecond = clock.getTimestamp() - pullTime;
+            PullTimeDelayAlarmData pullTimeDelayAlarmData = new PullTimeDelayAlarmData();
+            pullTimeDelayAlarmData.setPullTimeDelayInSecond(pullTimeDelayInSecond);
+            pumaClientAlarmDataService.replacePullTimeDelay(clientName, pullTimeDelayAlarmData);
         }
     }
 
     private void flushPushTimeDelay() {
-        for (Map.Entry<String, PushTimeDelayAlarmData> entry: pushTimeDelayAlarmDataMap.entrySet()) {
+        for (Map.Entry<String, Long> entry: pushTimeMap.entrySet()) {
             String clientName = entry.getKey();
-            PushTimeDelayAlarmData data = entry.getValue();
-            pumaClientAlarmDataService.replacePushTimeDelay(clientName, data);
+            long pushTime = entry.getValue();
+            long pushTimeDelayInSecond = clock.getTimestamp() - pushTime;
+            PushTimeDelayAlarmData pushTimeDelayAlarmData = new PushTimeDelayAlarmData();
+            pushTimeDelayAlarmData.setPushTimeDelayInSecond(pushTimeDelayInSecond);
+            pumaClientAlarmDataService.replacePushTimeDelay(clientName, pushTimeDelayAlarmData);
         }
     }
 
     @Override
-    public void logPullTimeDelay(String clientName, PullTimeDelayAlarmData data) throws PumaAlarmLogException {
-        pullTimeDelayAlarmDataMap.put(clientName, data);
+    public void logPullTime(String clientName, long pullTime) throws PumaAlarmLogException {
+        pullTimeMap.put(clientName, pullTime);
     }
 
     @Override
-    public void logPushTimeDelay(String clientName, PushTimeDelayAlarmData data) throws PumaAlarmLogException {
-        pushTimeDelayAlarmDataMap.put(clientName, data);
+    public void logPushTime(String clientName, long pushTime) throws PumaAlarmLogException {
+        pushTimeMap.put(clientName, pushTime);
     }
 
     public void setPumaClientAlarmDataService(PumaClientAlarmDataService pumaClientAlarmDataService) {

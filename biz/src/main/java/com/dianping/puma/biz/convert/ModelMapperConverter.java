@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  * Email: lixiaotian07@gmail.com
  */
 @Service
-public class ConverterImpl implements Converter {
+public class ModelMapperConverter implements Converter {
 
     private ModelMapper modelMapper;
 

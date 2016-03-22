@@ -4,7 +4,13 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="memoryClientAlarmDataService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientAlarmDataService" />
+    <bean id="converter"
+          class="com.dianping.puma.biz.convert.ModelMapperConverter" />
+
+    <bean id="clientAlarmDataService"
+          class="com.dianping.puma.biz.service.remote.RemoteClientAlarmDataService">
+        <property name="converter" ref="converter" />
+        <property name="clientAlarmDataDao" ref="clientAlarmDataDao" />
+    </bean>
 
 </beans>

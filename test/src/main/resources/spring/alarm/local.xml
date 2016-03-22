@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="converter" class="com.dianping.puma.biz.convert.ConverterImpl" />
+    <bean id="converter" class="com.dianping.puma.biz.convert.ModelMapperConverter" />
 
     <bean id="memoryClientService"
           class="com.dianping.puma.biz.service.memory.MemoryClientService" />

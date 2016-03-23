@@ -4,23 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="converter" class="com.dianping.puma.biz.convert.ModelMapperConverter" />
-
-    <bean id="memoryClientService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientService" />
-
-    <bean id="memoryClientAlarmDataService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientAlarmDataService" />
-
-    <bean id="memoryClientAlarmBenchmarkService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientAlarmBenchmarkService" />
-
-    <bean id="memoryClientAlarmStrategyService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientAlarmStrategyService" />
-
-    <bean id="memoryClientAlarmMetaService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientAlarmMetaService" />
-
     <bean id="pullTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.PullTimeDelayAlarmArbiter" />
     <bean id="pushTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.PushTimeDelayAlarmArbiter" />
     <bean id="chainedAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.ChainedAlarmArbiter">
@@ -61,11 +44,11 @@
     </bean>
 
     <bean id="pumaAlarmMonitor" class="com.dianping.puma.alarm.monitor.ScanningAlarmMonitor" init-method="start">
-        <property name="pumaClientService" ref="memoryClientService" />
-        <property name="pumaClientAlarmDataService" ref="memoryClientAlarmDataService" />
-        <property name="pumaClientAlarmBenchmarkService" ref="memoryClientAlarmBenchmarkService" />
-        <property name="pumaClientAlarmStrategyService" ref="memoryClientAlarmStrategyService" />
-        <property name="pumaClientAlarmMetaService" ref="memoryClientAlarmMetaService" />
+        <property name="pumaClientService" ref="pumaClientService" />
+        <property name="pumaClientAlarmDataService" ref="pumaClientAlarmDataService" />
+        <property name="pumaClientAlarmBenchmarkService" ref="pumaClientAlarmBenchmarkService" />
+        <property name="pumaClientAlarmStrategyService" ref="pumaClientAlarmStrategyService" />
+        <property name="pumaClientAlarmMetaService" ref="pumaClientAlarmMetaService" />
         <property name="arbiter" ref="chainedAlarmArbiter" />
         <property name="regulator" ref="chainedAlarmRegulator" />
         <property name="notifier" ref="chainedAlarmNotifier" />

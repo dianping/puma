@@ -8,13 +8,13 @@ public class ClientAlarmBenchmarkEntity extends BaseEntity {
 
     private String clientName;
 
-    private boolean alarmPullTimeDelay;
+    private boolean pullTimeDelayAlarm;
 
     private long minPullTimeDelayInSecond;
 
     private long maxPullTimeDelayInSecond;
 
-    private boolean alarmPushTimeDelay;
+    private boolean pushTimeDelayAlarm;
 
     private long minPushTimeDelayInSecond;
 
@@ -28,12 +28,12 @@ public class ClientAlarmBenchmarkEntity extends BaseEntity {
         this.clientName = clientName;
     }
 
-    public boolean isAlarmPullTimeDelay() {
-        return alarmPullTimeDelay;
+    public boolean isPullTimeDelayAlarm() {
+        return pullTimeDelayAlarm;
     }
 
-    public void setAlarmPullTimeDelay(boolean alarmPullTimeDelay) {
-        this.alarmPullTimeDelay = alarmPullTimeDelay;
+    public void setPullTimeDelayAlarm(boolean pullTimeDelayAlarm) {
+        this.pullTimeDelayAlarm = pullTimeDelayAlarm;
     }
 
     public long getMinPullTimeDelayInSecond() {
@@ -52,12 +52,12 @@ public class ClientAlarmBenchmarkEntity extends BaseEntity {
         this.maxPullTimeDelayInSecond = maxPullTimeDelayInSecond;
     }
 
-    public boolean isAlarmPushTimeDelay() {
-        return alarmPushTimeDelay;
+    public boolean isPushTimeDelayAlarm() {
+        return pushTimeDelayAlarm;
     }
 
-    public void setAlarmPushTimeDelay(boolean alarmPushTimeDelay) {
-        this.alarmPushTimeDelay = alarmPushTimeDelay;
+    public void setPushTimeDelayAlarm(boolean pushTimeDelayAlarm) {
+        this.pushTimeDelayAlarm = pushTimeDelayAlarm;
     }
 
     public long getMinPushTimeDelayInSecond() {

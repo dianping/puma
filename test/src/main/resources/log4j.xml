@@ -13,8 +13,15 @@
             <param name="ConversionPattern" value="[puma]%d %-5p [%c] %m%n"/>
         </layout>
     </appender>
+
+    <logger name="com.dianping.puma.alarm" additivity="false">
+        <level value ="DEBUG"/>
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="appAppender" />
+    </logger>
+
     <root>
-        <level value="DEBUG"/>
+        <level value="INFO"/>
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="appAppender"/>
     </root>

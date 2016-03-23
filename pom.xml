@@ -17,6 +17,8 @@
         <module>extension</module>
         <module>alarm</module>
         <module>utils</module>
+        <module>server</module>
+        <module>test</module>
     </modules>
 
     <description>puma-parent</description>

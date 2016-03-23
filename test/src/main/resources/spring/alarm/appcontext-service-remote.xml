@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="converter" class="com.dianping.puma.biz.convert.ModelMapperConverter" />
+
+    <bean id="pumaClientService"
+          class="com.dianping.puma.biz.service.remote.RemoteClientService">
+        <property name="converter" ref="converter" />
+        <property name="clientDao" ref="clientDao" />
+        <property name="clientAckDao" ref="clientAckDao" />
+        <property name="clientAdditionDao" ref="clientAdditionDao" />
+        <property name="clientConfigDao" ref="clientConfigDao" />
+        <property name="clientConnectDao" ref="clientConnectDao" />
+    </bean>
+
+    <bean id="pumaClientAlarmDataService"
+          class="com.dianping.puma.biz.service.remote.RemoteClientAlarmDataService">
+        <property name="converter" ref="converter" />
+        <property name="clientAlarmDataDao" ref="clientAlarmDataDao" />
+    </bean>
+
+    <bean id="pumaClientAlarmBenchmarkService"
+          class="com.dianping.puma.biz.service.remote.RemoteClientAlarmBenchmarkService">
+        <property name="converter" ref="converter" />
+        <property name="clientAlarmBenchmarkDao" ref="clientAlarmBenchmarkDao" />
+    </bean>
+
+    <bean id="pumaClientAlarmStrategyService"
+          class="com.dianping.puma.biz.service.remote.RemoteClientAlarmStrategyService">
+        <property name="converter" ref="converter" />
+        <property name="clientAlarmStrategyDao" ref="clientAlarmStrategyDao" />
+    </bean>
+
+    <bean id="pumaClientAlarmMetaService"
+          class="com.dianping.puma.biz.service.remote.RemoteClientAlarmMetaService">
+        <property name="converter" ref="converter" />
+        <property name="clientAlarmMetaDao" ref="clientAlarmMetaDao" />
+    </bean>
+
+</beans>

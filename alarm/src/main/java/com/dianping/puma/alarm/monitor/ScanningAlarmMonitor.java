@@ -75,7 +75,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
             public void run() {
                 try {
                     if (logger.isDebugEnabled()) {
-                        logger.info("Start periodically scanning puma alarms...");
+                        logger.debug("Start periodically scanning puma alarms...");
                     }
 
                     scan();

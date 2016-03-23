@@ -23,23 +23,25 @@ public class PumaLocalAlarmIntegrationTest {
     private static Logger logger = LoggerFactory.getLogger(PumaLocalAlarmIntegrationTest.class);
 
     public static void main(String[] args) throws IOException {
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:spring/alarm/local.xml");
+        ApplicationContext ctx = new ClassPathXmlApplicationContext(
+                "classpath:spring/alarm/appcontext.xml",
+                "classpath:spring/alarm/appcontext-service-local.xml");
         final PumaAlarmMonitor monitor = (PumaAlarmMonitor) ctx.getBean("pumaAlarmMonitor");
 
         final MemoryClientService clientService
-                = (MemoryClientService) ctx.getBean("memoryClientService");
+                = (MemoryClientService) ctx.getBean("pumaClientService");
 
         final MemoryClientAlarmDataService dataService
-                = (MemoryClientAlarmDataService) ctx.getBean("memoryClientAlarmDataService");
+                = (MemoryClientAlarmDataService) ctx.getBean("pumaClientAlarmDataService");
 
         final MemoryClientAlarmBenchmarkService benchmarkService
-                = (MemoryClientAlarmBenchmarkService) ctx.getBean("memoryClientAlarmBenchmarkService");
+                = (MemoryClientAlarmBenchmarkService) ctx.getBean("pumaClientAlarmBenchmarkService");
 
         final MemoryClientAlarmStrategyService strategyService
-                = (MemoryClientAlarmStrategyService) ctx.getBean("memoryClientAlarmStrategyService");
+                = (MemoryClientAlarmStrategyService) ctx.getBean("pumaClientAlarmStrategyService");
 
         final MemoryClientAlarmMetaService metaService
-                = (MemoryClientAlarmMetaService) ctx.getBean("memoryClientAlarmMetaService");
+                = (MemoryClientAlarmMetaService) ctx.getBean("pumaClientAlarmMetaService");
 
         Thread thread = new Thread(new Runnable() {
             @Override

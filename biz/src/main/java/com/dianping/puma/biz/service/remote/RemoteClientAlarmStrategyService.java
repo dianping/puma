@@ -23,19 +23,31 @@ public class RemoteClientAlarmStrategyService implements PumaClientAlarmStrategy
     @Override
     public NoAlarmStrategy findNo(String clientName) {
         ClientAlarmStrategyEntity entity = clientAlarmStrategyDao.find(clientName);
-        return converter.convert(entity, NoAlarmStrategy.class);
+        if (entity == null || !entity.isNoAlarm()) {
+            return null;
+        } else {
+            return converter.convert(entity, NoAlarmStrategy.class);
+        }
     }
 
     @Override
     public LinearAlarmStrategy findLinear(String clientName) {
         ClientAlarmStrategyEntity entity = clientAlarmStrategyDao.find(clientName);
-        return converter.convert(entity, LinearAlarmStrategy.class);
+        if (entity == null || !entity.isLinearAlarm()) {
+            return null;
+        } else {
+            return converter.convert(entity, LinearAlarmStrategy.class);
+        }
     }
 
     @Override
     public ExponentialAlarmStrategy findExponential(String clientName) {
         ClientAlarmStrategyEntity entity = clientAlarmStrategyDao.find(clientName);
-        return converter.convert(entity, ExponentialAlarmStrategy.class);
+        if (entity == null || !entity.isExponentialAlarm()) {
+            return null;
+        } else {
+            return converter.convert(entity, ExponentialAlarmStrategy.class);
+        }
     }
 
     @Override

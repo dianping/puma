@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.service;
+package com.dianping.puma.biz.service.remote;
 
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.*;
@@ -18,7 +18,7 @@ import java.util.List;
  * Email: lixiaotian07@gmail.com
  */
 @Service
-public class ClientServiceImpl implements PumaClientService {
+public class RemoteClientService implements PumaClientService {
 
     @Autowired
     Converter converter;
@@ -135,5 +135,25 @@ public class ClientServiceImpl implements PumaClientService {
 
     public void setConverter(Converter converter) {
         this.converter = converter;
+    }
+
+    public void setClientDao(ClientDao clientDao) {
+        this.clientDao = clientDao;
+    }
+
+    public void setClientAdditionDao(ClientAdditionDao clientAdditionDao) {
+        this.clientAdditionDao = clientAdditionDao;
+    }
+
+    public void setClientConfigDao(ClientConfigDao clientConfigDao) {
+        this.clientConfigDao = clientConfigDao;
+    }
+
+    public void setClientConnectDao(ClientConnectDao clientConnectDao) {
+        this.clientConnectDao = clientConnectDao;
+    }
+
+    public void setClientAckDao(ClientAckDao clientAckDao) {
+        this.clientAckDao = clientAckDao;
     }
 }

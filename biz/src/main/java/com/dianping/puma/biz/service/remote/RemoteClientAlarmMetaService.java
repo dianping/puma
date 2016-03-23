@@ -84,4 +84,12 @@ public class RemoteClientAlarmMetaService implements PumaClientAlarmMetaService 
     public void replaceLog(String clientName, LogAlarmMeta meta) {
 
     }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public void setClientAlarmMetaDao(ClientAlarmMetaDao clientAlarmMetaDao) {
+        this.clientAlarmMetaDao = clientAlarmMetaDao;
+    }
 }

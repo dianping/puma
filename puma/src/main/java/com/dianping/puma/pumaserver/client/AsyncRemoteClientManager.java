@@ -83,7 +83,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             String clientName = entry.getKey();
             ClientAck clientAck = entry.getValue();
             try {
-                clientAckService.replace(clientName, clientAck);
+                clientAckService.create(clientName, clientAck);
                 it.remove();
             } catch (Throwable t) {
                 logger.error("Failed to flush puma client[{}] ack[{}].", clientName, clientAck, t);
@@ -98,7 +98,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             String clientName = entry.getKey();
             ClientConfig clientConfig = entry.getValue();
             try {
-                clientConfigService.replace(clientName, clientConfig);
+                clientConfigService.create(clientName, clientConfig);
                 it.remove();
             } catch (Throwable t) {
                 logger.error("Failed to flush puma client[{}] config[{}].", clientName, clientConfig, t);
@@ -113,7 +113,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             String clientName = entry.getKey();
             ClientConnect clientConnect = entry.getValue();
             try {
-                clientConnectService.replace(clientName, clientConnect);
+                clientConnectService.create(clientName, clientConnect);
                 it.remove();
             } catch (Throwable t) {
                 logger.error("Failed to flush puma client[{}] connect[{}].", clientName, clientConnect, t);

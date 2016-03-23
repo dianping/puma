@@ -27,9 +27,9 @@ public class DPEmailService implements PumaEmailService {
     private HttpClient httpClient = HttpClients.createDefault();
 
     @Override
-    public void send(String destination, String title, String content) {
+    public void send(String recipient, String title, String content) {
         List<NameValuePair> nameValuePairs = Lists.newArrayList();
-        nameValuePairs.add(new BasicNameValuePair("recipients", destination));
+        nameValuePairs.add(new BasicNameValuePair("recipients", recipient));
         nameValuePairs.add(new BasicNameValuePair("title", title));
         nameValuePairs.add(new BasicNameValuePair("body", content));
 

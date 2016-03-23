@@ -6,5 +6,5 @@ package com.dianping.puma.alarm.service;
  */
 public interface PumaEmailService {
 
-    void send(String destination, String title, String content);
+    void send(String recipient, String title, String content);
 }

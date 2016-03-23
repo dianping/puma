@@ -12,9 +12,9 @@ public class ClientConfigEntity extends BaseEntity {
 
     private String tableRegex;
 
-    private Boolean dml;
+    private boolean dml;
 
-    private Boolean ddl;
+    private boolean ddl;
 
     public String getClientName() {
         return clientName;
@@ -40,19 +40,19 @@ public class ClientConfigEntity extends BaseEntity {
         this.tableRegex = tableRegex;
     }
 
-    public Boolean getDml() {
+    public boolean getDml() {
         return dml;
     }
 
-    public void setDml(Boolean dml) {
+    public void setDml(boolean dml) {
         this.dml = dml;
     }
 
-    public Boolean getDdl() {
+    public boolean getDdl() {
         return ddl;
     }
 
-    public void setDdl(Boolean ddl) {
+    public void setDdl(boolean ddl) {
         this.ddl = ddl;
     }
 }

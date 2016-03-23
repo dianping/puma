@@ -18,9 +18,9 @@ public class ClientEntity {
 
     private String tableRegex;
 
-    private Boolean dml;
+    private boolean dml;
 
-    private Boolean ddl;
+    private boolean ddl;
 
     // client connect.
 
@@ -30,13 +30,13 @@ public class ClientEntity {
 
     // client ack.
 
-    private Long serverId;
+    private long serverId;
 
     private String filename;
 
-    private Long position;
+    private long position;
 
-    private Long timestamp;
+    private long timestamp;
 
     public String getClientName() {
         return clientName;
@@ -70,19 +70,19 @@ public class ClientEntity {
         this.tableRegex = tableRegex;
     }
 
-    public Boolean getDml() {
+    public boolean getDml() {
         return dml;
     }
 
-    public void setDml(Boolean dml) {
+    public void setDml(boolean dml) {
         this.dml = dml;
     }
 
-    public Boolean getDdl() {
+    public boolean getDdl() {
         return ddl;
     }
 
-    public void setDdl(Boolean ddl) {
+    public void setDdl(boolean ddl) {
         this.ddl = ddl;
     }
 
@@ -102,11 +102,11 @@ public class ClientEntity {
         this.serverAddress = serverAddress;
     }
 
-    public Long getServerId() {
+    public long getServerId() {
         return serverId;
     }
 
-    public void setServerId(Long serverId) {
+    public void setServerId(long serverId) {
         this.serverId = serverId;
     }
 
@@ -118,19 +118,19 @@ public class ClientEntity {
         this.filename = filename;
     }
 
-    public Long getPosition() {
+    public long getPosition() {
         return position;
     }
 
-    public void setPosition(Long position) {
+    public void setPosition(long position) {
         this.position = position;
     }
 
-    public Long getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Long timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 }

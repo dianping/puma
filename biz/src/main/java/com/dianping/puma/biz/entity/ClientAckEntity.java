@@ -8,13 +8,13 @@ public class ClientAckEntity extends BaseEntity {
 
     private String clientName;
 
-    private Long serverId;
+    private long serverId;
 
     private String filename;
 
-    private Long position;
+    private long position;
 
-    private Long timestamp;
+    private long timestamp;
 
     public String getClientName() {
         return clientName;
@@ -24,11 +24,11 @@ public class ClientAckEntity extends BaseEntity {
         this.clientName = clientName;
     }
 
-    public Long getServerId() {
+    public long getServerId() {
         return serverId;
     }
 
-    public void setServerId(Long serverId) {
+    public void setServerId(long serverId) {
         this.serverId = serverId;
     }
 
@@ -40,19 +40,19 @@ public class ClientAckEntity extends BaseEntity {
         this.filename = filename;
     }
 
-    public Long getPosition() {
+    public long getPosition() {
         return position;
     }
 
-    public void setPosition(Long position) {
+    public void setPosition(long position) {
         this.position = position;
     }
 
-    public Long getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Long timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 }

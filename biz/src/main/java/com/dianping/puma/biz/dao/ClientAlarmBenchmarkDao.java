@@ -12,9 +12,11 @@ public interface ClientAlarmBenchmarkDao {
 
     void insert(ClientAlarmBenchmarkEntity entity);
 
+    int update(ClientAlarmBenchmarkEntity entity);
+
     int updatePullTimeDelay(ClientAlarmBenchmarkEntity entity);
 
     int updatePushTimeDelay(ClientAlarmBenchmarkEntity entity);
 
-    void delete(String clientName);
+    int delete(String clientName);
 }

@@ -33,11 +33,26 @@
         )
     </insert>
 
+    <update id="update" parameterType="ClientAlarmBenchmarkEntity">
+        UPDATE
+        ClientAlarmBenchmark
+        SET
+        PullTimeDelayAlarm = #{pullTimeDelayAlarm},
+        MinPullTimeDelayInSecond = #{minPullTimeDelayInSecond},
+        MaxPullTimeDelayInSecond = #{maxPullTimeDelayInSecond},
+        PushTimeDelayAlarm = #{pushTimeDelayAlarm},
+        MinPushTimeDelayInSecond = #{minPushTimeDelayInSecond},
+        MaxPushTimeDelayInSecond = #{maxPushTimeDelayInSecond}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
     <update id="updatePullTimeDelay" parameterType="ClientAlarmBenchmarkEntity">
         UPDATE
         ClientAlarmBenchmark
         SET
         PullTimeDelayAlarm = #{pullTimeDelayAlarm},
+        MinPullTimeDelayInSecond = #{minPullTimeDelayInSecond},
         MaxPullTimeDelayInSecond = #{maxPullTimeDelayInSecond}
         WHERE
         ClientName = #{clientName}
@@ -48,7 +63,8 @@
         ClientAlarmBenchmark
         SET
         PushTimeDelayAlarm = #{pushTimeDelayAlarm},
-        maxPushTimeDelayInSecond = #{maxPushTimeDelayInSecond}
+        MinPushTimeDelayInSecond = #{minPushTimeDelayInSecond},
+        MaxPushTimeDelayInSecond = #{maxPushTimeDelayInSecond}
         WHERE
         ClientName = #{clientName}
     </update>

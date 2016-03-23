@@ -1,6 +1,6 @@
 package com.dianping.puma.pumaserver;
 
-import com.dianping.puma.common.service.ClientAckService;
+import com.dianping.puma.common.service.PumaClientAckService;
 import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
@@ -42,7 +42,7 @@ public class PumaServerManager {
     ClientManager clientManager;
 
     @Autowired
-    ClientAckService clientAckService;
+    PumaClientAckService clientAckService;
 
     @Autowired
     private PumaEventServerInterceptor pumaEventServerInterceptor;
@@ -128,7 +128,7 @@ public class PumaServerManager {
         this.clientManager = clientManager;
     }
 
-    public void setClientAckService(ClientAckService clientAckService) {
+    public void setClientAckService(PumaClientAckService clientAckService) {
         this.clientAckService = clientAckService;
     }
 }

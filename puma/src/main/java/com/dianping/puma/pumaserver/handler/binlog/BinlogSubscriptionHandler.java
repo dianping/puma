@@ -4,7 +4,7 @@ import com.dianping.cat.Cat;
 import com.dianping.puma.common.model.ClientAck;
 import com.dianping.puma.common.model.ClientConfig;
 import com.dianping.puma.common.model.ClientConnect;
-import com.dianping.puma.common.service.ClientAckService;
+import com.dianping.puma.common.service.PumaClientAckService;
 import com.dianping.puma.common.utils.AddressUtils;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
@@ -32,7 +32,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     private ClientManager clientManager;
 
-    private ClientAckService clientAckService;
+    private PumaClientAckService clientAckService;
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
@@ -115,7 +115,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         this.clientSessionService = clientSessionService;
     }
 
-    public void setClientAckService(ClientAckService clientAckService) {
+    public void setClientAckService(PumaClientAckService clientAckService) {
         this.clientAckService = clientAckService;
     }
 

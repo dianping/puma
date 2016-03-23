@@ -29,6 +29,16 @@
         )
     </insert>
 
+    <update id="update" parameterType="ClientAlarmDataEntity">
+        UPDATE
+        ClientAlarmData
+        SET
+        PullTimeDelayInSecond = #{pullTimeDelayInSecond},
+        PushTimeDelayInSecond = #{pushTimeDelayInSecond}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
     <update id="updatePullTimeDelay" parameterType="ClientAlarmDataEntity">
         UPDATE
         ClientAlarmData

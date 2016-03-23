@@ -1,10 +1,10 @@
-package com.dianping.puma.biz.service;
+package com.dianping.puma.biz.service.remote;
 
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAckDao;
 import com.dianping.puma.biz.entity.ClientAckEntity;
 import com.dianping.puma.common.model.ClientAck;
-import com.dianping.puma.common.service.ClientAckService;
+import com.dianping.puma.common.service.PumaClientAckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * Email: lixiaotian07@gmail.com
  */
 @Service
-public class ClientAckServiceImpl implements ClientAckService {
+public class RemoteClientAckService implements PumaClientAckService {
 
     @Autowired
     Converter converter;
@@ -28,29 +28,9 @@ public class ClientAckServiceImpl implements ClientAckService {
     }
 
     @Override
-    public void create(String clientName, ClientAck clientAck) {
-        ClientAckEntity entity = converter.convert(clientAck, ClientAckEntity.class);
-        entity.setClientName(clientName);
-        clientAckDao.insert(entity);
-    }
-
-    @Override
-    public int modify(String clientName, ClientAck clientAck) {
+    public int update(String clientName, ClientAck clientAck) {
         ClientAckEntity entity = converter.convert(clientAck, ClientAckEntity.class);
         entity.setClientName(clientName);
         return clientAckDao.update(entity);
-    }
-
-    @Override
-    public void replace(String clientName, ClientAck clientAck) {
-        int result = modify(clientName, clientAck);
-        if (result == 0) {
-            create(clientName, clientAck);
-        }
-    }
-
-    @Override
-    public int remove(String clientName) {
-        return clientAckDao.delete(clientName);
     }
 }

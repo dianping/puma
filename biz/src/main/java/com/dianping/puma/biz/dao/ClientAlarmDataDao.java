@@ -12,9 +12,11 @@ public interface ClientAlarmDataDao {
 
     void insert(ClientAlarmDataEntity entity);
 
+    void update(ClientAlarmDataEntity entity);
+
     int updatePullTimeDelay(ClientAlarmDataEntity entity);
 
     int updatePushTimeDelay(ClientAlarmDataEntity entity);
 
-    void delete(String clientName);
+    int delete(String clientName);
 }

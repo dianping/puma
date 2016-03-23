@@ -38,6 +38,18 @@ public class RemoteClientService implements PumaClientService {
     @Autowired
     ClientAckDao clientAckDao;
 
+    @Autowired
+    ClientAlarmDataDao clientAlarmDataDao;
+
+    @Autowired
+    ClientAlarmBenchmarkDao clientAlarmBenchmarkDao;
+
+    @Autowired
+    ClientAlarmStrategyDao clientAlarmStrategyDao;
+
+    @Autowired
+    ClientAlarmMetaDao clientAlarmMetaDao;
+
     @Override
     @Transactional(value = "pumaTransactionManager", rollbackFor = Throwable.class)
     public Client findByClientName(String clientName) {
@@ -75,49 +87,81 @@ public class RemoteClientService implements PumaClientService {
     @Override
     @Transactional(value = "pumaTransactionManager", rollbackFor = Throwable.class)
     public void create(Client client) {
-        ClientEntity clientEntity = converter.convert(client, ClientEntity.class);
+        ClientEntity clientEntity
+                = converter.convert(client, ClientEntity.class);
         clientDao.insert(clientEntity);
 
-        ClientAdditionEntity clientAdditionEntity = converter.convert(client, ClientAdditionEntity.class);
+        ClientAdditionEntity clientAdditionEntity
+                = converter.convert(client, ClientAdditionEntity.class);
         clientAdditionDao.insert(clientAdditionEntity);
 
-        ClientConfigEntity clientConfigEntity = converter.convert(client, ClientConfigEntity.class);
+        ClientConfigEntity clientConfigEntity
+                = converter.convert(client, ClientConfigEntity.class);
         clientConfigDao.insert(clientConfigEntity);
 
-        ClientConnectEntity clientConnectEntity = converter.convert(client, ClientConnectEntity.class);
+        ClientConnectEntity clientConnectEntity
+                = converter.convert(client, ClientConnectEntity.class);
         clientConnectDao.insert(clientConnectEntity);
 
-        ClientAckEntity clientAckEntity = converter.convert(client, ClientAckEntity.class);
+        ClientAckEntity clientAckEntity
+                = converter.convert(client, ClientAckEntity.class);
         clientAckDao.insert(clientAckEntity);
+
+        ClientAlarmDataEntity clientAlarmDataEntity
+                = converter.convert(client, ClientAlarmDataEntity.class);
+        clientAlarmDataDao.insert(clientAlarmDataEntity);
+
+        ClientAlarmBenchmarkEntity clientAlarmBenchmarkEntity
+                = converter.convert(client, ClientAlarmBenchmarkEntity.class);
+        clientAlarmBenchmarkDao.insert(clientAlarmBenchmarkEntity);
+
+        ClientAlarmStrategyEntity clientAlarmStrategyEntity
+                = converter.convert(client, ClientAlarmStrategyEntity.class);
+        clientAlarmStrategyDao.insert(clientAlarmStrategyEntity);
+
+        ClientAlarmMetaEntity clientAlarmMetaEntity
+                = converter.convert(client, ClientAlarmMetaEntity.class);
+        clientAlarmMetaDao.insert(clientAlarmMetaEntity);
     }
 
     @Override
     @Transactional(value = "pumaTransactionManager", rollbackFor = Throwable.class)
     public void update(Client client) {
-        ClientEntity clientEntity = converter.convert(client, ClientEntity.class);
-        if (clientDao.update(clientEntity) == 0) {
-            throw new IllegalArgumentException("Update affects 0 rows.");
-        }
+        ClientEntity clientEntity
+                = converter.convert(client, ClientEntity.class);
+        clientDao.update(clientEntity);
 
-        ClientAdditionEntity clientAdditionEntity = converter.convert(client, ClientAdditionEntity.class);
-        if (clientAdditionDao.update(clientAdditionEntity) == 0) {
-            throw new IllegalArgumentException("Update affects 0 rows.");
-        }
+        ClientAdditionEntity clientAdditionEntity
+                = converter.convert(client, ClientAdditionEntity.class);
+        clientAdditionDao.update(clientAdditionEntity);
 
-        ClientConfigEntity clientConfigEntity = converter.convert(client, ClientConfigEntity.class);
-        if (clientConfigDao.update(clientConfigEntity) == 0) {
-            throw new IllegalArgumentException("Update affects 0 rows.");
-        }
+        ClientConfigEntity clientConfigEntity
+                = converter.convert(client, ClientConfigEntity.class);
+        clientConfigDao.update(clientConfigEntity);
 
-        ClientConnectEntity clientConnectEntity = converter.convert(client, ClientConnectEntity.class);
-        if (clientConnectDao.update(clientConnectEntity) == 0) {
-            throw new IllegalArgumentException("Update affects 0 rows.");
-        }
+        ClientConnectEntity clientConnectEntity
+                = converter.convert(client, ClientConnectEntity.class);
+        clientConnectDao.update(clientConnectEntity);
 
-        ClientAckEntity clientAckEntity = converter.convert(client, ClientAckEntity.class);
-        if (clientAckDao.update(clientAckEntity) == 0) {
-            throw new IllegalArgumentException("Update affects 0 rows.");
-        }
+        ClientAckEntity clientAckEntity
+                = converter.convert(client, ClientAckEntity.class);
+        clientAckDao.update(clientAckEntity);
+
+        ClientAlarmDataEntity clientAlarmDataEntity
+                = converter.convert(client, ClientAlarmDataEntity.class);
+        clientAlarmDataDao.update(clientAlarmDataEntity);
+
+        ClientAlarmBenchmarkEntity clientAlarmBenchmarkEntity
+                = converter.convert(client, ClientAlarmBenchmarkEntity.class);
+        clientAlarmBenchmarkDao.update(clientAlarmBenchmarkEntity);
+
+        ClientAlarmStrategyEntity clientAlarmStrategyEntity
+                = converter.convert(client, ClientAlarmStrategyEntity.class);
+        clientAlarmStrategyDao.update(clientAlarmStrategyEntity);
+
+        ClientAlarmMetaEntity clientAlarmMetaEntity
+                = converter.convert(client, ClientAlarmMetaEntity.class);
+        clientAlarmMetaDao.update(clientAlarmMetaEntity);
     }
 
     @Override
@@ -129,6 +173,10 @@ public class RemoteClientService implements PumaClientService {
         clientConfigDao.delete(clientName);
         clientConnectDao.delete(clientName);
         clientAckDao.delete(clientName);
+        clientAlarmDataDao.delete(clientName);
+        clientAlarmBenchmarkDao.delete(clientName);
+        clientAlarmStrategyDao.delete(clientName);
+        clientAlarmMetaDao.delete(clientName);
 
         return result;
     }
@@ -155,5 +203,21 @@ public class RemoteClientService implements PumaClientService {
 
     public void setClientAckDao(ClientAckDao clientAckDao) {
         this.clientAckDao = clientAckDao;
+    }
+
+    public void setClientAlarmDataDao(ClientAlarmDataDao clientAlarmDataDao) {
+        this.clientAlarmDataDao = clientAlarmDataDao;
+    }
+
+    public void setClientAlarmBenchmarkDao(ClientAlarmBenchmarkDao clientAlarmBenchmarkDao) {
+        this.clientAlarmBenchmarkDao = clientAlarmBenchmarkDao;
+    }
+
+    public void setClientAlarmStrategyDao(ClientAlarmStrategyDao clientAlarmStrategyDao) {
+        this.clientAlarmStrategyDao = clientAlarmStrategyDao;
+    }
+
+    public void setClientAlarmMetaDao(ClientAlarmMetaDao clientAlarmMetaDao) {
+        this.clientAlarmMetaDao = clientAlarmMetaDao;
     }
 }

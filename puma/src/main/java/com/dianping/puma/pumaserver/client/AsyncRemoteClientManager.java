@@ -5,9 +5,9 @@ import com.dianping.puma.common.model.Client;
 import com.dianping.puma.common.model.ClientAck;
 import com.dianping.puma.common.model.ClientConfig;
 import com.dianping.puma.common.model.ClientConnect;
-import com.dianping.puma.common.service.ClientAckService;
-import com.dianping.puma.common.service.ClientConfigService;
-import com.dianping.puma.common.service.ClientConnectService;
+import com.dianping.puma.common.service.PumaClientAckService;
+import com.dianping.puma.common.service.PumaClientConfigService;
+import com.dianping.puma.common.service.PumaClientConnectService;
 import com.dianping.puma.common.service.PumaClientService;
 import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.dianping.puma.pumaserver.client.exception.PumaClientManageException;
@@ -34,13 +34,13 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    ClientAckService clientAckService;
+    PumaClientAckService clientAckService;
 
     @Autowired
-    ClientConfigService clientConfigService;
+    PumaClientConfigService clientConfigService;
 
     @Autowired
-    ClientConnectService clientConnectService;
+    PumaClientConnectService clientConnectService;
 
     @Autowired
     ClientPositionService clientPositionService;
@@ -86,7 +86,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             try {
                 Client client = clientService.findByClientName(clientName);
                 if (client != null) {
-                    clientAckService.replace(clientName, clientAck);
+                    clientAckService.update(clientName, clientAck);
                 }
                 it.remove();
             } catch (Throwable t) {
@@ -104,7 +104,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             try {
                 Client client = clientService.findByClientName(clientName);
                 if (client != null) {
-                    clientConfigService.replace(clientName, clientConfig);
+                    clientConfigService.update(clientName, clientConfig);
                 }
                 it.remove();
             } catch (Throwable t) {
@@ -122,7 +122,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             try {
                 Client client = clientService.findByClientName(clientName);
                 if (client != null) {
-                    clientConnectService.replace(clientName, clientConnect);
+                    clientConnectService.update(clientName, clientConnect);
                 }
                 it.remove();
             } catch (Throwable t) {
@@ -156,15 +156,15 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
         clientConnectMap.put(clientName, clientConnect);
     }
 
-    public void setClientAckService(ClientAckService clientAckService) {
+    public void setClientAckService(PumaClientAckService clientAckService) {
         this.clientAckService = clientAckService;
     }
 
-    public void setClientConfigService(ClientConfigService clientConfigService) {
+    public void setClientConfigService(PumaClientConfigService clientConfigService) {
         this.clientConfigService = clientConfigService;
     }
 
-    public void setClientConnectService(ClientConnectService clientConnectService) {
+    public void setClientConnectService(PumaClientConnectService clientConnectService) {
         this.clientConnectService = clientConnectService;
     }
 

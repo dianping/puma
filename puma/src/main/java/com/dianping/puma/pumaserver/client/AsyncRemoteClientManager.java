@@ -1,6 +1,7 @@
 package com.dianping.puma.pumaserver.client;
 
 import com.dianping.puma.biz.service.ClientPositionService;
+import com.dianping.puma.common.model.Client;
 import com.dianping.puma.common.model.ClientAck;
 import com.dianping.puma.common.model.ClientConfig;
 import com.dianping.puma.common.model.ClientConnect;
@@ -83,7 +84,10 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             String clientName = entry.getKey();
             ClientAck clientAck = entry.getValue();
             try {
-                clientAckService.create(clientName, clientAck);
+                Client client = clientService.findByClientName(clientName);
+                if (client != null) {
+                    clientAckService.replace(clientName, clientAck);
+                }
                 it.remove();
             } catch (Throwable t) {
                 logger.error("Failed to flush puma client[{}] ack[{}].", clientName, clientAck, t);
@@ -98,7 +102,10 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             String clientName = entry.getKey();
             ClientConfig clientConfig = entry.getValue();
             try {
-                clientConfigService.create(clientName, clientConfig);
+                Client client = clientService.findByClientName(clientName);
+                if (client != null) {
+                    clientConfigService.replace(clientName, clientConfig);
+                }
                 it.remove();
             } catch (Throwable t) {
                 logger.error("Failed to flush puma client[{}] config[{}].", clientName, clientConfig, t);
@@ -113,7 +120,10 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             String clientName = entry.getKey();
             ClientConnect clientConnect = entry.getValue();
             try {
-                clientConnectService.create(clientName, clientConnect);
+                Client client = clientService.findByClientName(clientName);
+                if (client != null) {
+                    clientConnectService.replace(clientName, clientConnect);
+                }
                 it.remove();
             } catch (Throwable t) {
                 logger.error("Failed to flush puma client[{}] connect[{}].", clientName, clientConnect, t);

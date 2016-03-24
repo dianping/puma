@@ -7,8 +7,6 @@ import com.dianping.puma.common.model.Client;
 import com.dianping.puma.common.service.PumaClientService;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,38 +15,27 @@ import java.util.List;
  * Created by xiaotian.li on 16/2/22.
  * Email: lixiaotian07@gmail.com
  */
-@Service
 public class RemoteClientService implements PumaClientService {
 
-    @Autowired
-    Converter converter;
+    private Converter converter;
 
-    @Autowired
-    ClientDao clientDao;
+    private ClientDao clientDao;
 
-    @Autowired
-    ClientAdditionDao clientAdditionDao;
+    private ClientAdditionDao clientAdditionDao;
 
-    @Autowired
-    ClientConfigDao clientConfigDao;
+    private ClientConfigDao clientConfigDao;
 
-    @Autowired
-    ClientConnectDao clientConnectDao;
+    private ClientConnectDao clientConnectDao;
 
-    @Autowired
-    ClientAckDao clientAckDao;
+    private ClientAckDao clientAckDao;
 
-    @Autowired
-    ClientAlarmDataDao clientAlarmDataDao;
+    private ClientAlarmDataDao clientAlarmDataDao;
 
-    @Autowired
-    ClientAlarmBenchmarkDao clientAlarmBenchmarkDao;
+    private ClientAlarmBenchmarkDao clientAlarmBenchmarkDao;
 
-    @Autowired
-    ClientAlarmStrategyDao clientAlarmStrategyDao;
+    private ClientAlarmStrategyDao clientAlarmStrategyDao;
 
-    @Autowired
-    ClientAlarmMetaDao clientAlarmMetaDao;
+    private ClientAlarmMetaDao clientAlarmMetaDao;
 
     @Override
     @Transactional(value = "pumaTransactionManager", rollbackFor = Throwable.class)

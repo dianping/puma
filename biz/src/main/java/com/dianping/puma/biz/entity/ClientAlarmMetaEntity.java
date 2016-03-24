@@ -8,13 +8,19 @@ public class ClientAlarmMetaEntity extends BaseEntity {
 
     private String clientName;
 
-    private String emails;
+    private boolean alarmByLog;
 
     private boolean alarmByEmail;
 
+    private String emailRecipients;
+
     private boolean alarmByWeChat;
 
+    private String weChatRecipients;
+
     private boolean alarmBySms;
+
+    private String smsRecipients;
 
     public String getClientName() {
         return clientName;
@@ -24,12 +30,12 @@ public class ClientAlarmMetaEntity extends BaseEntity {
         this.clientName = clientName;
     }
 
-    public String getEmails() {
-        return emails;
+    public boolean isAlarmByLog() {
+        return alarmByLog;
     }
 
-    public void setEmails(String emails) {
-        this.emails = emails;
+    public void setAlarmByLog(boolean alarmByLog) {
+        this.alarmByLog = alarmByLog;
     }
 
     public boolean isAlarmByEmail() {
@@ -40,6 +46,14 @@ public class ClientAlarmMetaEntity extends BaseEntity {
         this.alarmByEmail = alarmByEmail;
     }
 
+    public String getEmailRecipients() {
+        return emailRecipients;
+    }
+
+    public void setEmailRecipients(String emailRecipients) {
+        this.emailRecipients = emailRecipients;
+    }
+
     public boolean isAlarmByWeChat() {
         return alarmByWeChat;
     }
@@ -48,11 +62,27 @@ public class ClientAlarmMetaEntity extends BaseEntity {
         this.alarmByWeChat = alarmByWeChat;
     }
 
+    public String getWeChatRecipients() {
+        return weChatRecipients;
+    }
+
+    public void setWeChatRecipients(String weChatRecipients) {
+        this.weChatRecipients = weChatRecipients;
+    }
+
     public boolean isAlarmBySms() {
         return alarmBySms;
     }
 
     public void setAlarmBySms(boolean alarmBySms) {
         this.alarmBySms = alarmBySms;
+    }
+
+    public String getSmsRecipients() {
+        return smsRecipients;
+    }
+
+    public void setSmsRecipients(String smsRecipients) {
+        this.smsRecipients = smsRecipients;
     }
 }

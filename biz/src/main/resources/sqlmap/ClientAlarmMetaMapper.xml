@@ -18,18 +18,24 @@
         ClientAlarmMeta
         (
         ClientName,
-        Emails,
+        AlarmByLog,
         AlarmByEmail,
+        EmailRecipients,
         AlarmByWeChat,
-        AlarmBySms
+        WeChatRecipients,
+        AlarmBySms,
+        SmsRecipients
         )
         VALUES
         (
         #{clientName},
-        #{recipients},
+        #{alarmByLog},
         #{alarmByEmail},
+        #{emailRecipients},
         #{alarmByWeChat},
-        #{alarmBySms}
+        #{weChatRecipients},
+        #{alarmBySms},
+        #{smsRecipients}
         )
     </insert>
 
@@ -37,10 +43,13 @@
         UPDATE
         ClientAlarmMeta
         SET
-        Emails = #{recipients},
+        AlarmByLog = #{alarmByLog},
         AlarmByEmail = #{alarmByEmail},
+        EmailRecipients = #{emailRecipients},
         AlarmByWeChat = #{alarmByWeChat},
-        AlarmBySms = #{alarmBySms}
+        WeChatRecipients = #{weChatRecipients},
+        AlarmBySms = #{alarmBySms},
+        SmsRecipients = #{smsRecipients}
         WHERE
         ClientName = #{clientName}
     </update>

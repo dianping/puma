@@ -19,16 +19,20 @@
         (
         ClientName,
         PullTimeDelayAlarm,
+        MinPullTimeDelayInSecond,
         MaxPullTimeDelayInSecond,
         PushTimeDelayAlarm,
+        MinPushTimeDelayInSecond,
         MaxPushTimeDelayInSecond
         )
         VALUES
         (
         #{clientName},
-        #{pullTimeDelayAlarm}
+        #{pullTimeDelayAlarm},
+        #{minPullTimeDelayInSecond},
         #{maxPullTimeDelayInSecond},
         #{pushTimeDelayAlarm},
+        #{minPushTimeDelayInSecond},
         #{maxPushTimeDelayInSecond}
         )
     </insert>

@@ -29,6 +29,14 @@ public class LinearAlarmRegulatorTest {
         regulator.start();
     }
 
+    /**
+     * 测试第一次状态异常一定能够告警.
+     *
+     * 线性告警策略: 100,100,...
+     * 第一次,状态异常,时刻0, 告警
+     *
+     * @throws Exception
+     */
     @Test
     public void test0() throws Exception {
         AlarmResult result = new AlarmResult();
@@ -37,31 +45,23 @@ public class LinearAlarmRegulatorTest {
         strategy.setLinearAlarmIntervalInSecond(100);
 
         result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(200L);
+        when(clock.getTimestamp()).thenReturn(0L);
         result = regulator.regulate("test", result, strategy);
         assertTrue(result.isAlarm());
-
-        result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(290L);
-        result = regulator.regulate("test", result, strategy);
-        assertFalse(result.isAlarm());
-
-        result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(310L);
-        result = regulator.regulate("test", result, strategy);
-        assertTrue(result.isAlarm());
-
-        result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(500L);
-        result = regulator.regulate("test", result, strategy);
-        assertTrue(result.isAlarm());
-
-        result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(550L);
-        result = regulator.regulate("test", result, strategy);
-        assertFalse(result.isAlarm());
     }
 
+    /**
+     * 测试多次告警需要符合线性告警策略.
+     *
+     * 线性告警策略: 100,100,...
+     * 第一次,状态异常,时刻0,告警.
+     * 第二次,状态异常,时刻50,不告警.
+     * 第三次,状态异常,时刻150,告警.
+     * 第四次,状态异常,时刻200,不告警.
+     * 第五次,状态异常,时刻300,告警.
+     *
+     * @throws Exception
+     */
     @Test
     public void test1() throws Exception {
         AlarmResult result = new AlarmResult();
@@ -69,32 +69,74 @@ public class LinearAlarmRegulatorTest {
         LinearAlarmStrategy strategy = new LinearAlarmStrategy();
         strategy.setLinearAlarmIntervalInSecond(100);
 
-        result.setAlarm(false);
+        result.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(0L);
+        result = regulator.regulate("test", result, strategy);
+        assertTrue(result.isAlarm());
+
+        result.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(50L);
+        result = regulator.regulate("test", result, strategy);
+        assertFalse(result.isAlarm());
+
+        result.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(150L);
+        result = regulator.regulate("test", result, strategy);
+        assertTrue(result.isAlarm());
+
+        result.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(200L);
         result = regulator.regulate("test", result, strategy);
         assertFalse(result.isAlarm());
 
         result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(290L);
+        when(clock.getTimestamp()).thenReturn(300L);
         result = regulator.regulate("test", result, strategy);
         assertTrue(result.isAlarm());
+    }
+
+    /**
+     * 测试正常状态可以清楚告警状态.
+     *
+     * 线性告警策略: 100,100,...
+     * 第一次,状态异常,时刻0,告警.
+     * 第二次,状态正常,时刻50,不告警.
+     * 第三次,状态异常,时刻60,告警.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test2() throws Exception {
+        AlarmResult result = new AlarmResult();
+
+        LinearAlarmStrategy strategy = new LinearAlarmStrategy();
+        strategy.setLinearAlarmIntervalInSecond(100);
 
         result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(310L);
-        result = regulator.regulate("test", result, strategy);
-        assertFalse(result.isAlarm());
-
-        result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(500L);
+        when(clock.getTimestamp()).thenReturn(0L);
         result = regulator.regulate("test", result, strategy);
         assertTrue(result.isAlarm());
 
         result.setAlarm(false);
-        when(clock.getTimestamp()).thenReturn(550L);
+        when(clock.getTimestamp()).thenReturn(50L);
         result = regulator.regulate("test", result, strategy);
         assertFalse(result.isAlarm());
+
+        result.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(60L);
+        result = regulator.regulate("test", result, strategy);
+        assertTrue(result.isAlarm());
     }
 
+    /**
+     * 测试状态正常一直不告警.
+     *
+     * 线性告警策略: 100,100,...
+     * 第一次,状态正常,时刻0,不告警.
+     * 第二次,状态正常,时刻50,不告警.
+     *
+     * @throws Exception
+     */
     @Test
     public void test3() throws Exception {
         AlarmResult result = new AlarmResult();
@@ -102,32 +144,61 @@ public class LinearAlarmRegulatorTest {
         LinearAlarmStrategy strategy = new LinearAlarmStrategy();
         strategy.setLinearAlarmIntervalInSecond(100);
 
+        result.setAlarm(false);
+        when(clock.getTimestamp()).thenReturn(0L);
+        result = regulator.regulate("test", result, strategy);
+        assertFalse(result.isAlarm());
+
+        result.setAlarm(false);
+        when(clock.getTimestamp()).thenReturn(50L);
+        result = regulator.regulate("test", result, strategy);
+        assertFalse(result.isAlarm());
+    }
+
+    /**
+     * 测试多个名字告警.
+     *
+     * 线性告警策略: 100,100,...
+     * 第一次,名字a,状态异常,时刻0,告警.
+     * 第二次,名字b,状态异常,时刻50,告警.
+     * 第三次,名字a,状态异常,时刻120,告警.
+     * 第四次,名字b,状态异常,时刻200,告警.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test4() throws Exception {
+        AlarmResult result = new AlarmResult();
+
+        LinearAlarmStrategy strategy = new LinearAlarmStrategy();
+        strategy.setLinearAlarmIntervalInSecond(100);
+
+        result.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(0L);
+        result = regulator.regulate("a", result, strategy);
+        assertTrue(result.isAlarm());
+
+        result.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(50L);
+        result = regulator.regulate("b", result, strategy);
+        assertTrue(result.isAlarm());
+
+        result.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(120L);
+        result = regulator.regulate("a", result, strategy);
+        assertTrue(result.isAlarm());
+
         result.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(200L);
-        result = regulator.regulate("test", result, strategy);
-        assertTrue(result.isAlarm());
-
-        result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(290L);
-        result = regulator.regulate("abcd", result, strategy);
-        assertTrue(result.isAlarm());
-
-        result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(310L);
-        result = regulator.regulate("test", result, strategy);
-        assertTrue(result.isAlarm());
-
-        result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(500L);
-        result = regulator.regulate("abcd", result, strategy);
-        assertTrue(result.isAlarm());
-
-        result.setAlarm(true);
-        when(clock.getTimestamp()).thenReturn(550L);
-        result = regulator.regulate("text", result, strategy);
+        result = regulator.regulate("b", result, strategy);
         assertTrue(result.isAlarm());
     }
 
+    /**
+     * 测试非线性策略会抛出异常.
+     *
+     * @throws Exception
+     */
     @Test(expected = PumaAlarmRegulateUnsupportedException.class)
     public void testException0() throws Exception {
         AlarmResult result = new AlarmResult();

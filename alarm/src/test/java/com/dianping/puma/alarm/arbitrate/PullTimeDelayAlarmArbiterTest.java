@@ -26,6 +26,12 @@ public class PullTimeDelayAlarmArbiterTest {
         arbiter.start();
     }
 
+    /**
+     * 测试结果落在范围之内的情况.
+     * 结果:1000, 范围:10-10000, 不告警.
+     *
+     * @throws Exception
+     */
     @Test
     public void test0() throws Exception {
         PullTimeDelayAlarmData data = new PullTimeDelayAlarmData();
@@ -40,22 +46,14 @@ public class PullTimeDelayAlarmArbiterTest {
         assertFalse(result.isAlarm());
     }
 
+    /**
+     * 测试结果比范围小的情况.
+     * 结果:1000, 范围:2000-10000, 告警.
+     *
+     * @throws Exception
+     */
     @Test
     public void test1() throws Exception {
-        PullTimeDelayAlarmData data = new PullTimeDelayAlarmData();
-        data.setPullTimeDelayInSecond(1000);
-
-        PullTimeDelayAlarmBenchmark benchmark = new PullTimeDelayAlarmBenchmark();
-        benchmark.setPullTimeDelayAlarm(true);
-        benchmark.setMinPullTimeDelayInSecond(1000);
-        benchmark.setMaxPullTimeDelayInSecond(1000);
-
-        AlarmResult result = arbiter.arbitrate(data, benchmark);
-        assertFalse(result.isAlarm());
-    }
-
-    @Test
-    public void test2() throws Exception {
         PullTimeDelayAlarmData data = new PullTimeDelayAlarmData();
         data.setPullTimeDelayInSecond(1000);
 
@@ -68,8 +66,14 @@ public class PullTimeDelayAlarmArbiterTest {
         assertTrue(result.isAlarm());
     }
 
+    /**
+     * 测试结果比范围大的情况.
+     * 结果:1000, 范围:10-100, 告警.
+     *
+     * @throws Exception
+     */
     @Test
-    public void test3() throws Exception {
+    public void test2() throws Exception {
         PullTimeDelayAlarmData data = new PullTimeDelayAlarmData();
         data.setPullTimeDelayInSecond(1000);
 
@@ -82,8 +86,14 @@ public class PullTimeDelayAlarmArbiterTest {
         assertTrue(result.isAlarm());
     }
 
+    /**
+     * 测试改结果不需要告警的情况.
+     * 结果:1000, 范围:10-100, 但是结果不需要告警, 不告警.
+     *
+     * @throws Exception
+     */
     @Test
-    public void test4() throws Exception {
+    public void test3() throws Exception {
         PullTimeDelayAlarmData data = new PullTimeDelayAlarmData();
         data.setPullTimeDelayInSecond(1000);
 
@@ -96,6 +106,11 @@ public class PullTimeDelayAlarmArbiterTest {
         assertFalse(result.isAlarm());
     }
 
+    /**
+     * 测试非拉取时间数据是否会抛出异常.
+     *
+     * @throws Exception
+     */
     @Test(expected = PumaAlarmArbitrateUnsupportedException.class)
     public void testException0() throws Exception {
         PushTimeDelayAlarmData data = new PushTimeDelayAlarmData();
@@ -105,6 +120,11 @@ public class PullTimeDelayAlarmArbiterTest {
         arbiter.arbitrate(data, benchmark);
     }
 
+    /**
+     * 测试非拉取时间范围是否会抛出异常.
+     *
+     * @throws Exception
+     */
     @Test(expected = PumaAlarmArbitrateUnsupportedException.class)
     public void testException1() throws Exception {
         PullTimeDelayAlarmData data = new PullTimeDelayAlarmData();

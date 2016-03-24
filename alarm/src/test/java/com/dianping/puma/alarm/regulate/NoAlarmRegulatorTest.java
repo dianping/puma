@@ -23,6 +23,11 @@ public class NoAlarmRegulatorTest {
         regulator.start();
     }
 
+    /**
+     * 测试状态异常是否能够不告警.
+     *
+     * @throws Exception
+     */
     @Test
     public void test0() throws Exception {
         AlarmResult result = new AlarmResult();
@@ -34,6 +39,11 @@ public class NoAlarmRegulatorTest {
         assertFalse(result.isAlarm());
     }
 
+    /**
+     * 测试状态正常是否能够不告警.
+     *
+     * @throws Exception
+     */
     @Test
     public void test1() throws Exception {
         AlarmResult result = new AlarmResult();
@@ -45,6 +55,11 @@ public class NoAlarmRegulatorTest {
         assertFalse(result.isAlarm());
     }
 
+    /**
+     * 测试非告警策略是否能抛出异常.
+     *
+     * @throws Exception
+     */
     @Test(expected = PumaAlarmRegulateUnsupportedException.class)
     public void testException0() throws Exception {
         AlarmResult result = new AlarmResult();

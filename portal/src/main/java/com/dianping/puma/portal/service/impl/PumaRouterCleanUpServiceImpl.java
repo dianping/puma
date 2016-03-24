@@ -1,8 +1,8 @@
 package com.dianping.puma.portal.service.impl;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.common.entity.PumaServerEntity;
-import com.dianping.puma.common.entity.PumaServerTargetEntity;
+import com.dianping.puma.common.model.PumaServer;
+import com.dianping.puma.common.model.PumaServerTarget;
 import com.dianping.puma.common.service.PumaServerService;
 import com.dianping.puma.common.service.PumaServerTargetService;
 import com.dianping.puma.portal.service.PumaRouterCleanUpService;
@@ -56,17 +56,17 @@ public class PumaRouterCleanUpServiceImpl implements PumaRouterCleanUpService {
                     }
 
                     String serverIP = StringUtils.substringBefore(server, ":");
-                    PumaServerEntity serverEntity = pumaServerService.findByHost(serverIP);
-                    if (serverEntity == null || !serverEntity.checkAlive()) {
+                    PumaServer pumaServer = pumaServerService.findByHost(serverIP);
+                    if (pumaServer == null || !pumaServer.checkAlive()) {
                         needToUnregistry.add(server);
                         continue;
                     }
 
-                    List<PumaServerTargetEntity> targets = pumaServerTargetService.findByServerHost(serverEntity.getHost());
-                    boolean anyMatches = FluentIterable.from(targets).anyMatch(new Predicate<PumaServerTargetEntity>() {
+                    List<PumaServerTarget> pumaServerTargets = pumaServerTargetService.findByServerHost(pumaServer.getHost());
+                    boolean anyMatches = FluentIterable.from(pumaServerTargets).anyMatch(new Predicate<PumaServerTarget>() {
                         @Override
-                        public boolean apply(PumaServerTargetEntity input) {
-                            return db.equals(input.getTargetDb());
+                        public boolean apply(PumaServerTarget pumaServerTarget) {
+                            return db.equals(pumaServerTarget.getTargetDb());
                         }
                     });
 

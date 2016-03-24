@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.common.entity.ClientPositionEntity;
+import com.dianping.puma.biz.entity.ClientPositionEntity;
 
 import java.util.List;
 

@@ -1,62 +1,88 @@
 package com.dianping.puma.biz.service;
 
+import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.PumaServerDao;
-import com.dianping.puma.common.entity.PumaServerEntity;
-import com.dianping.puma.common.service.PumaServerService;
+import com.dianping.puma.biz.entity.PumaServerEntity;
 import com.dianping.puma.biz.util.IPUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.dianping.puma.common.model.PumaServer;
+import com.dianping.puma.common.service.PumaServerService;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Service("pumaServerService")
 public class PumaServerServiceImpl implements PumaServerService {
 
-    @Autowired
-    PumaServerDao pumaServerDao;
+    private Converter converter;
+
+    private PumaServerDao pumaServerDao;
 
     @Override
-    public PumaServerEntity find(String name) {
-        return pumaServerDao.findByName(name);
+    public PumaServer find(String name) {
+        PumaServerEntity entity = pumaServerDao.findByName(name);
+        return converter.convert(entity, PumaServer.class);
     }
 
     @Override
-    public PumaServerEntity findById(int id) {
-        return pumaServerDao.findById(id);
+    public PumaServer findById(int id) {
+        PumaServerEntity entity = pumaServerDao.findById(id);
+        return converter.convert(entity, PumaServer.class);
     }
 
     @Override
-    public PumaServerEntity findByHost(String host) {
-        return pumaServerDao.findByHost(host);
+    public PumaServer findByHost(String host) {
+        PumaServerEntity entity = pumaServerDao.findByHost(host);
+        return converter.convert(entity, PumaServer.class);
     }
 
     @Override
-    public List<PumaServerEntity> findOnCurrentServer() {
-        List<PumaServerEntity> result = new ArrayList<PumaServerEntity>();
+    public List<PumaServer> findOnCurrentServer() {
+        List<PumaServer> result = new ArrayList<PumaServer>();
         for (String host : IPUtils.getNoLoopbackIP4Addresses()) {
-            PumaServerEntity entity = findByHost(host);
-            if (entity != null) {
-                result.add(entity);
+            PumaServer pumaServer = findByHost(host);
+            if (pumaServer != null) {
+                result.add(pumaServer);
             }
         }
         return result;
     }
 
     @Override
-    public List<PumaServerEntity> findAll() {
-        return pumaServerDao.findAll();
+    public List<PumaServer> findAll() {
+        return FluentIterable
+                .from(pumaServerDao.findAll())
+                .transform(new Function<PumaServerEntity, PumaServer>() {
+                    @Override
+                    public PumaServer apply(PumaServerEntity entity) {
+                        return converter.convert(entity, PumaServer.class);
+                    }
+                }).toList();
     }
 
     @Override
-    public List<PumaServerEntity> findAllAlive() {
-        return pumaServerDao.findAllAlive();
+    public List<PumaServer> findAllAlive() {
+        return FluentIterable
+                .from(pumaServerDao.findAllAlive())
+                .transform(new Function<PumaServerEntity, PumaServer>() {
+                    @Override
+                    public PumaServer apply(PumaServerEntity entity) {
+                        return converter.convert(entity, PumaServer.class);
+                    }
+                }).toList();
     }
 
     @Override
-    public List<PumaServerEntity> findByPage(int page, int pageSize) {
-        return pumaServerDao.findByPage((page - 1) * pageSize, pageSize);
+    public List<PumaServer> findByPage(int page, int pageSize) {
+        return FluentIterable
+                .from(pumaServerDao.findByPage((page - 1) * pageSize, pageSize))
+                .transform(new Function<PumaServerEntity, PumaServer>() {
+                    @Override
+                    public PumaServer apply(PumaServerEntity entity) {
+                        return converter.convert(entity, PumaServer.class);
+                    }
+                }).toList();
     }
 
     @Override
@@ -66,27 +92,29 @@ public class PumaServerServiceImpl implements PumaServerService {
 
     @Override
     public void registerByHost(String host) {
-        PumaServerEntity server = findByHost(host);
-        if (server == null) {
-            server = new PumaServerEntity();
-            server.setName(host);
-            server.setHost(host);
-            server.setPort(4040);
-            create(server);
+        PumaServer pumaServer = findByHost(host);
+        if (pumaServer == null) {
+            pumaServer = new PumaServer();
+            pumaServer.setName(host);
+            pumaServer.setHost(host);
+            pumaServer.setPort(4040);
+            create(pumaServer);
         } else {
-            server.setUpdateTime(new Date());
-            update(server);
+            pumaServer.setUpdateTime(new Date());
+            update(pumaServer);
         }
     }
 
     @Override
-    public void create(PumaServerEntity pumaServer) {
-        pumaServerDao.insert(pumaServer);
+    public void create(PumaServer pumaServer) {
+        PumaServerEntity entity = converter.convert(pumaServer, PumaServerEntity.class);
+        pumaServerDao.insert(entity);
     }
 
     @Override
-    public void update(PumaServerEntity pumaServer) {
-        pumaServerDao.update(pumaServer);
+    public void update(PumaServer pumaServer) {
+        PumaServerEntity entity = converter.convert(pumaServer, PumaServerEntity.class);
+        pumaServerDao.update(entity);
     }
 
     @Override
@@ -97,5 +125,13 @@ public class PumaServerServiceImpl implements PumaServerService {
     @Override
     public void remove(int id) {
         pumaServerDao.delete(id);
+    }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public void setPumaServerDao(PumaServerDao pumaServerDao) {
+        this.pumaServerDao = pumaServerDao;
     }
 }

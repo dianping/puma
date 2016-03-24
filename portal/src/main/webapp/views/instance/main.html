@@ -1,0 +1,46 @@
+<script type="text/ng-template" id="target.html">
+    <div class="modal-header">
+        <h3 class="modal-title">{{item.name}}</h3>
+    </div>
+    <div class="modal-body">
+        <ul>
+            <li ng-repeat="table in item.target.tables | orderBy:'schemaName'">
+                {{table.schemaName}}.{{table.tableName}}
+            </li>
+        </ul>
+    </div>
+</script>
+
+<table role="grid" class="table table-striped table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>Server</th>
+        <th>Name</th>
+        <th>Store Qps</th>
+        <th>I / U / D / DDL</th>
+        <th>BinlogInfo</th>
+        <th>Target</th>
+        <th>Other</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="server in servers | orderBy:'server'">
+        <td>{{server.server}}</td>
+        <td><span data-html="true" data-toggle="popover" data-placement="top"
+                  data-content="Host : {{server.host}} <br />Port  : {{server.port}}">{{server.name}}</span>
+        </td>
+        <td>{{server.storeQps}}</td>
+        <td>{{server.totalInsertEvent}} / {{server.totalUpdateEvent}} /
+            {{server.totalDeleteEvent}} / {{server.totalDdlEvent}}
+        </td>
+        <td><span data-html="true" data-toggle="popover" data-placement="top"
+                  data-content="ServerId : {{server.binlogInfo.serverId}} <br />BinlogFile  : {{server.binlogInfo.binlogFile}} <br />BinlogPosition   : {{server.binlogInfo.binlogPosition }} <br />EventIndex   : {{server.binlogInfo.eventIndex }} <br />Timestamp   : {{server.binlogInfo.timestamp*1000 }}">{{server.binlogInfo.timestamp * 1000 | toLocaleString}}</span>
+        </td>
+        <td><a href="" ng-click="openTarget(server)" data-html="true" data-toggle="popover"
+               data-placement="top" data-content="{{server.targetStr}}">show</a></td>
+        <td><span data-html="true" data-toggle="popover" data-placement="left"
+                  data-content="BucketDate : {{server.bucketDate}} <br />BucketNumber : {{server.bucketNumber}} <br />TotalParsedEvent : {{server.totalParsedEvent}} <br />TotalStoreCount : {{server.totalStoreCount }} <br />TotalStoreBytes : {{server.totalStoreBytes}}">{{server.totalParsedEvent }}</span>
+        </td>
+    </tr>
+    </tbody>
+</table>

@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.common.entity.PumaServerTargetEntity;
+import com.dianping.puma.biz.entity.PumaServerTargetEntity;
 
 import java.util.List;
 

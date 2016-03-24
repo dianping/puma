@@ -1,33 +1,32 @@
 package com.dianping.puma.biz.service;
 
+import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.PumaServerDao;
 import com.dianping.puma.biz.dao.PumaServerTargetDao;
 import com.dianping.puma.biz.dao.PumaTargetDao;
-import com.dianping.puma.common.entity.PumaServerEntity;
-import com.dianping.puma.common.entity.PumaServerTargetEntity;
-import com.dianping.puma.common.entity.PumaTargetEntity;
+import com.dianping.puma.biz.entity.PumaServerEntity;
+import com.dianping.puma.biz.entity.PumaServerTargetEntity;
+import com.dianping.puma.biz.entity.PumaTargetEntity;
+import com.dianping.puma.common.model.PumaServerTarget;
 import com.dianping.puma.common.service.PumaServerTargetService;
 import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public class PumaServerTargetServiceImpl implements PumaServerTargetService {
 
-    @Autowired
-    PumaServerTargetDao pumaServerTargetDao;
+    private Converter converter;
 
-    @Autowired
-    PumaTargetDao pumaTargetDao;
+    private PumaServerTargetDao pumaServerTargetDao;
 
-    @Autowired
-    PumaServerDao pumaServerDao;
+    private PumaTargetDao pumaTargetDao;
+
+    private PumaServerDao pumaServerDao;
 
     @Override
-    public List<PumaServerTargetEntity> findByDatabase(String database) {
+    public List<PumaServerTarget> findByDatabase(String database) {
         List<PumaTargetEntity> pumaTargets = pumaTargetDao.findByDatabase(database);
 
         List<String> tables = Lists.transform(pumaTargets, new Function<PumaTargetEntity, String>() {
@@ -37,8 +36,16 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
             }
         });
 
-        List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetDao.findByDatabase(database);
-        for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
+        List<PumaServerTarget> pumaServerTargets = FluentIterable
+                .from(pumaServerTargetDao.findByDatabase(database))
+                .transform(new Function<PumaServerTargetEntity, PumaServerTarget>() {
+                    @Override
+                    public PumaServerTarget apply(PumaServerTargetEntity entity) {
+                        return converter.convert(entity, PumaServerTarget.class);
+                    }
+                }).toList();
+
+        for (PumaServerTarget pumaServerTarget: pumaServerTargets) {
             pumaServerTarget.setTables(tables);
 
             String serverName = pumaServerTarget.getServerName();
@@ -50,7 +57,7 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
     }
 
     @Override
-    public List<PumaServerTargetEntity> findByServerHost(String host) {
+    public List<PumaServerTarget> findByServerHost(String host) {
         PumaServerEntity pumaServer = pumaServerDao.findByHost(host);
         if (pumaServer == null) {
             return Lists.newArrayList();
@@ -58,8 +65,16 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
 
         String serverName = pumaServer.getName();
 
-        List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetDao.findByServerName(serverName);
-        for (PumaServerTargetEntity pumaServerTarget: pumaServerTargets) {
+        List<PumaServerTarget> pumaServerTargets = FluentIterable
+                .from(pumaServerTargetDao.findByServerName(serverName))
+                .transform(new Function<PumaServerTargetEntity, PumaServerTarget>() {
+                    @Override
+                    public PumaServerTarget apply(PumaServerTargetEntity entity) {
+                        return converter.convert(entity, PumaServerTarget.class);
+                    }
+                }).toList();
+
+        for (PumaServerTarget pumaServerTarget: pumaServerTargets) {
             pumaServerTarget.setServerHost(host);
 
             String database = pumaServerTarget.getTargetDb();
@@ -78,22 +93,41 @@ public class PumaServerTargetServiceImpl implements PumaServerTargetService {
     }
 
     @Override
-    public int create(PumaServerTargetEntity entity) {
+    public int create(PumaServerTarget pumaServerTarget) {
+        PumaServerTargetEntity entity = converter.convert(pumaServerTarget, PumaServerTargetEntity.class);
         return pumaServerTargetDao.insert(entity);
     }
 
     @Override
-    public int replace(PumaServerTargetEntity entity) {
+    public int replace(PumaServerTarget pumaServerTarget) {
+        PumaServerTargetEntity entity = converter.convert(pumaServerTarget, PumaServerTargetEntity.class);
         return pumaServerTargetDao.replace(entity);
     }
 
     @Override
-    public int update(PumaServerTargetEntity entity) {
+    public int update(PumaServerTarget pumaServerTarget) {
+        PumaServerTargetEntity entity = converter.convert(pumaServerTarget, PumaServerTargetEntity.class);
         return pumaServerTargetDao.update(entity);
     }
 
     @Override
     public int remove(int id) {
         return pumaServerTargetDao.delete(id);
+    }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public void setPumaServerTargetDao(PumaServerTargetDao pumaServerTargetDao) {
+        this.pumaServerTargetDao = pumaServerTargetDao;
+    }
+
+    public void setPumaTargetDao(PumaTargetDao pumaTargetDao) {
+        this.pumaTargetDao = pumaTargetDao;
+    }
+
+    public void setPumaServerDao(PumaServerDao pumaServerDao) {
+        this.pumaServerDao = pumaServerDao;
     }
 }

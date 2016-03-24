@@ -1,7 +1,7 @@
 package com.dianping.puma.parser;
 
-import com.dianping.puma.common.entity.PumaTaskStateEntity;
-import com.dianping.puma.common.entity.SrcDbEntity;
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.core.codec.RawEventCodec;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;

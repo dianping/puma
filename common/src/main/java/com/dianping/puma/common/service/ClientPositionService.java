@@ -1,6 +1,6 @@
 package com.dianping.puma.common.service;
 
-import com.dianping.puma.common.entity.ClientPositionEntity;
+import com.dianping.puma.common.model.ClientPosition;
 
 /**
  * Dozer @ 7/15/15
@@ -8,9 +8,10 @@ import com.dianping.puma.common.entity.ClientPositionEntity;
  * http://www.dozer.cc
  */
 public interface ClientPositionService {
-    ClientPositionEntity find(String clientName);
 
-    void update(ClientPositionEntity clientPositionEntity);
+    ClientPosition find(String clientName);
+
+    void update(ClientPosition clientPosition);
 
     void flush();
 

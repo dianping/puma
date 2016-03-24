@@ -1,15 +1,14 @@
 package com.dianping.puma.biz.service;
 
+import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientPositionDao;
-import com.dianping.puma.common.entity.ClientPositionEntity;
+import com.dianping.puma.biz.entity.ClientPositionEntity;
+import com.dianping.puma.common.model.ClientPosition;
 import com.dianping.puma.common.service.ClientPositionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,37 +19,38 @@ import java.util.concurrent.ConcurrentHashMap;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-@Service
 public class ClientPositionServiceImpl implements ClientPositionService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ClientPositionServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(ClientPositionServiceImpl.class);
 
-    @Autowired
+    private Converter converter;
+
     private ClientPositionDao clientPositionDao;
 
-    private Map<String, ClientPositionEntity> positionEntityMap = new ConcurrentHashMap<String, ClientPositionEntity>();
+    private Map<String, ClientPosition> positionMap = new ConcurrentHashMap<String, ClientPosition>();
 
     @Override
-    public ClientPositionEntity find(String clientName) {
-        return clientPositionDao.findByClientName(clientName);
+    public ClientPosition find(String clientName) {
+        ClientPositionEntity entity = clientPositionDao.findByClientName(clientName);
+        return converter.convert(entity, ClientPosition.class);
     }
 
     @Override
-    public void update(ClientPositionEntity clientPositionEntity) {
-        positionEntityMap.put(clientPositionEntity.getClientName(), clientPositionEntity);
+    public void update(ClientPosition clientPosition) {
+        positionMap.put(clientPosition.getClientName(), clientPosition);
     }
 
     @Scheduled(fixedDelay = 5000)
     public void flush() {
-        Set<String> keys = positionEntityMap.keySet();
+        Set<String> keys = positionMap.keySet();
         for (String key : keys) {
-            ClientPositionEntity entity = positionEntityMap.remove(key);
-            if (entity == null) {
+            ClientPosition clientPosition = positionMap.remove(key);
+            if (clientPosition == null) {
                 continue;
             }
 
             try {
-                entity.setUpdateTime(new Date());
+                ClientPositionEntity entity = converter.convert(clientPosition, ClientPositionEntity.class);
                 int updateRow = clientPositionDao.update(entity);
                 if (updateRow == 0) {
                     clientPositionDao.insert(entity);
@@ -66,5 +66,13 @@ public class ClientPositionServiceImpl implements ClientPositionService {
         for (ClientPositionEntity entity : clients) {
             clientPositionDao.delete(entity.getId());
         }
+    }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public void setClientPositionDao(ClientPositionDao clientPositionDao) {
+        this.clientPositionDao = clientPositionDao;
     }
 }

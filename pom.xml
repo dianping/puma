@@ -10,8 +10,8 @@
 
     <modules>
         <module>puma</module>
-        <module>puma-client</module>
-        <module>puma-core</module>
+        <module>client</module>
+        <module>core</module>
         <module>common</module>
         <module>biz</module>
         <module>extension</module>

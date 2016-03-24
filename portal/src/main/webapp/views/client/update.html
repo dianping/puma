@@ -1,0 +1,201 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Puma客户端</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Puma客户端修改
+            </div>
+
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form class="form-horizontal" role="form">
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="clientName">名称</label>
+
+                                <div class="col-lg-6">
+                                    <input id="clientName" type="text" class="form-control" placeholder=""
+                                           ng-model="client.clientName" readonly="readonly">
+                                </div>
+                            </div>
+
+                            <hr/>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="groupName">组名</label>
+
+                                <div class="col-lg-6">
+                                    <input id="groupName" type="text" class="form-control" placeholder=""
+                                           ng-model="client.groupName">
+                                </div>
+                            </div>
+
+                            <hr/>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="server-id">起始位置</label>
+
+                                <div class="col-lg-6">
+                                    <input id="server-id" type="text" class="form-control"
+                                           placeholder="server-id" ng-model="client.serverId">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="filename"></label>
+
+                                <div class="col-lg-6">
+                                    <input id="filename" type="text" class="form-control"
+                                           placeholder="日志文件" ng-model="client.filename">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="position"></label>
+
+                                <div class="col-lg-6">
+                                    <input id="position" type="text" class="form-control"
+                                           placeholder="日志位置" ng-model="client.position">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="timestamp" class="col-lg-3 control-label">起始时间</label>
+
+                                <div class="col-lg-6">
+                                    <div id="timestamp">
+                                        <div class="dropdown">
+                                            <a class="dropdown-toggle" id="timestamp-href"
+                                               role="button" data-toggle="dropdown" data-target="#">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" placeholder="日志时间"
+                                                           data-ng-model="client.date">
+                                                    <span class="input-group-addon">
+                                                        <i class="glyphicon glyphicon-calendar"></i>
+                                                    </span>
+                                                </div>
+                                            </a>
+                                            <ul class="dropdown-menu" role="menu"
+                                                aria-labelledby="dLabel">
+                                                <datetimepicker data-ng-model="client.date"
+                                                                data-datetimepicker-config="{dropdownSelector: '#timestamp-href'}"/>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr/>
+
+                            <!--div class="form-group">
+                                <label class="col-lg-3 control-label" for="databaseName">监听库名</label>
+
+                                <div class="col-lg-6">
+                                    <input id="databaseName" type="text" class="form-control" placeholder=""
+                                           ng-model="client.databaseName">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="tableRegex">监听表名</label>
+
+                                <div class="col-lg-6">
+                                   <textarea id="tableRegex" class="form-control" rows="3"
+                                             placeholder="/正则表达式/g" ng-model="client.tableRegex"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="dml">监听DML</label>
+
+                                <div class="col-lg-6">
+                                    <select id="dml" class="form-control" ng-model="client.dml">
+                                        <option>true</option>
+                                        <option>false</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="ddl">监听DDL</label>
+
+                                <div class="col-lg-6">
+                                    <select id="ddl" class="form-control" ng-model="client.ddl">
+                                        <option>true</option>
+                                        <option>false</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <hr/>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="emails">告警邮件</label>
+
+                                <div class="col-lg-6">
+                                    <textarea id="emails" class="form-control" rows="3"
+                                              placeholder="多个邮件地址以逗号隔开" ng-model="client.emails"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="alarmIntervalInSecond">告警间隔</label>
+
+                                <div class="col-lg-6">
+                                    <input id="alarmIntervalInSecond" type="number" class="form-control"
+                                           placeholder="单位为秒" ng-model="client.alarmIntervalInSecond">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="sendDelayThresholdInSecond">延时阈值</label>
+
+                                <div class="col-lg-6">
+                                    <input id="sendDelayThresholdInSecond" type="text" class="form-control"
+                                           placeholder="单位为秒" ng-model="client.sendDelayThresholdInSecond">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label" for="getDelayThresholdInSecond">失联阈值</label>
+
+                                <div class="col-lg-6">
+                                    <input id="getDelayThresholdInSecond" type="text" class="form-control"
+                                           placeholder="单位为秒" ng-model="client.getDelayThresholdInSecond">
+                                </div>
+                            </div-->
+
+                            <hr/>
+
+                            <div class="col-lg-offset-7 col-lg-2">
+                                <div class="col-lg-6">
+                                    <button type="button" class="btn btn-outline btn-success"
+                                            ng-click="onClickSave()">保存
+                                    </button>
+                                </div>
+                                <div class="col-lg-6">
+                                    <button type="button" class="btn btn-outline btn-warning"
+                                            ng-click="onClickReset()">重置
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                    <!-- /.col-lg-6 (nested) -->
+                </div>
+                <!-- /.row (nested) -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+    <!-- /.col-lg-12 -->
+</div>

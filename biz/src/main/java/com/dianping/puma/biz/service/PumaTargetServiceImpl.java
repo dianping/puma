@@ -1,45 +1,52 @@
 package com.dianping.puma.biz.service;
 
+import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.PumaServerDao;
 import com.dianping.puma.biz.dao.PumaServerTargetDao;
 import com.dianping.puma.biz.dao.PumaTargetDao;
-import com.dianping.puma.common.entity.PumaServerEntity;
-import com.dianping.puma.common.entity.PumaServerTargetEntity;
-import com.dianping.puma.common.entity.PumaTargetEntity;
+import com.dianping.puma.biz.entity.PumaServerEntity;
+import com.dianping.puma.biz.entity.PumaServerTargetEntity;
+import com.dianping.puma.biz.entity.PumaTargetEntity;
+import com.dianping.puma.common.model.PumaTarget;
 import com.dianping.puma.common.service.PumaTargetService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
 public class PumaTargetServiceImpl implements PumaTargetService {
 
-    @Autowired
-    PumaTargetDao pumaTargetDao;
+    private Converter converter;
 
-    @Autowired
-    PumaServerTargetDao pumaServerTargetDao;
+    private PumaTargetDao pumaTargetDao;
 
-    @Autowired
-    PumaServerDao pumaServerDao;
+    private PumaServerTargetDao pumaServerTargetDao;
+
+    private PumaServerDao pumaServerDao;
 
     @Override
-    public List<PumaTargetEntity> findByDatabase(String database) {
-        return pumaTargetDao.findByDatabase(database);
+    public List<PumaTarget> findByDatabase(String database) {
+        return FluentIterable
+                .from(pumaTargetDao.findByDatabase(database))
+                .transform(new Function<PumaTargetEntity, PumaTarget>() {
+                    @Override
+                    public PumaTarget apply(PumaTargetEntity entity) {
+                        return converter.convert(entity, PumaTarget.class);
+                    }
+                }).toList();
     }
 
     @Override
-    public List<PumaTargetEntity> findByHost(String host) {
+    public List<PumaTarget> findByHost(String host) {
         PumaServerEntity pumaServer = pumaServerDao.findByHost(host);
         List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetDao.findByServerName(pumaServer.getName());
 
-        List<PumaTargetEntity> result = new ArrayList<PumaTargetEntity>();
+        List<PumaTarget> result = new ArrayList<PumaTarget>();
         for (PumaServerTargetEntity serverTarget : pumaServerTargets) {
             String targetDb = serverTarget.getTargetDb();
-            List<PumaTargetEntity> pumaTarget = pumaTargetDao.findByDatabase(targetDb);
-            for (PumaTargetEntity target : pumaTarget) {
+            List<PumaTarget> pumaTarget = findByDatabase(targetDb);
+            for (PumaTarget target : pumaTarget) {
                 target.setBeginTime(serverTarget.getBeginTime());
             }
             result.addAll(pumaTarget);
@@ -48,17 +55,41 @@ public class PumaTargetServiceImpl implements PumaTargetService {
     }
 
     @Override
-    public List<PumaTargetEntity> findAll() {
-        return pumaTargetDao.findAll();
+    public List<PumaTarget> findAll() {
+        return FluentIterable
+                .from(pumaTargetDao.findAll())
+                .transform(new Function<PumaTargetEntity, PumaTarget>() {
+                    @Override
+                    public PumaTarget apply(PumaTargetEntity entity) {
+                        return converter.convert(entity, PumaTarget.class);
+                    }
+                }).toList();
     }
 
     @Override
-    public int create(PumaTargetEntity entity) {
+    public int create(PumaTarget pumaTarget) {
+        PumaTargetEntity entity = converter.convert(pumaTarget, PumaTargetEntity.class);
         return pumaTargetDao.insert(entity);
     }
 
     @Override
     public int remove(int id) {
         return pumaTargetDao.delete(id);
+    }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public void setPumaTargetDao(PumaTargetDao pumaTargetDao) {
+        this.pumaTargetDao = pumaTargetDao;
+    }
+
+    public void setPumaServerTargetDao(PumaServerTargetDao pumaServerTargetDao) {
+        this.pumaServerTargetDao = pumaServerTargetDao;
+    }
+
+    public void setPumaServerDao(PumaServerDao pumaServerDao) {
+        this.pumaServerDao = pumaServerDao;
     }
 }

@@ -1,0 +1,31 @@
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-2">
+
+        <div ng-include="template.model + 'head.html'"></div>
+
+        <div ng-include="template.model + 'server.html'"></div>
+
+        <div ng-repeat="node in model.nodes track by $index">
+
+            <div class="row" ng-if="node.type === 'extract'">
+                <div ng-include="template.model + 'node.html'"></div>
+            </div>
+
+            <div class="row" ng-if="node.type === 'transform'">
+                <div ng-include="template.model + 'node.html'"></div>
+            </div>
+
+            <div class="row" ng-if="node.type === 'load'">
+                <div ng-include="template.model + 'node.html'"></div>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-sm-10 text-right">
+                <button class="btn btn-success" ng-click="save()">Save</button>
+            </div>
+        </div>
+
+    </div>
+</div>

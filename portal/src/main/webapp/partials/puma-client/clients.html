@@ -1,0 +1,32 @@
+<div>
+    <table class="table table-hover table-bordered">
+        <thead>
+        <tr>
+            <th class="col-sm-2">客户端名称</th>
+            <th class="col-sm-1">组名</th>
+            <th class="col-sm-1">库表信息</th>
+            <th class="col-sm-2">客户端地址</th>
+            <th class="col-sm-2">服务器地址</th>
+            <th class="col-sm-1">最后发送</th>
+            <th class="col-sm-1">最后交互</th>
+            <th class="col-sm-2">最后确认</th>
+            <th class="col-sm-1">QPS</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr ng-repeat="client in clients">
+            <td>{{client.clientName}}</td>
+            <td>{{client.groupName}}</td>
+            <td>{{client.database}}</td>
+            <td>{{client.clientAddress}}</td>
+            <td>{{client.serverAddress}}</td>
+            <td>{{client.pushTime}}</td>
+            <td>{{client.pullTime}}</td>
+            <td>{{client.lastBinlogPosition}}</td>
+            <td>{{client.qps}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+

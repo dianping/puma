@@ -2,7 +2,7 @@ package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.PumaServerDao;
 import com.dianping.puma.biz.service.PumaServerService;
-import com.dianping.puma.common.entity.PumaServerEntity;
+import com.dianping.puma.biz.entity.PumaServerEntity;
 import com.dianping.puma.utils.IPUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

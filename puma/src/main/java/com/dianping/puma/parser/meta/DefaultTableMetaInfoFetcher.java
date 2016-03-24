@@ -17,7 +17,7 @@ package com.dianping.puma.parser.meta;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
-import com.dianping.puma.common.entity.SrcDbEntity;
+import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.model.Table;
 import com.dianping.puma.model.TableSet;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;

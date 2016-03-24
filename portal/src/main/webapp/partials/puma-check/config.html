@@ -1,0 +1,168 @@
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-2">
+        <div class="row">
+            <div class="col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Base Info
+                    </div>
+                    <div class="panel-body">
+                        <div onload="item = model.baseInfo"
+                             ng-if="true"
+                             ng-include="templateBase + baseTemplate + '.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Source DataSource Builder
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-tabs">
+                            <li ng-class="{'active':model.sourceDsBuilderProp.className == 'GroupDataSourceBuilder'}">
+                                <a data-toggle="tab" href=""
+                                   ng-click="model.sourceDsBuilderProp = {'className' : 'GroupDataSourceBuilder'}">GroupDataSource</a>
+                            </li>
+                            <li ng-class="{'active':model.sourceDsBuilderProp.className == 'ShardDataSourceBuilder'}">
+                                <a data-toggle="tab" href=""
+                                   ng-click="model.sourceDsBuilderProp = {'className' : 'ShardDataSourceBuilder'}">ShardDataSource</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div onload="item = model.sourceDsBuilderProp"
+                                 ng-if="true"
+                                 ng-include="templateBase + model.sourceDsBuilderProp.className + '.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Source Fetcher
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a data-toggle="tab" href=""
+                                   ng-click="model.sourceFetcherProp = {'className' : 'UpdateTimeAndIdSourceFetcher'}">UpdateTimeAndIdSourceFetcher</a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div onload="item = model.sourceFetcherProp"
+                                 ng-if="true"
+                                 ng-include="templateBase + model.sourceFetcherProp.className + '.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Target DataSource Builder
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-tabs">
+                            <li ng-class="{'active':model.targetDsBuilderProp.className == 'GroupDataSourceBuilder'}">
+                                <a data-toggle="tab" href=""
+                                   ng-click="model.targetDsBuilderProp = {'className' : 'GroupDataSourceBuilder'}">GroupDataSource</a>
+                            </li>
+                            <li ng-class="{'active':model.targetDsBuilderProp.className == 'ShardDataSourceBuilder'}">
+                                <a data-toggle="tab" href=""
+                                   ng-click="model.targetDsBuilderProp = {'className' : 'ShardDataSourceBuilder'}">ShardDataSource</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div onload="item = model.targetDsBuilderProp"
+                                 ng-if="true"
+                                 ng-include="templateBase + model.targetDsBuilderProp.className + '.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Target Fetcher
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a data-toggle="tab" href=""
+                                   ng-click="model.targetFetcherProp = {'className' : 'SingleLineTargetFetcher'}">SingleLineTargetFetcher</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div onload="item = model.targetFetcherProp"
+                                 ng-if="true"
+                                 ng-include="templateBase + model.targetFetcherProp.className + '.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Comparison
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a data-toggle="tab" href=""
+                                   ng-click="model.comparisonProp = {'className' : 'FullComparison'}">FullComparison</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div onload="item = model.comparisonProp"
+                                 ng-if="true"
+                                 ng-include="templateBase + model.comparisonProp.className + '.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Mapper
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a data-toggle="tab" href=""
+                                   ng-click="model.mapperProp = {'className' : 'DefaultRowMapper'}">DefaultRowMapper</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div onload="item = model.mapperProp"
+                                 ng-if="true"
+                                 ng-include="templateBase + model.mapperProp.className + '.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-10 text-center">
+                <button class="btn btn-success" ng-click="create()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

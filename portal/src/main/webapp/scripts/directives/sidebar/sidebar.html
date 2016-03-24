@@ -1,0 +1,77 @@
+<div class="navbar-default sidebar" role="navigation">
+    <div class="sidebar-nav navbar-collapse">
+        <ul class="nav in" id="side-menu">
+            <sidebar-search></sidebar-search>
+            <li ui-sref-active="active">
+                <a ui-sref="dashboard.home"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+            </li>
+
+            <li ng-class="{active: collapseVar==1}">{{dropDown}}
+                <a href="" ng-click="check(1)">
+                    <i class="fa fa-bullseye fa-fw"></i> Puma 文档
+                    <span class="fa arrow"></span>
+                </a>
+                <ul class="nav nav-second-level" uib-collapse="collapseVar!=1">
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.document({filename: 'api'})">
+                            <i class="fa fa-file-text-o fa-fw"></i> Puma 使用文档
+                        </a>
+                    </li>
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.document({filename: 'register-api'})">
+                            <i class="fa fa-file-text-o fa-fw"></i> Puma 注册接口
+                        </a>
+                    </li>
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.document({filename: 'design'})">
+                            <i class="fa fa-file-text-o fa-fw"></i> Puma 设计文档
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li ng-class="{active: collapseVar==2}">{{dropDown}}
+                <a href="" ng-click="check(2)">
+                    <i class="fa fa-shield fa-fw"></i> Puma 实例
+                    <span class="fa arrow"></span>
+                </a>
+                <ul class="nav nav-second-level" uib-collapse="collapseVar!=2">
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.instance">
+                            <i class="fa fa-th-list fa-fw"></i> Puma 实例列表
+                        </a>
+                    </li>
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.instance-config">
+                            <i class="fa fa-edit fa-fw"></i> Puma 实例配置
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li ng-class="{active: collapseVar==3}">{{dropDown}}
+                <a href="" ng-click="check(3)">
+                    <i class="fa fa-anchor fa-fw"></i> Puma 客户端
+                    <span class="fa arrow"></span>
+                </a>
+                <ul class="nav nav-second-level" uib-collapse="collapseVar!=3">
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.client">
+                            <i class="fa fa-th-list fa-fw"></i> Puma 客户端列表
+                        </a>
+                    </li>
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.client-create">
+                            <i class="fa fa-edit fa-fw"></i> Puma 客户端注册
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+        </ul>
+    </div>
+    <!-- /.sidebar-collapse -->
+</div> 
+
+
+

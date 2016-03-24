@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.entity;
 
-import java.sql.Date;
+import java.util.Date;
 
 /**
  * Created by xiaotian.li on 16/2/24.

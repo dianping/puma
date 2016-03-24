@@ -1,0 +1,33 @@
+*[data-toggle="popover"] {
+    cursor: pointer;
+}
+
+.popover {
+    max-width: none !important;
+}
+
+pre {
+    padding: 0px !important;
+    border: none !important;
+}
+
+.panel-body > table {
+    margin-bottom: 0px;
+}
+
+.panel-body > .nav-tabs {
+    margin-bottom: 20px;
+}
+
+.tooltip-inner {
+    max-width: 350px;
+    /* If max-width does not work, try using width instead */
+    width: 350px;
+}
+
+.nav-tabs-content {
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-radius: 0px 0px 4px 4px;
+}

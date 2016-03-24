@@ -1,8 +1,8 @@
 package com.dianping.puma.portal.web;
 
-import com.dianping.puma.common.entity.PumaServerEntity;
-import com.dianping.puma.common.entity.PumaServerTargetEntity;
-import com.dianping.puma.common.entity.PumaTargetEntity;
+import com.dianping.puma.common.model.PumaServer;
+import com.dianping.puma.common.model.PumaServerTarget;
+import com.dianping.puma.common.model.PumaTarget;
 import com.dianping.puma.common.service.PumaServerService;
 import com.dianping.puma.common.service.PumaServerTargetService;
 import com.dianping.puma.common.service.PumaTargetService;
@@ -53,8 +53,8 @@ public class PumaController extends BasicController {
         PumaDto pumaDto = new PumaDto();
         pumaDto.setDatabase(database);
 
-        List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetService.findByDatabase(database);
-        for (PumaServerTargetEntity pumaServerTarget : pumaServerTargets) {
+        List<PumaServerTarget> pumaServerTargets = pumaServerTargetService.findByDatabase(database);
+        for (PumaServerTarget pumaServerTarget : pumaServerTargets) {
             pumaDto.setTables(pumaServerTarget.getTables());
             pumaDto.addServerName(pumaServerTarget.getServerName());
             pumaDto.addHost(pumaServerTarget.getServerName(), pumaServerTarget.getServerHost());
@@ -74,11 +74,11 @@ public class PumaController extends BasicController {
         }
 
         String database = pumaDto.getDatabase();
-        List<PumaServerTargetEntity> pumaServerTargets = pumaServerTargetService.findByDatabase(database);
+        List<PumaServerTarget> pumaServerTargets = pumaServerTargetService.findByDatabase(database);
 
         // Removes unused puma server target.
         List<String> serverNames = pumaDto.getServerNames();
-        for (PumaServerTargetEntity pumaServerTarget : pumaServerTargets) {
+        for (PumaServerTarget pumaServerTarget : pumaServerTargets) {
             if (!serverNames.contains(pumaServerTarget.getServerName())) {
                 pumaServerTargetService.remove(pumaServerTarget.getId());
             }
@@ -86,7 +86,7 @@ public class PumaController extends BasicController {
 
         // Updates new puma server target.
         for (String serverName : serverNames) {
-            PumaServerTargetEntity pumaServerTarget = new PumaServerTargetEntity();
+            PumaServerTarget pumaServerTarget = new PumaServerTarget();
             pumaServerTarget.setServerName(serverName);
             pumaServerTarget.setTargetDb(database);
 
@@ -98,14 +98,14 @@ public class PumaController extends BasicController {
 
         // Removes unused puma tables.
         List<String> tables = pumaDto.getTables();
-        List<PumaTargetEntity> pumaTargets = pumaTargetService.findByDatabase(database);
-        List<String> oriTables = Lists.transform(pumaTargets, new Function<PumaTargetEntity, String>() {
+        List<PumaTarget> pumaTargets = pumaTargetService.findByDatabase(database);
+        List<String> oriTables = Lists.transform(pumaTargets, new Function<PumaTarget, String>() {
             @Override
-            public String apply(PumaTargetEntity pumaTarget) {
+            public String apply(PumaTarget pumaTarget) {
                 return pumaTarget.getTable();
             }
         });
-        for (PumaTargetEntity pumaTarget : pumaTargets) {
+        for (PumaTarget pumaTarget : pumaTargets) {
             if (!tables.contains(pumaTarget.getTable())) {
                 pumaTargetService.remove(pumaTarget.getId());
             }
@@ -114,7 +114,7 @@ public class PumaController extends BasicController {
         // Creates new puma tables.
         for (String table : tables) {
             if (!oriTables.contains(table)) {
-                PumaTargetEntity pumaTarget = new PumaTargetEntity();
+                PumaTarget pumaTarget = new PumaTarget();
                 pumaTarget.setDatabase(database);
                 pumaTarget.setTable(table);
                 pumaTargetService.create(pumaTarget);
@@ -128,7 +128,7 @@ public class PumaController extends BasicController {
     @ResponseBody
     public Object findServers() {
         List<String> servers = new ArrayList<String>();
-        for (PumaServerEntity pumaServer : pumaServerService.findAll()) {
+        for (PumaServer pumaServer : pumaServerService.findAll()) {
             servers.add(pumaServer.getName());
         }
         return servers;

@@ -1,0 +1,48 @@
+<script type="text/ng-template" id="tables.html">
+    <div class="modal-header">
+        <h3 class="modal-title">{{item.name}}</h3>
+    </div>
+    <div class="modal-body">
+        <ul>
+            <li ng-repeat="table in item.tables | orderBy">
+                {{table}}
+            </li>
+        </ul>
+    </div>
+</script>
+
+<table role="grid"
+       class="table table-striped table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>Server</th>
+        <th>Name</th>
+        <th>Remote</th>
+        <th>Fetch Qps</th>
+        <th>Target</th>
+        <th>SendBinlogInfo</th>
+        <th>AckBinlogInfo</th>
+        <th>Other</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="client in clients | orderBy:'server'">
+        <td>{{client.server}}</td>
+        <td>{{client.name}}</td>
+        <td>{{client.ip}}</td>
+        <td>{{client.fetchQps}}</td>
+        <td><a ng-click="openTables(client)" data-html="true" data-toggle="popover"
+               data-placement="top" data-content="{{client.tablesStr}}">{{client.database}}</a>
+        </td>
+        <td><span data-html="true" data-toggle="popover" data-placement="top"
+                  data-content="ServerId : {{client.sendBinlogInfo.serverId}} <br />BinlogFile  : {{client.sendBinlogInfo.binlogFile}} <br />BinlogPosition   : {{client.sendBinlogInfo.binlogPosition }} <br />EventIndex   : {{client.sendBinlogInfo.eventIndex }} <br />Timestamp   : {{client.sendBinlogInfo.timestamp*1000 }}">{{client.sendBinlogInfo.timestamp * 1000 | toLocaleString}}</span>
+        </td>
+        <td><span data-html="true" data-toggle="popover" data-placement="top"
+                  data-content="ServerId : {{client.ackBinlogInfo.serverId}} <br />BinlogFile  : {{client.ackBinlogInfo.binlogFile}} <br />BinlogPosition   : {{client.ackBinlogInfo.binlogPosition }} <br />EventIndex   : {{client.ackBinlogInfo.eventIndex }} <br />Timestamp   : {{client.ackBinlogInfo.timestamp*1000 }}">{{client.ackBinlogInfo.timestamp * 1000 | toLocaleString}}</span>
+        </td>
+        <td><span data-html="true" data-toggle="popover" data-placement="left"
+                  data-content="Storage : {{client.storage}} <br />Codec : {{client.codec}} <br />Dml : {{client.withDml}} <br />Ddl : {{client.withDdl}} <br />Transaction : {{client.withTransaction}}">{{client.storage}}</span>
+        </td>
+    </tr>
+    </tbody>
+</table>

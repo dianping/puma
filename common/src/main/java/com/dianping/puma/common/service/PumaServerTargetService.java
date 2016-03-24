@@ -1,20 +1,20 @@
 package com.dianping.puma.common.service;
 
-import com.dianping.puma.common.entity.PumaServerTargetEntity;
+import com.dianping.puma.common.model.PumaServerTarget;
 
 import java.util.List;
 
 public interface PumaServerTargetService {
 
-    List<PumaServerTargetEntity> findByDatabase(String database);
+    List<PumaServerTarget> findByDatabase(String database);
 
-    List<PumaServerTargetEntity> findByServerHost(String host);
+    List<PumaServerTarget> findByServerHost(String host);
 
-    int create(PumaServerTargetEntity entity);
+    int create(PumaServerTarget entity);
 
-    int replace(PumaServerTargetEntity entity);
+    int replace(PumaServerTarget entity);
 
-    int update(PumaServerTargetEntity entity);
+    int update(PumaServerTarget entity);
 
     int remove(int id);
 }

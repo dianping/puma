@@ -1,32 +1,32 @@
 package com.dianping.puma.common.service;
 
-import com.dianping.puma.common.entity.PumaServerEntity;
+import com.dianping.puma.common.model.PumaServer;
 
 import java.util.List;
 
 public interface PumaServerService {
 
-	PumaServerEntity findById(int id);
+	PumaServer findById(int id);
 
-	PumaServerEntity find(String name);
+	PumaServer find(String name);
 
-	PumaServerEntity findByHost(String host);
+	PumaServer findByHost(String host);
 
-	List<PumaServerEntity> findOnCurrentServer();
+	List<PumaServer> findOnCurrentServer();
 
-	List<PumaServerEntity> findAll();
+	List<PumaServer> findAll();
 
-	List<PumaServerEntity> findAllAlive();
+	List<PumaServer> findAllAlive();
 
 	long count();
 
-	List<PumaServerEntity> findByPage(int page, int pageSize);
+	List<PumaServer> findByPage(int page, int pageSize);
 
 	void registerByHost(String host);
 
-	void create(PumaServerEntity pumaServer);
+	void create(PumaServer pumaServer);
 
-	void update(PumaServerEntity pumaServer);
+	void update(PumaServer pumaServer);
 
 	void remove(String name);
 

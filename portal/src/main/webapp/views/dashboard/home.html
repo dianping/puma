@@ -1,0 +1,165 @@
+<div class="row">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Puma Server 负载</div>
+            <div class="panel-body">
+                <canvas class="chart chart-pie"
+                        chart-options="options"
+                        chart-data="data.serverValue" chart-labels="data.serverLabel" chart-colours="data.serverColor">
+                </canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Puma Task 同步状态</div>
+            <div class="panel-body">
+                <canvas class="chart chart-pie"
+                        chart-options="options"
+                        chart-data="data.taskValue" chart-labels="data.taskLabel" chart-colours="data.taskColor">
+                </canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Puma Client 同步状态</div>
+            <div class="panel-body">
+                <canvas class="chart chart-pie"
+                        chart-options="options"
+                        chart-data="data.clientValue" chart-labels="data.clientLabel" chart-colours="data.clientColor">
+                </canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Puma Server 负载耻辱榜</div>
+            <div class="panel-body">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Server</th>
+                        <th>Load</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in data.servers">
+                        <td>{{item.name}}</td>
+                        <td>{{item.load.toFixed(2)}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Puma Task 延时耻辱榜</div>
+            <div class="panel-body">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Delay</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in data.tasks">
+                        <td>{{item.name}}</td>
+                        <td>{{item.delay | delay}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Puma Client 延时耻辱榜</div>
+            <div class="panel-body">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Delay</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in data.clients">
+                        <td>{{item.name}}</td>
+                        <td>{{item.delay | delay}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Puma Server QPS</div>
+            <div class="panel-body">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Server</th>
+                        <th>QPS</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in data.serverQps">
+                        <td>{{item.name}}</td>
+                        <td>{{item.qps}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Puma Task QPS</div>
+            <div class="panel-body">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>QPS</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in data.taskQps">
+                        <td>{{item.name}}</td>
+                        <td>{{item.qps}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Puma Client QPS</div>
+            <div class="panel-body">
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>QPS</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in data.clientQps">
+                        <td>{{item.name}}</td>
+                        <td>{{item.qps}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+{
+  "name": "puma-admin",
+  "authors": [
+    "yuyang.gong",
+    "xiaotian.li"
+  ],
+  "description": "",
+  "main": "index.html",
+  "license": "MIT",
+  "homepage": "http://puma.dp",
+  "ignore": [
+    "node_modules"
+  ],
+  "dependencies": {
+    "angular": "~1.5.0",
+    "json3": "~3.3.1",
+    "es5-shim": "~3.1.0",
+    "angular-resource": "1.5.0",
+    "angular-cookies": "1.5.0",
+    "angular-sanitize": "1.5.0",
+    "angular-animate": "1.5.0",
+    "angular-touch": "1.5.0",
+    "angular-route": "1.5.0",
+    "font-awesome": "4.3.0",
+    "angular-bootstrap": "~1.2.1",
+    "oclazyload": "~0.5.2",
+    "angular-loading-bar": "~0.7.0",
+    "angular-ui-router": "~0.2.13",
+    "angular-toggle-switch": "~1.2.1",
+    "metisMenu": "~1.1.3",
+    "angular-chart.js": "~0.9.0",
+    "ngtoast": "~1.5.6",
+    "angular-bootstrap-datetimepicker": "~0.4.0",
+    "ng-table": "~1.0.0",
+    "isteven-angular-multiselect": "~4.0.0",
+    "showdown": "~1.3.0",
+    "ng-showdown": "~1.1.0",
+    "Chart.js": "~1.0.2"
+  }
+}

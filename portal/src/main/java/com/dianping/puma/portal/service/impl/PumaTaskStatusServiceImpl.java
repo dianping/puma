@@ -1,7 +1,7 @@
 package com.dianping.puma.portal.service.impl;
 
 import com.dianping.lion.client.ConfigCache;
-import com.dianping.puma.common.entity.PumaServerEntity;
+import com.dianping.puma.common.model.PumaServer;
 import com.dianping.puma.common.service.PumaServerService;
 import com.dianping.puma.core.util.ConvertHelper;
 import com.dianping.puma.portal.model.DashboardModel;
@@ -98,10 +98,10 @@ public class PumaTaskStatusServiceImpl implements PumaTaskStatusService {
             return;
         }
         try {
-            List<PumaServerEntity> servers = pumaServerService.findAllAlive();
-            cleanUp(servers);
+            List<PumaServer> pumaServers = pumaServerService.findAllAlive();
+            cleanUp(pumaServers);
 
-            for (final PumaServerEntity server : servers) {
+            for (final PumaServer server : pumaServers) {
                 try {
                     queryStatus(server);
                 } catch (Exception e) {
@@ -117,7 +117,7 @@ public class PumaTaskStatusServiceImpl implements PumaTaskStatusService {
         }
     }
 
-    protected void queryStatus(final PumaServerEntity server) {
+    protected void queryStatus(final PumaServer server) {
         HttpGet get = new HttpGet(buildUrl(server.getHost()));
         get.releaseConnection();
         httpClient.execute(get, new FutureCallback<HttpResponse>() {
@@ -148,11 +148,11 @@ public class PumaTaskStatusServiceImpl implements PumaTaskStatusService {
         });
     }
 
-    protected void cleanUp(List<PumaServerEntity> servers) {
-        Set<String> serverNames = FluentIterable.from(servers).transform(new Function<PumaServerEntity, String>() {
+    protected void cleanUp(List<PumaServer> servers) {
+        Set<String> serverNames = FluentIterable.from(servers).transform(new Function<PumaServer, String>() {
             @Override
-            public String apply(PumaServerEntity input) {
-                return input.getName();
+            public String apply(PumaServer pumaServer) {
+                return pumaServer.getName();
             }
         }).toSet();
 

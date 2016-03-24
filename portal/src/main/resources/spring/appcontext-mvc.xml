@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+    <!-- Scans for annotated @Controllers in the classpath -->
+    <!--context:component-scan base-package="com.dianping.puma.admin.web">
+        <context:include-filter type="annotation"
+            expression="org.springframework.stereotype.Controller" />
+    </context:component-scan-->
+
+    <context:component-scan base-package="com.dianping.puma.portal.web"/>
+
+    <!-- Configures the @Controller programming model -->
+    <mvc:annotation-driven/>
+
+    <!--mvc:resources mapping="/**" location="/"/-->
+
+    <!--mvc:resources mapping="/javascripts/**" location="/js/" />
+    <mvc:resources mapping="/images/**" location="/images/" />
+    <mvc:resources mapping="/stylesheets/**" location="/style/" />
+    <mvc:resources mapping="/style/**" location="/style/" />
+    <mvc:resources mapping="/image/**" location="/images/" />
+    <mvc:resources mapping="/*.html" location="/app/" />
+    <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/resources/**" location="/resources/"/-->
+
+    <!-- Saves a locale change using a cookie -->
+    <!-- <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver" 
+        /> -->
+
+    <!-- Application Message Bundle -->
+    <!-- cacheSeconds: A value of "0" will check the last-modified timestamp 
+        of the file on every message access. Do not use this in a production environment! -->
+    <!-- <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource"> 
+        <property ref="basename" value="/WEB-INF/messages/messages" /> <property
+        ref="cacheSeconds" value="-1" /> </bean> -->
+
+    <!-- View resolvers can also be configured with ResourceBundles or XML 
+        files. If you need different view resolving based on Locale, you have to 
+        use the resource bundle resolver. -->
+    <bean id="viewResolver"
+          class="org.springframework.web.servlet.view.velocity.VelocityLayoutViewResolver"><!-- 一开始误用InternalResourceViewResolver，那是jsp使用的，谨记教训。 -->
+        <property name="cache" value="true"/>
+        <property name="cacheUnresolved" value="true"/>
+        <property name="exposeSpringMacroHelpers" value="true"/>
+        <property name="requestContextAttribute" value="rc"/>
+        <property name="suffix" value=".htm"/>
+        <property name="toolboxConfigLocation">
+            <value>/app/deprecated/velocity/toolbox.xml</value>
+        </property>
+        <property name="layoutUrl">
+            <value>layout.htm</value>
+        </property>
+        <property name="dateToolAttribute">
+            <value>dateTool</value>
+        </property>
+        <property name="numberToolAttribute">
+            <value>numberTool</value>
+        </property>
+        <!-- 设置响应头的content-type值 -->
+        <property name="contentType" value="text/html; charset=UTF-8"/>
+    </bean>
+
+</beans>

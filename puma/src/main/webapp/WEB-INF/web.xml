@@ -5,9 +5,9 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-            classpath*:config/spring/local/appcontext-*.xml,
+			classpath*:spring/local/appcontext-*.xml,
 			classpath*:spring/db/appcontext-*.xml
-        </param-value>
+		</param-value>
 	</context-param>
 	<filter>
 		<filter-name>corsFilter</filter-name>
@@ -26,8 +26,8 @@
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
 			<param-value>
-                classpath:config/spring/local/appcontext-mvc.xml
-            </param-value>
+				classpath:spring/local/appcontext-mvc.xml
+			</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

@@ -47,4 +47,15 @@
         #{updateTime}
         )
     </insert>
+
+    <select id="findOldTestClient" resultType="ClientPositionEntity">
+        select * from ClientPosition
+        where UpdateTime &lt; NOW() - INTERVAL 10 DAY
+        and ClientName like '%test'
+    </select>
+
+    <delete id="delete" parameterType="int">
+        delete from ClientPosition where id = #{id}
+    </delete>
+
 </mapper>

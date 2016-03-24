@@ -1,8 +1,8 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.ClientPositionDao;
-import com.dianping.puma.biz.entity.ClientPositionEntity;
 import com.dianping.puma.biz.service.ClientPositionService;
+import com.dianping.puma.common.entity.ClientPositionEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +71,13 @@ public class ClientPositionServiceImpl implements ClientPositionService {
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
+        }
+    }
+
+    public void cleanUpTestClients() {
+        List<ClientPositionEntity> clients = clientPositionDao.findOldTestClient();
+        for (ClientPositionEntity entity : clients) {
+            clientPositionDao.delete(entity.getId());
         }
     }
 }

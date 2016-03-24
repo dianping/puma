@@ -1,7 +1,7 @@
 package com.dianping.puma.pumaserver.service.impl;
 
-import com.dianping.puma.biz.entity.ClientPositionEntity;
 import com.dianping.puma.biz.service.ClientPositionService;
+import com.dianping.puma.common.entity.ClientPositionEntity;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.exception.binlog.BinlogAckException;

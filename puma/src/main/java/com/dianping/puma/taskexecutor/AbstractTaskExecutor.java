@@ -16,8 +16,8 @@
 package com.dianping.puma.taskexecutor;
 
 import com.dianping.puma.annotation.ThreadUnSafe;
-import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.common.PumaContext;
+import com.dianping.puma.common.entity.PumaTaskStateEntity;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.model.TableSet;

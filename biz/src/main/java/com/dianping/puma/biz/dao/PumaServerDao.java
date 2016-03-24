@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.PumaServerEntity;
+import com.dianping.puma.common.entity.PumaServerEntity;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

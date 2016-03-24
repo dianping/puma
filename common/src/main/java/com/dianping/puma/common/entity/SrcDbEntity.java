@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.entity;
+package com.dianping.puma.common.entity;
 
 import com.google.common.base.Objects;
 

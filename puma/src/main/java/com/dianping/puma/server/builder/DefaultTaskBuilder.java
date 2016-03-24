@@ -1,6 +1,6 @@
 package com.dianping.puma.server.builder;
 
-import com.dianping.puma.biz.entity.PumaTaskStateEntity;
+import com.dianping.puma.common.entity.PumaTaskStateEntity;
 import com.dianping.puma.core.util.sql.DDLType;
 import com.dianping.puma.datahandler.DefaultDataHandler;
 import com.dianping.puma.filter.*;

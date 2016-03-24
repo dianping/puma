@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.entity.ClientPositionEntity;
+import com.dianping.puma.common.entity.ClientPositionEntity;
 
 import java.util.List;
 
@@ -18,4 +18,6 @@ public interface ClientPositionService {
     void update(ClientPositionEntity clientPositionEntity, boolean flush);
 
     void flush();
+
+    void cleanUpTestClients();
 }

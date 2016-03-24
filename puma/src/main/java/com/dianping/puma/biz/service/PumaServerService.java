@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.entity.PumaServerEntity;
+import com.dianping.puma.common.entity.PumaServerEntity;
 
 import java.util.List;
 

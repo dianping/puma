@@ -1,8 +1,8 @@
 package com.dianping.puma.server.checker;
 
-import com.dianping.puma.biz.entity.PumaServerTargetEntity;
-import com.dianping.puma.biz.entity.SrcDbEntity;
 import com.dianping.puma.biz.service.PumaServerTargetService;
+import com.dianping.puma.common.entity.PumaServerTargetEntity;
+import com.dianping.puma.common.entity.SrcDbEntity;
 import com.dianping.puma.instance.InstanceManager;
 import com.dianping.puma.server.container.TaskContainer;
 import com.dianping.puma.server.server.TaskServerManager;

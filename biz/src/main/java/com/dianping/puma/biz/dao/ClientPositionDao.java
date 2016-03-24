@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.dao;
 
-import com.dianping.puma.biz.entity.ClientPositionEntity;
+import com.dianping.puma.common.entity.ClientPositionEntity;
 
 import java.util.List;
 
@@ -18,4 +18,8 @@ public interface ClientPositionDao {
     int update(ClientPositionEntity entity);
 
     int insert(ClientPositionEntity entity);
+
+    int delete(int id);
+
+    List<ClientPositionEntity> findOldTestClient();
 }

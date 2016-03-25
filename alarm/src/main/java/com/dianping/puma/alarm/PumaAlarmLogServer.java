@@ -1,6 +1,6 @@
 package com.dianping.puma.alarm;
 
-import com.dianping.puma.alarm.monitor.PumaAlarmMonitor;
+import com.dianping.puma.alarm.log.PumaAlarmLogger;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.server.PumaServer;
 
@@ -8,25 +8,25 @@ import com.dianping.puma.common.server.PumaServer;
  * Created by xiaotian.li on 16/3/25.
  * Email: lixiaotian07@gmail.com
  */
-public class PumaAlarmMonitorServer extends AbstractPumaLifeCycle implements PumaServer {
+public class PumaAlarmLogServer extends AbstractPumaLifeCycle implements PumaServer {
 
-    private PumaAlarmMonitor monitor;
+    private PumaAlarmLogger logger;
 
     @Override
     public void start() {
         super.start();
 
-        monitor.start();
+        logger.start();
     }
 
     @Override
     public void stop() {
         super.stop();
 
-        monitor.stop();
+        logger.stop();
     }
 
-    public void setMonitor(PumaAlarmMonitor monitor) {
-        this.monitor = monitor;
+    public void setLogger(PumaAlarmLogger logger) {
+        this.logger = logger;
     }
 }

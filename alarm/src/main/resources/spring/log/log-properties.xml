@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <!-- logger -->
+    <bean id="pumaAlarmLogger" class="com.dianping.puma.alarm.log.FlushingPumaAlarmLogger">
+        <property name="pumaClientAlarmDataService" ref="pumaClientAlarmDataService" />
+        <property name="flushIntervalInSecond" value="10" />
+    </bean>
+
+    <!-- server -->
+    <bean id="pumaAlarmLogServer" class="com.dianping.puma.alarm.PumaAlarmLogServer">
+        <property name="logger" ref="pumaAlarmLogger" />
+    </bean>
+
+</beans>

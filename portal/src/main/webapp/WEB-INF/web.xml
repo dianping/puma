@@ -13,6 +13,7 @@
             classpath*:spring/appcontext-service.xml,
             classpath*:spring/db/appcontext-dao.xml,
             classpath*:spring/db/appcontext-db.xml,
+            classpath*:spring/db/appcontext-tx.xml
         </param-value>
     </context-param>
     

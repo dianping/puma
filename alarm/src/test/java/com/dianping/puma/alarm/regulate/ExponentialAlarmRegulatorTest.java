@@ -2,6 +2,7 @@ package com.dianping.puma.alarm.regulate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
 import com.dianping.puma.alarm.model.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.strategy.ExponentialAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.NoAlarmStrategy;
 import com.dianping.puma.common.utils.Clock;
@@ -32,7 +33,7 @@ public class ExponentialAlarmRegulatorTest {
 
     /**
      * 测试第一次状态异常一定会告警.
-     *
+     * <p/>
      * 指数告警策略: 100,200,200,...
      * 第一次,状态异常,时刻0,告警.
      *
@@ -40,21 +41,22 @@ public class ExponentialAlarmRegulatorTest {
      */
     @Test
     public void test0() throws Exception {
-       AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
         ExponentialAlarmStrategy strategy = new ExponentialAlarmStrategy();
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(200);
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
     }
 
     /**
      * 测试告警能否符合指数告警的策略.
-     *
+     * <p/>
      * 指数告警策略: 100,200,400,800,...
      * 第一次,状态异常,0时刻,告警.
      * 第二次,状态异常,50时刻,不告警.
@@ -70,37 +72,38 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(10000);
 
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(50L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(150L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(300L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(500L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
     }
 
     /**
      * 测试告警在指数告警策略达到最大值是能否正常告警.
-     *
+     * <p/>
      * 指数告警策略:100,200,400,400,...
      * 第一次,状态异常,0时刻,告警.
      * 第二次,状态异常,150时刻,告警.
@@ -117,42 +120,43 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(400);
 
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(150L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(500L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(1000L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(1500L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(2000L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
     }
 
     /**
      * 测试状态正常能够清空之前的告警状态.
-     *
+     * <p/>
      * 指数告警策略:100,200,200...
      * 第一次,状态异常,0时刻,告警.
      * 第二次,状态正常,50时刻,不告警.
@@ -166,27 +170,28 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(200);
 
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(false);
+        state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(50L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(60L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
     }
 
     /**
      * 测试状态正常一直不告警.
-     *
+     * <p/>
      * 指数告警策略:100,200,200,...
      * 第一次,状态正常,时刻0,不告警.
      * 第二次,状态正常,时刻100,不告警.
@@ -200,27 +205,28 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(200);
 
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
-        result.setAlarm(false);
+        state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
 
-        result.setAlarm(false);
+        state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(100L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
 
-        result.setAlarm(false);
+        state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(1000L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
     }
 
     /**
      * 测试多个不同名字告警数据能否正常告警.
-     *
+     * <p/>
      * 指数告警策略: 0,100,200,200,...
      * 第一次,名字a,时刻0,告警.
      * 第二次,名字b,时刻200,告警.
@@ -235,26 +241,27 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(200);
 
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("a", result, strategy);
+        result = regulator.regulate("a", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(200L);
-        result = regulator.regulate("b", result, strategy);
+        result = regulator.regulate("b", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(250L);
-        result = regulator.regulate("a", result, strategy);
+        result = regulator.regulate("a", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(260L);
-        result = regulator.regulate("b", result, strategy);
+        result = regulator.regulate("b", state, strategy);
         assertFalse(result.isAlarm());
     }
 
@@ -266,8 +273,8 @@ public class ExponentialAlarmRegulatorTest {
     @Test(expected = PumaAlarmRegulateUnsupportedException.class)
     public void testException0() throws Exception {
         NoAlarmStrategy strategy = new NoAlarmStrategy();
-        AlarmResult result = new AlarmResult();
-        regulator.regulate("test", result, strategy);
+        AlarmState state = new AlarmState();
+        regulator.regulate("test", state, strategy);
     }
 
     @After

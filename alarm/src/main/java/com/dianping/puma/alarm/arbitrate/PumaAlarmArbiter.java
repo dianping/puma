@@ -1,9 +1,9 @@
 package com.dianping.puma.alarm.arbitrate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateException;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
-import com.dianping.puma.alarm.model.AlarmResult;
 import com.dianping.puma.common.PumaLifeCycle;
 
 /**
@@ -12,5 +12,5 @@ import com.dianping.puma.common.PumaLifeCycle;
  */
 public interface PumaAlarmArbiter extends PumaLifeCycle {
 
-    AlarmResult arbitrate(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmArbitrateException;
+    AlarmState arbitrate(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmArbitrateException;
 }

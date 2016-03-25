@@ -3,6 +3,7 @@ package com.dianping.puma.alarm.regulate;
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateException;
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
 import com.dianping.puma.alarm.model.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.ExponentialAlarmStrategy;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
@@ -24,7 +25,7 @@ public class ExponentialAlarmRegulator extends AbstractPumaLifeCycle implements 
     private ConcurrentMap<String, Long> nextAlarmIntervalMap = new MapMaker().makeMap();
 
     @Override
-    public AlarmResult regulate(String clientName, AlarmResult result, AlarmStrategy strategy)
+    public AlarmResult regulate(String clientName, AlarmState state, AlarmStrategy strategy)
             throws PumaAlarmRegulateException {
         if (!(strategy instanceof ExponentialAlarmStrategy)) {
             throw new PumaAlarmRegulateUnsupportedException("unsupported alarm strategy[%s]", strategy);
@@ -32,10 +33,12 @@ public class ExponentialAlarmRegulator extends AbstractPumaLifeCycle implements 
 
         ExponentialAlarmStrategy exponentialAlarmStrategy = (ExponentialAlarmStrategy) strategy;
 
-        if (!result.isAlarm()) {
+        AlarmResult result = new AlarmResult();
+
+        if (!state.isAlarm()) {
             lastAlarmTimeMap.remove(clientName);
             nextAlarmIntervalMap.remove(clientName);
-            return result;
+            result.setAlarm(false);
         } else {
 
             if (!lastAlarmTimeMap.containsKey(clientName)) {
@@ -43,7 +46,7 @@ public class ExponentialAlarmRegulator extends AbstractPumaLifeCycle implements 
                 long minExponentialAlarmIntervalInSecond
                         = exponentialAlarmStrategy.getMinExponentialAlarmIntervalInSecond();
                 nextAlarmIntervalMap.put(clientName, minExponentialAlarmIntervalInSecond);
-                return result;
+                result.setAlarm(true);
             } else {
                 long nextAlarmInterval = nextAlarmIntervalMap.get(clientName);
                 long lastAlarmTime = lastAlarmTimeMap.get(clientName);
@@ -61,11 +64,14 @@ public class ExponentialAlarmRegulator extends AbstractPumaLifeCycle implements 
                     nextAlarmInterval = (nextAlarmInterval > maxExponentialAlarmIntervalInSecond)
                             ? maxExponentialAlarmIntervalInSecond : nextAlarmInterval;
                     nextAlarmIntervalMap.put(clientName, nextAlarmInterval);
+                    result.setAlarm(true);
                 }
 
                 return result;
             }
         }
+
+        return result;
     }
 
     public void setClock(Clock clock) {

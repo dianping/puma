@@ -2,9 +2,9 @@ package com.dianping.puma.alarm.arbitrate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateException;
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
-import com.dianping.puma.alarm.model.AlarmResult;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class ChainedAlarmArbiter extends AbstractPumaLifeCycle implements PumaAl
     }
 
     @Override
-    public AlarmResult arbitrate(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmArbitrateException {
+    public AlarmState arbitrate(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmArbitrateException {
         for (PumaAlarmArbiter arbiter: arbiters) {
             try {
                 return arbiter.arbitrate(data, benchmark);

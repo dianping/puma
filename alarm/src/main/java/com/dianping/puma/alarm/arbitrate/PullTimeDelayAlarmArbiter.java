@@ -2,11 +2,11 @@ package com.dianping.puma.alarm.arbitrate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateException;
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
-import com.dianping.puma.alarm.model.AlarmResult;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 
 /**
@@ -16,7 +16,7 @@ import com.dianping.puma.common.AbstractPumaLifeCycle;
 public class PullTimeDelayAlarmArbiter extends AbstractPumaLifeCycle implements PumaAlarmArbiter {
 
     @Override
-    public AlarmResult arbitrate(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmArbitrateException {
+    public AlarmState arbitrate(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmArbitrateException {
         if (!(data instanceof PullTimeDelayAlarmData)) {
             throw new PumaAlarmArbitrateUnsupportedException("unsupported data[%s]", data);
         }
@@ -28,10 +28,10 @@ public class PullTimeDelayAlarmArbiter extends AbstractPumaLifeCycle implements 
         PullTimeDelayAlarmData pullTimeDelayAlarmData = (PullTimeDelayAlarmData) data;
         PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark = (PullTimeDelayAlarmBenchmark) benchmark;
 
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
 
         if (!pullTimeDelayAlarmBenchmark.isPullTimeDelayAlarm()) {
-            result.setAlarm(false);
+            state.setAlarm(false);
         } else {
             long minPullTimeDelayInSecond = pullTimeDelayAlarmBenchmark.getMinPullTimeDelayInSecond();
             long maxPullTimeDelayInSecond = pullTimeDelayAlarmBenchmark.getMaxPullTimeDelayInSecond();
@@ -40,12 +40,12 @@ public class PullTimeDelayAlarmArbiter extends AbstractPumaLifeCycle implements 
 
             if (pullTimeDelayInSecond >= minPullTimeDelayInSecond
                     && pullTimeDelayInSecond <= maxPullTimeDelayInSecond) {
-                result.setAlarm(false);
+                state.setAlarm(false);
             } else {
-                result.setAlarm(true);
+                state.setAlarm(true);
             }
         }
 
-        return result;
+        return state;
     }
 }

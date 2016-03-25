@@ -2,6 +2,7 @@ package com.dianping.puma.alarm.regulate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
 import com.dianping.puma.alarm.model.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.NoAlarmStrategy;
 import org.junit.After;
@@ -30,12 +31,14 @@ public class NoAlarmRegulatorTest {
      */
     @Test
     public void test0() throws Exception {
-        AlarmResult result = new AlarmResult();
-        result.setAlarm(true);
+        AlarmState state = new AlarmState();
+        AlarmResult result;
+
+        state.setAlarm(true);
 
         NoAlarmStrategy strategy = new NoAlarmStrategy();
 
-        result = regulator.regulate("abc", result, strategy);
+        result = regulator.regulate("abc", state, strategy);
         assertFalse(result.isAlarm());
     }
 
@@ -46,12 +49,14 @@ public class NoAlarmRegulatorTest {
      */
     @Test
     public void test1() throws Exception {
-        AlarmResult result = new AlarmResult();
-        result.setAlarm(false);
+        AlarmState state = new AlarmState();
+        AlarmResult result;
+
+        state.setAlarm(false);
 
         NoAlarmStrategy strategy = new NoAlarmStrategy();
 
-        result = regulator.regulate("abc", result, strategy);
+        result = regulator.regulate("abc", state, strategy);
         assertFalse(result.isAlarm());
     }
 
@@ -62,11 +67,11 @@ public class NoAlarmRegulatorTest {
      */
     @Test(expected = PumaAlarmRegulateUnsupportedException.class)
     public void testException0() throws Exception {
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
 
         LinearAlarmStrategy strategy = new LinearAlarmStrategy();
 
-        regulator.regulate("abc", result, strategy);
+        regulator.regulate("abc", state, strategy);
     }
 
     @After

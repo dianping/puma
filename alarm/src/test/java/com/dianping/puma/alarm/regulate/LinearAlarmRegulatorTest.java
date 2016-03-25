@@ -2,6 +2,7 @@ package com.dianping.puma.alarm.regulate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
 import com.dianping.puma.alarm.model.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.NoAlarmStrategy;
 import com.dianping.puma.common.utils.Clock;
@@ -40,14 +41,15 @@ public class LinearAlarmRegulatorTest {
      */
     @Test
     public void test0() throws Exception {
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
         LinearAlarmStrategy strategy = new LinearAlarmStrategy();
         strategy.setLinearAlarmIntervalInSecond(100);
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
     }
 
@@ -65,34 +67,35 @@ public class LinearAlarmRegulatorTest {
      */
     @Test
     public void test1() throws Exception {
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
         LinearAlarmStrategy strategy = new LinearAlarmStrategy();
         strategy.setLinearAlarmIntervalInSecond(100);
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(50L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(150L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(200L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
 
         result.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(300L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
     }
 
@@ -108,24 +111,25 @@ public class LinearAlarmRegulatorTest {
      */
     @Test
     public void test2() throws Exception {
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
         LinearAlarmStrategy strategy = new LinearAlarmStrategy();
         strategy.setLinearAlarmIntervalInSecond(100);
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(false);
+        state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(50L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(60L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertTrue(result.isAlarm());
     }
 
@@ -140,19 +144,20 @@ public class LinearAlarmRegulatorTest {
      */
     @Test
     public void test3() throws Exception {
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
         LinearAlarmStrategy strategy = new LinearAlarmStrategy();
         strategy.setLinearAlarmIntervalInSecond(100);
 
-        result.setAlarm(false);
+        state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
 
-        result.setAlarm(false);
+        state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(50L);
-        result = regulator.regulate("test", result, strategy);
+        result = regulator.regulate("test", state, strategy);
         assertFalse(result.isAlarm());
     }
 
@@ -169,29 +174,30 @@ public class LinearAlarmRegulatorTest {
      */
     @Test
     public void test4() throws Exception {
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
+        AlarmResult result;
 
         LinearAlarmStrategy strategy = new LinearAlarmStrategy();
         strategy.setLinearAlarmIntervalInSecond(100);
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("a", result, strategy);
+        result = regulator.regulate("a", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(50L);
-        result = regulator.regulate("b", result, strategy);
+        result = regulator.regulate("b", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(120L);
-        result = regulator.regulate("a", result, strategy);
+        result = regulator.regulate("a", state, strategy);
         assertTrue(result.isAlarm());
 
-        result.setAlarm(true);
+        state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(200L);
-        result = regulator.regulate("b", result, strategy);
+        result = regulator.regulate("b", state, strategy);
         assertTrue(result.isAlarm());
     }
 
@@ -202,11 +208,11 @@ public class LinearAlarmRegulatorTest {
      */
     @Test(expected = PumaAlarmRegulateUnsupportedException.class)
     public void testException0() throws Exception {
-        AlarmResult result = new AlarmResult();
+        AlarmState state = new AlarmState();
 
         NoAlarmStrategy strategy = new NoAlarmStrategy();
 
-        regulator.regulate("test", result, strategy);
+        regulator.regulate("test", state, strategy);
     }
 
     @After

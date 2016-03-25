@@ -2,6 +2,7 @@ package com.dianping.puma.alarm.regulate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateException;
 import com.dianping.puma.alarm.model.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 import com.dianping.puma.common.PumaLifeCycle;
 
@@ -11,6 +12,6 @@ import com.dianping.puma.common.PumaLifeCycle;
  */
 public interface PumaAlarmRegulator extends PumaLifeCycle {
 
-    AlarmResult regulate(String clientName, AlarmResult result, AlarmStrategy strategy)
+    AlarmResult regulate(String clientName, AlarmState state, AlarmStrategy strategy)
         throws PumaAlarmRegulateException;
 }

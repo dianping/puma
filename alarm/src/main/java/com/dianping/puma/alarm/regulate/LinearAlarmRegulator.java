@@ -3,6 +3,7 @@ package com.dianping.puma.alarm.regulate;
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateException;
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
 import com.dianping.puma.alarm.model.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
@@ -22,7 +23,7 @@ public class LinearAlarmRegulator extends AbstractPumaLifeCycle implements PumaA
     private ConcurrentMap<String, Long> lastAlarmTimeMap = new MapMaker().makeMap();
 
     @Override
-    public AlarmResult regulate(String clientName, AlarmResult result, AlarmStrategy strategy)
+    public AlarmResult regulate(String clientName, AlarmState state, AlarmStrategy strategy)
             throws PumaAlarmRegulateException {
         if (!(strategy instanceof LinearAlarmStrategy)) {
             throw new PumaAlarmRegulateUnsupportedException("unsupported alarm strategy[%s]", strategy);
@@ -30,28 +31,30 @@ public class LinearAlarmRegulator extends AbstractPumaLifeCycle implements PumaA
 
         LinearAlarmStrategy linearAlarmStrategy = (LinearAlarmStrategy) strategy;
 
-        if (!result.isAlarm()) {
+        AlarmResult result = new AlarmResult();
+
+        if (!state.isAlarm()) {
             lastAlarmTimeMap.remove(clientName);
-            return result;
+            result.setAlarm(false);
         } else {
 
             if (!lastAlarmTimeMap.containsKey(clientName)) {
                 lastAlarmTimeMap.put(clientName, clock.getTimestamp());
-                return result;
+                result.setAlarm(true);
             } else {
                 long lastAlarmTime = lastAlarmTimeMap.get(clientName);
                 long now = clock.getTimestamp();
                 long linearAlarmIntervalInSecond = linearAlarmStrategy.getLinearAlarmIntervalInSecond();
                 if (now - lastAlarmTime > linearAlarmIntervalInSecond) {
                     lastAlarmTimeMap.put(clientName, now);
-                    return result;
+                    result.setAlarm(true);
                 } else {
                     result.setAlarm(false);
-                    return result;
                 }
             }
-
         }
+
+        return result;
     }
 
     public void setClock(Clock clock) {

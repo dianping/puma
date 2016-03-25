@@ -1,11 +1,11 @@
 package com.dianping.puma.alarm.arbitrate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
-import com.dianping.puma.alarm.model.AlarmResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,8 +41,8 @@ public class PushTimeDelayAlarmArbiterTest {
         benchmark.setMinPushTimeDelayInSecond(10);
         benchmark.setMaxPushTimeDelayInSecond(10000);
 
-        AlarmResult result = arbiter.arbitrate(data, benchmark);
-        assertFalse(result.isAlarm());
+        AlarmState state = arbiter.arbitrate(data, benchmark);
+        assertFalse(state.isAlarm());
     }
 
     /**
@@ -61,8 +61,8 @@ public class PushTimeDelayAlarmArbiterTest {
         benchmark.setMinPushTimeDelayInSecond(2000);
         benchmark.setMaxPushTimeDelayInSecond(10000);
 
-        AlarmResult result = arbiter.arbitrate(data, benchmark);
-        assertTrue(result.isAlarm());
+        AlarmState state = arbiter.arbitrate(data, benchmark);
+        assertTrue(state.isAlarm());
     }
 
     /**
@@ -81,8 +81,8 @@ public class PushTimeDelayAlarmArbiterTest {
         benchmark.setMinPushTimeDelayInSecond(10);
         benchmark.setMaxPushTimeDelayInSecond(100);
 
-        AlarmResult result = arbiter.arbitrate(data, benchmark);
-        assertTrue(result.isAlarm());
+        AlarmState state = arbiter.arbitrate(data, benchmark);
+        assertTrue(state.isAlarm());
     }
 
     /**
@@ -101,8 +101,8 @@ public class PushTimeDelayAlarmArbiterTest {
         benchmark.setMinPushTimeDelayInSecond(10);
         benchmark.setMaxPushTimeDelayInSecond(100);
 
-        AlarmResult result = arbiter.arbitrate(data, benchmark);
-        assertFalse(result.isAlarm());
+        AlarmState state = arbiter.arbitrate(data, benchmark);
+        assertFalse(state.isAlarm());
     }
 
     /**

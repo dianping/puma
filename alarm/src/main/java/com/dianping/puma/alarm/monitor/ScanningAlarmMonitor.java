@@ -2,6 +2,9 @@ package com.dianping.puma.alarm.monitor;
 
 import com.dianping.puma.alarm.arbitrate.PumaAlarmArbiter;
 import com.dianping.puma.alarm.exception.PumaAlarmMonitorException;
+import com.dianping.puma.alarm.model.AlarmMessage;
+import com.dianping.puma.alarm.model.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
@@ -9,13 +12,13 @@ import com.dianping.puma.alarm.model.data.AlarmData;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.meta.*;
-import com.dianping.puma.alarm.model.AlarmResult;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.ExponentialAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.NoAlarmStrategy;
 import com.dianping.puma.alarm.notify.PumaAlarmNotifier;
 import com.dianping.puma.alarm.regulate.PumaAlarmRegulator;
+import com.dianping.puma.alarm.render.PumaAlarmRenderer;
 import com.dianping.puma.alarm.service.PumaClientAlarmBenchmarkService;
 import com.dianping.puma.alarm.service.PumaClientAlarmDataService;
 import com.dianping.puma.alarm.service.PumaClientAlarmMetaService;
@@ -43,6 +46,8 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private PumaAlarmArbiter arbiter;
+
+    private PumaAlarmRenderer renderer;
 
     private PumaAlarmRegulator regulator;
 
@@ -127,9 +132,11 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
                 AlarmData data = entry.getKey();
                 AlarmBenchmark benchmark = entry.getValue();
 
-                AlarmResult result = arbiter.arbitrate(data, benchmark);
-
-                result = regulator.regulate(clientName, result, strategy);
+                AlarmState state = arbiter.arbitrate(data, benchmark);
+                AlarmMessage message = renderer.render(clientName, data, benchmark);
+                AlarmResult result = regulator.regulate(clientName, state, strategy);
+                result.setTitle(message.getTitle());
+                result.setContent(message.getContent());
 
                 for (AlarmMeta meta : metas) {
                     notifier.notify(result, meta);
@@ -214,6 +221,10 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     public void setArbiter(PumaAlarmArbiter arbiter) {
         this.arbiter = arbiter;
+    }
+
+    public void setRenderer(PumaAlarmRenderer renderer) {
+        this.renderer = renderer;
     }
 
     public void setRegulator(PumaAlarmRegulator regulator) {

@@ -3,6 +3,7 @@ package com.dianping.puma.alarm.regulate;
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateException;
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
 import com.dianping.puma.alarm.model.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 
@@ -35,11 +36,11 @@ public class ChainedAlarmRegulator extends AbstractPumaLifeCycle implements Puma
     }
 
     @Override
-    public AlarmResult regulate(String clientName, AlarmResult result, AlarmStrategy strategy)
+    public AlarmResult regulate(String clientName, AlarmState state, AlarmStrategy strategy)
             throws PumaAlarmRegulateException {
         for (PumaAlarmRegulator regulator: regulators) {
             try {
-                return regulator.regulate(clientName, result, strategy);
+                return regulator.regulate(clientName, state, strategy);
             } catch (PumaAlarmRegulateUnsupportedException ignore) {
             }
         }

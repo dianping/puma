@@ -2,9 +2,9 @@ package com.dianping.puma.alarm.notify;
 
 import com.dianping.puma.alarm.exception.PumaAlarmNotifyException;
 import com.dianping.puma.alarm.exception.PumaAlarmNotifyUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmResult;
 import com.dianping.puma.alarm.model.meta.AlarmMeta;
 import com.dianping.puma.alarm.model.meta.LogAlarmMeta;
-import com.dianping.puma.alarm.model.AlarmResult;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

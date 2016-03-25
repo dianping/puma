@@ -40,7 +40,7 @@ public class ChainedAlarmRenderer extends AbstractPumaAlarmRenderer {
         for (PumaAlarmRenderer renderer: renderers) {
             try {
                 return renderer.render(clientName, data, benchmark);
-            } catch (Throwable ignore) {
+            } catch (PumaAlarmRenderUnsupportedException ignore) {
             }
         }
 

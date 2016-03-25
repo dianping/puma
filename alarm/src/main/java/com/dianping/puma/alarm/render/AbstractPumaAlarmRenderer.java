@@ -17,6 +17,7 @@ public abstract class AbstractPumaAlarmRenderer extends AbstractPumaLifeCycle im
 
     protected AlarmTemplate generateAlarmTemplate(String propertiesFilePath) {
         try {
+            AlarmTemplate alarmTemplate = new AlarmTemplate();
             Properties properties = new Properties();
             InputStream is = getClass().getClassLoader().getResourceAsStream(propertiesFilePath);
             properties.load(is);
@@ -25,20 +26,24 @@ public abstract class AbstractPumaAlarmRenderer extends AbstractPumaLifeCycle im
             if (titleTemplate == null) {
                 throw new NullPointerException("title template");
             } else {
-                template.setTitleTemplate(titleTemplate);
+                alarmTemplate.setTitleTemplate(titleTemplate);
             }
 
             String contentTemplate = properties.getProperty("content");
             if (contentTemplate == null) {
                 throw new NullPointerException("content template");
             } else {
-                template.setContentTemplate(contentTemplate);
+                alarmTemplate.setContentTemplate(contentTemplate);
             }
 
-            return template;
+            return alarmTemplate;
 
         } catch (Throwable t) {
             throw new PumaAlarmRenderException("Failed to generate alarm template.", t);
         }
+    }
+
+    public void setTemplate(AlarmTemplate template) {
+        this.template = template;
     }
 }

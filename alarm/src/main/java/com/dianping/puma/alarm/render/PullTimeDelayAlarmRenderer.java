@@ -14,7 +14,7 @@ import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
  */
 public class PullTimeDelayAlarmRenderer extends AbstractPumaAlarmRenderer {
 
-    private final String propertiesFilePath = "template/pull-time-delay.properties";
+    protected final String propertiesFilePath = "template/alarm-pulltimedelay.properties";
 
     @Override
     public AlarmMessage render(String clientName, AlarmData data, AlarmBenchmark benchmark)
@@ -29,7 +29,7 @@ public class PullTimeDelayAlarmRenderer extends AbstractPumaAlarmRenderer {
         }
 
         if (template == null) {
-            generateAlarmTemplate(propertiesFilePath);
+            template = generateAlarmTemplate(propertiesFilePath);
         }
 
         AlarmMessage message = new AlarmMessage();

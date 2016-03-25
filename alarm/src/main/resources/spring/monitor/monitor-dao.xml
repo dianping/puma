@@ -8,4 +8,10 @@
         <property name="basePackage" value="com.dianping.puma.biz.dao" />
         <property name="sqlSessionFactoryBeanName" value="pumaSqlSessionFactory" />
     </bean>
+
+    <!--bean id="clientAlarmDataDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.dianping.puma.biz.dao.ClientAlarmDataDao" />
+        <property name="sqlSessionFactory" value="pumaSqlSessionFactory" />
+    </bean-->
+
 </beans>

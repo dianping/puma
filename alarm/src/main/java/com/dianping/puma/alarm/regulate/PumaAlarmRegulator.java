@@ -1,7 +1,7 @@
 package com.dianping.puma.alarm.regulate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRegulateException;
-import com.dianping.puma.alarm.model.result.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmResult;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 import com.dianping.puma.common.PumaLifeCycle;
 

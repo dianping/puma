@@ -1,4 +1,4 @@
-package com.dianping.puma.alarm.model.result;
+package com.dianping.puma.alarm.model;
 
 import lombok.ToString;
 

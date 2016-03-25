@@ -9,7 +9,7 @@ import com.dianping.puma.alarm.model.data.AlarmData;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.meta.*;
-import com.dianping.puma.alarm.model.result.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmResult;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.ExponentialAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;

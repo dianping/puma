@@ -6,7 +6,7 @@ import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
-import com.dianping.puma.alarm.model.result.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmResult;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 
 /**

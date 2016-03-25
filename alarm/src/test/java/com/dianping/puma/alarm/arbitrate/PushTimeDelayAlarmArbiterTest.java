@@ -5,7 +5,7 @@ import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
-import com.dianping.puma.alarm.model.result.AlarmResult;
+import com.dianping.puma.alarm.model.AlarmResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

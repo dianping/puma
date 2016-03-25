@@ -16,7 +16,7 @@
             expression="org.springframework.stereotype.Controller" />
     </context:component-scan-->
 
-    <context:component-scan base-package="com.dianping.puma.portal.web"/>
+    <context:component-scan base-package="com.dianping.puma.web.web"/>
 
     <!-- Configures the @Controller programming model -->
     <mvc:annotation-driven/>

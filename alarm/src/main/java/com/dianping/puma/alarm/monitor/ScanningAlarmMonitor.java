@@ -1,6 +1,7 @@
 package com.dianping.puma.alarm.monitor;
 
 import com.dianping.puma.alarm.arbitrate.PumaAlarmArbiter;
+import com.dianping.puma.alarm.exception.PumaAlarmMonitorException;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
@@ -57,7 +58,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     private PumaClientAlarmMetaService pumaClientAlarmMetaService;
 
-    private long scanIntervalInSecond = 5;
+    private long scanIntervalInSecond = 10;
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(
             1, new NamedThreadFactory("scanning-alarm-monitor-executor", false));
@@ -98,55 +99,94 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
     }
 
     private void scan() {
-        try {
-            List<String> clientNames = pumaClientService.findAllClientNames();
+        List<String> clientNames = pumaClientService.findAllClientNames();
 
-            for (String clientName: clientNames) {
-                Map<AlarmData, AlarmBenchmark> pairs = generatePairs(clientName);
-                AlarmStrategy strategy = generateStrategy(clientName);
-                List<AlarmMeta> metas = generateMetas(clientName);
+        for (String clientName : clientNames) {
+            AlarmStrategy strategy = monitorStrategy(clientName);
+            List<AlarmMeta> metas = monitorMetas(clientName);
 
-                for (Map.Entry<AlarmData, AlarmBenchmark> entry: pairs.entrySet()) {
-                    AlarmData data = entry.getKey();
-                    AlarmBenchmark benchmark = entry.getValue();
+            Map<AlarmData, AlarmBenchmark> map = Maps.newHashMap();
 
-                    AlarmResult result = arbiter.arbitrate(data, benchmark);
+            PullTimeDelayAlarmData pullTimeDelayAlarmData
+                    = monitorPullTimeDelayData(clientName);
+            PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark
+                    = monitorPullTimeDelayBenchmark(clientName);
+            if (pullTimeDelayAlarmData != null && pullTimeDelayAlarmBenchmark != null) {
+                map.put(pullTimeDelayAlarmData, pullTimeDelayAlarmBenchmark);
+            }
 
-                    result = regulator.regulate(clientName, result, strategy);
+            PushTimeDelayAlarmData pushTimeDelayAlarmData
+                    = monitorPushTimeDelayData(clientName);
+            PushTimeDelayAlarmBenchmark pushTimeDelayAlarmBenchmark
+                    = monitorPushTimeDelayBenchmark(clientName);
+            if (pushTimeDelayAlarmData != null && pushTimeDelayAlarmBenchmark != null) {
+                map.put(pushTimeDelayAlarmData, pushTimeDelayAlarmBenchmark);
+            }
 
-                    for (AlarmMeta meta: metas) {
-                        notifier.notify(result, meta);
-                    }
+            for (Map.Entry<AlarmData, AlarmBenchmark> entry : map.entrySet()) {
+                AlarmData data = entry.getKey();
+                AlarmBenchmark benchmark = entry.getValue();
+
+                AlarmResult result = arbiter.arbitrate(data, benchmark);
+
+                result = regulator.regulate(clientName, result, strategy);
+
+                for (AlarmMeta meta : metas) {
+                    notifier.notify(result, meta);
                 }
             }
-        } catch (Throwable t) {
-            logger.error("Failed to scan puma alarms.", t);
         }
     }
 
-    private Map<AlarmData, AlarmBenchmark> generatePairs(String clientName) {
-        Map<AlarmData, AlarmBenchmark> pairs = Maps.newHashMap();
-
-        PullTimeDelayAlarmData pullTimeDelayAlarmData
-                = pumaClientAlarmDataService.findPullTimeDelay(clientName);
-        PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark
-                = pumaClientAlarmBenchmarkService.findPullTimeDelay(clientName);
-        if (pullTimeDelayAlarmData != null && pullTimeDelayAlarmBenchmark != null) {
-            pairs.put(pullTimeDelayAlarmData, pullTimeDelayAlarmBenchmark);
-        }
-
-        PushTimeDelayAlarmData pushTimeDelayAlarmData
-                = pumaClientAlarmDataService.findPushTimeDelay(clientName);
-        PushTimeDelayAlarmBenchmark pushTimeDelayAlarmBenchmark
-                = pumaClientAlarmBenchmarkService.findPushTimeDelay(clientName);
-        if (pushTimeDelayAlarmData != null && pushTimeDelayAlarmBenchmark != null) {
-            pairs.put(pushTimeDelayAlarmData, pushTimeDelayAlarmBenchmark);
-        }
-
-        return pairs;
+    @Override
+    public PullTimeDelayAlarmData monitorPullTimeDelayData(String clientName)
+            throws PumaAlarmMonitorException {
+        return pumaClientAlarmDataService.findPullTimeDelay(clientName);
     }
 
-    private List<AlarmMeta> generateMetas(String clientName) {
+    @Override
+    public PushTimeDelayAlarmData monitorPushTimeDelayData(String clientName)
+            throws PumaAlarmMonitorException {
+        return pumaClientAlarmDataService.findPushTimeDelay(clientName);
+    }
+
+    @Override
+    public PullTimeDelayAlarmBenchmark monitorPullTimeDelayBenchmark(String clientName)
+            throws PumaAlarmMonitorException {
+        return pumaClientAlarmBenchmarkService.findPullTimeDelay(clientName);
+    }
+
+    @Override
+    public PushTimeDelayAlarmBenchmark monitorPushTimeDelayBenchmark(String clientName)
+            throws PumaAlarmMonitorException {
+        return pumaClientAlarmBenchmarkService.findPushTimeDelay(clientName);
+    }
+
+    @Override
+    public AlarmStrategy monitorStrategy(String clientName) throws PumaAlarmMonitorException {
+        NoAlarmStrategy noAlarmStrategy
+                = pumaClientAlarmStrategyService.findNo(clientName);
+        if (noAlarmStrategy != null) {
+            return noAlarmStrategy;
+        }
+
+        LinearAlarmStrategy linearAlarmStrategy
+                = pumaClientAlarmStrategyService.findLinear(clientName);
+        if (linearAlarmStrategy != null) {
+            return linearAlarmStrategy;
+        }
+
+        ExponentialAlarmStrategy exponentialAlarmStrategy
+                = pumaClientAlarmStrategyService.findExponential(clientName);
+        if (exponentialAlarmStrategy != null) {
+            return exponentialAlarmStrategy;
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<AlarmMeta> monitorMetas(String clientName) throws PumaAlarmMonitorException {
         List<AlarmMeta> metas = Lists.newArrayList();
 
         EmailAlarmMeta emailAlarmMeta = pumaClientAlarmMetaService.findEmail(clientName);
@@ -170,25 +210,6 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
         }
 
         return metas;
-    }
-
-    private AlarmStrategy generateStrategy(String clientName) {
-        NoAlarmStrategy noAlarmStrategy = pumaClientAlarmStrategyService.findNo(clientName);
-        if (noAlarmStrategy != null) {
-            return noAlarmStrategy;
-        }
-
-        LinearAlarmStrategy linearAlarmStrategy = pumaClientAlarmStrategyService.findLinear(clientName);
-        if (linearAlarmStrategy != null) {
-            return linearAlarmStrategy;
-        }
-
-        ExponentialAlarmStrategy exponentialAlarmStrategy = pumaClientAlarmStrategyService.findExponential(clientName);
-        if (exponentialAlarmStrategy != null) {
-            return exponentialAlarmStrategy;
-        }
-
-        return null;
     }
 
     public void setArbiter(PumaAlarmArbiter arbiter) {

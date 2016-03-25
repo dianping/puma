@@ -14,12 +14,8 @@ public class PumaAlarmMonitorServerLauncher {
     private static Logger logger = LoggerFactory.getLogger(PumaAlarmMonitorServerLauncher.class);
 
     public static void main(String[] args) {
-        final ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext(
-                "classpath:spring/monitor/monitor-properties.xml",
-                "classpath:spring/monitor/monitor-remote.xml",
-                "classpath:spring/monitor/monitor-dao.xml",
-                "classpath:spring/monitor/monitor-db.xml",
-                "classpath:spring/monitor/monitor-tx.xml");
+        final ConfigurableApplicationContext ctx
+                = new ClassPathXmlApplicationContext("classpath:spring/monitor-local.xml");
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override

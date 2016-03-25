@@ -16,7 +16,21 @@
         <dependency>
             <groupId>com.dianping.puma</groupId>
             <artifactId>puma-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.dianping.puma</groupId>
+            <artifactId>puma-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dianping.puma</groupId>
+            <artifactId>puma-biz</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.dianping.lion</groupId>
             <artifactId>lion-client</artifactId>

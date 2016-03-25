@@ -16,7 +16,7 @@
         <module>biz</module>
         <module>extension</module>
         <module>alarm</module>
-        <module>portal</module>
+        <module>web</module>
         <module>utils</module>
         <module>server</module>
         <module>test</module>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="pumaDataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+        <property name="jdbcRef" value="puma"/>
+        <property name="poolType" value="tomcat-jdbc"/>
+    </bean>
+
+    <bean id="pumaSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="pumaDataSource"/>
+        <property name="mapperLocations" value="classpath*:sqlmap/*.xml"/>
+        <property name="typeAliasesPackage" value="com.dianping.puma.biz.entity"/>
+    </bean>
+
+    <bean id="pumaTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="pumaDataSource" />
+    </bean>
+
+</beans>

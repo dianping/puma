@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <!-- arbiter -->
+    <bean id="pullTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.PullTimeDelayAlarmArbiter" />
+    <bean id="pushTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.PushTimeDelayAlarmArbiter" />
+    <bean id="pumaAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.ChainedAlarmArbiter">
+        <property name="arbiters">
+            <list>
+                <ref bean="pullTimeDelayAlarmArbiter" />
+                <ref bean="pushTimeDelayAlarmArbiter" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- renderer -->
+    <bean id="pullTimeDelayAlarmRenderer" class="com.dianping.puma.alarm.render.PullTimeDelayAlarmRenderer" />
+    <bean id="pushTimeDelayAlarmRenderer" class="com.dianping.puma.alarm.render.PushTimeDelayAlarmRenderer" />
+    <bean id="pumaAlarmRenderer" class="com.dianping.puma.alarm.render.ChainedAlarmRenderer">
+        <property name="renderers">
+            <list>
+                <ref bean="pullTimeDelayAlarmRenderer" />
+                <ref bean="pushTimeDelayAlarmRenderer" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- regulator -->
+    <bean id="noAlarmRegulator" class="com.dianping.puma.alarm.regulate.NoAlarmRegulator" />
+    <bean id="linearAlarmRegulator" class="com.dianping.puma.alarm.regulate.LinearAlarmRegulator" />
+    <bean id="exponentialAlarmRegulator" class="com.dianping.puma.alarm.regulate.ExponentialAlarmRegulator" />
+    <bean id="pumaAlarmRegulator" class="com.dianping.puma.alarm.regulate.ChainedAlarmRegulator">
+        <property name="regulators">
+            <list>
+                <ref bean="noAlarmRegulator" />
+                <ref bean="linearAlarmRegulator" />
+                <ref bean="exponentialAlarmRegulator" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- notifier -->
+    <bean id="emailAlarmNotifier" class="com.dianping.puma.alarm.notify.EmailAlarmNotifier" />
+    <bean id="weChatAlarmNotifier" class="com.dianping.puma.alarm.notify.WeChatAlarmNotifier" />
+    <bean id="smsAlarmNotifier" class="com.dianping.puma.alarm.notify.SmsAlarmNotifier" />
+    <bean id="logAlarmNotifier" class="com.dianping.puma.alarm.notify.LogAlarmNotifier" />
+    <bean id="pumaAlarmNotifier" class="com.dianping.puma.alarm.notify.ChainedAlarmNotifier">
+        <property name="notifiers">
+            <list>
+                <ref bean="emailAlarmNotifier" />
+                <ref bean="weChatAlarmNotifier" />
+                <ref bean="smsAlarmNotifier" />
+                <ref bean="logAlarmNotifier" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- monitor -->
+    <bean id="pumaAlarmMonitor" class="com.dianping.puma.alarm.monitor.ScanningAlarmMonitor" init-method="start">
+        <property name="pumaClientService" ref="pumaClientService" />
+        <property name="pumaClientAlarmDataService" ref="pumaClientAlarmDataService" />
+        <property name="pumaClientAlarmBenchmarkService" ref="pumaClientAlarmBenchmarkService" />
+        <property name="pumaClientAlarmStrategyService" ref="pumaClientAlarmStrategyService" />
+        <property name="pumaClientAlarmMetaService" ref="pumaClientAlarmMetaService" />
+        <property name="arbiter" ref="pumaAlarmArbiter" />
+        <property name="renderer" ref="pumaAlarmRenderer" />
+        <property name="regulator" ref="pumaAlarmRegulator" />
+        <property name="notifier" ref="pumaAlarmNotifier" />
+        <property name="scanIntervalInSecond" value="5" />
+    </bean>
+
+</beans>

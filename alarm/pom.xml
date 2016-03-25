@@ -27,6 +27,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.dianping.puma</groupId>
+            <artifactId>puma-biz</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- http -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

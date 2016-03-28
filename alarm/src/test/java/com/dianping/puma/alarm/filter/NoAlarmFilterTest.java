@@ -1,8 +1,9 @@
-package com.dianping.puma.alarm.regulate;
+package com.dianping.puma.alarm.filter;
 
-import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
+import com.dianping.puma.alarm.exception.PumaAlarmFilterUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmContext;
 import com.dianping.puma.alarm.model.AlarmResult;
-import com.dianping.puma.alarm.model.AlarmState;
+import com.dianping.puma.alarm.model.state.PullTimeDelayAlarmState;
 import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.NoAlarmStrategy;
 import org.junit.After;
@@ -15,13 +16,13 @@ import static org.junit.Assert.assertFalse;
  * Created by xiaotian.li on 16/3/18.
  * Email: lixiaotian07@gmail.com
  */
-public class NoAlarmRegulatorTest {
+public class NoAlarmFilterTest {
 
-    NoAlarmRegulator regulator = new NoAlarmRegulator();
+    NoAlarmFilter filter = new NoAlarmFilter();
 
     @Before
     public void setUp() throws Exception {
-        regulator.start();
+        filter.start();
     }
 
     /**
@@ -31,14 +32,18 @@ public class NoAlarmRegulatorTest {
      */
     @Test
     public void test0() throws Exception {
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
         AlarmResult result;
+
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
 
         state.setAlarm(true);
 
         NoAlarmStrategy strategy = new NoAlarmStrategy();
 
-        result = regulator.regulate("abc", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertFalse(result.isAlarm());
     }
 
@@ -49,14 +54,18 @@ public class NoAlarmRegulatorTest {
      */
     @Test
     public void test1() throws Exception {
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
         AlarmResult result;
+
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
 
         state.setAlarm(false);
 
         NoAlarmStrategy strategy = new NoAlarmStrategy();
 
-        result = regulator.regulate("abc", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertFalse(result.isAlarm());
     }
 
@@ -65,17 +74,21 @@ public class NoAlarmRegulatorTest {
      *
      * @throws Exception
      */
-    @Test(expected = PumaAlarmRegulateUnsupportedException.class)
+    @Test(expected = PumaAlarmFilterUnsupportedException.class)
     public void testException0() throws Exception {
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
 
         LinearAlarmStrategy strategy = new LinearAlarmStrategy();
 
-        regulator.regulate("abc", state, strategy);
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
+
+        filter.filter(context, state, strategy);
     }
 
     @After
     public void tearDown() throws Exception {
-        regulator.stop();
+        filter.stop();
     }
 }

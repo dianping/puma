@@ -2,9 +2,9 @@ package com.dianping.puma.alarm.arbitrate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateException;
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateUnsupportedException;
-import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
+import com.dianping.puma.alarm.model.state.AlarmState;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 
 import java.util.List;

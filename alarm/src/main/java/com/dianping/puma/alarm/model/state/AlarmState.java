@@ -1,13 +1,10 @@
-package com.dianping.puma.alarm.model;
-
-import lombok.ToString;
+package com.dianping.puma.alarm.model.state;
 
 /**
  * Created by xiaotian.li on 16/3/25.
  * Email: lixiaotian07@gmail.com
  */
-@ToString
-public class AlarmState {
+public abstract class AlarmState {
 
     private boolean alarm;
 

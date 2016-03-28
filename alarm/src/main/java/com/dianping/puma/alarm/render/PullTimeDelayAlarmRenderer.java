@@ -2,6 +2,7 @@ package com.dianping.puma.alarm.render;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRenderException;
 import com.dianping.puma.alarm.exception.PumaAlarmRenderUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmContext;
 import com.dianping.puma.alarm.model.AlarmMessage;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
@@ -14,10 +15,8 @@ import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
  */
 public class PullTimeDelayAlarmRenderer extends AbstractPumaAlarmRenderer {
 
-    protected final String propertiesFilePath = "template/alarm-pulltimedelay.properties";
-
     @Override
-    public AlarmMessage render(String clientName, AlarmData data, AlarmBenchmark benchmark)
+    public AlarmMessage render(AlarmContext context, AlarmData data, AlarmBenchmark benchmark)
             throws PumaAlarmRenderException {
 
         if (!(data instanceof PullTimeDelayAlarmData)) {
@@ -28,17 +27,14 @@ public class PullTimeDelayAlarmRenderer extends AbstractPumaAlarmRenderer {
             throw new PumaAlarmRenderUnsupportedException("unsupported benchmark[%s]", data);
         }
 
-        if (template == null) {
-            template = generateAlarmTemplate(propertiesFilePath);
-        }
-
         AlarmMessage message = new AlarmMessage();
 
         PullTimeDelayAlarmData pullTimeDelayAlarmData = (PullTimeDelayAlarmData) data;
         PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark = (PullTimeDelayAlarmBenchmark) benchmark;
 
-        String title = String.format(template.getTitleTemplate(), clientName);
-        String content = String.format(template.getContentTemplate(),
+        String title = String.format(titleTemplate, context.getName());
+        String content = String.format(
+                contentTemplate,
                 pullTimeDelayAlarmData.getPullTimeDelayInSecond(),
                 pullTimeDelayAlarmBenchmark.getMinPullTimeDelayInSecond(),
                 pullTimeDelayAlarmBenchmark.getMaxPullTimeDelayInSecond());

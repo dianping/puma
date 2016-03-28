@@ -27,6 +27,6 @@ public class LogAlarmNotifier extends AbstractPumaLifeCycle implements PumaAlarm
             return;
         }
 
-        logger.info("[Puma Alarm]");
+        logger.info(result.getTitle() + result.getContent());
     }
 }

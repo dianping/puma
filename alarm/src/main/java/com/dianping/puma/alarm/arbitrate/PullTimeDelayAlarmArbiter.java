@@ -2,11 +2,12 @@ package com.dianping.puma.alarm.arbitrate;
 
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateException;
 import com.dianping.puma.alarm.exception.PumaAlarmArbitrateUnsupportedException;
-import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
+import com.dianping.puma.alarm.model.state.AlarmState;
+import com.dianping.puma.alarm.model.state.PullTimeDelayAlarmState;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 
 /**
@@ -28,7 +29,7 @@ public class PullTimeDelayAlarmArbiter extends AbstractPumaLifeCycle implements 
         PullTimeDelayAlarmData pullTimeDelayAlarmData = (PullTimeDelayAlarmData) data;
         PullTimeDelayAlarmBenchmark pullTimeDelayAlarmBenchmark = (PullTimeDelayAlarmBenchmark) benchmark;
 
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
 
         if (!pullTimeDelayAlarmBenchmark.isPullTimeDelayAlarm()) {
             state.setAlarm(false);

@@ -1,12 +1,12 @@
-package com.dianping.puma.alarm.regulate;
+package com.dianping.puma.alarm.filter;
 
-import com.dianping.puma.alarm.exception.PumaAlarmRegulateException;
-import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
+import com.dianping.puma.alarm.exception.PumaAlarmFilterException;
+import com.dianping.puma.alarm.exception.PumaAlarmFilterUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmContext;
 import com.dianping.puma.alarm.model.AlarmResult;
-import com.dianping.puma.alarm.model.AlarmState;
+import com.dianping.puma.alarm.model.state.AlarmState;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.ExponentialAlarmStrategy;
-import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.utils.Clock;
 import com.google.common.collect.MapMaker;
 
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentMap;
  * Created by xiaotian.li on 16/3/17.
  * Email: lixiaotian07@gmail.com
  */
-public class ExponentialAlarmRegulator extends AbstractPumaLifeCycle implements PumaAlarmRegulator {
+public class ExponentialAlarmFilter extends AbstractPumaAlarmFilter {
 
     private Clock clock = new Clock();
 
@@ -25,31 +25,33 @@ public class ExponentialAlarmRegulator extends AbstractPumaLifeCycle implements 
     private ConcurrentMap<String, Long> nextAlarmIntervalMap = new MapMaker().makeMap();
 
     @Override
-    public AlarmResult regulate(String clientName, AlarmState state, AlarmStrategy strategy)
-            throws PumaAlarmRegulateException {
+    public AlarmResult filter(AlarmContext context, AlarmState state, AlarmStrategy strategy)
+            throws PumaAlarmFilterException {
         if (!(strategy instanceof ExponentialAlarmStrategy)) {
-            throw new PumaAlarmRegulateUnsupportedException("unsupported alarm strategy[%s]", strategy);
+            throw new PumaAlarmFilterUnsupportedException("unsupported alarm strategy[%s]", strategy);
         }
 
         ExponentialAlarmStrategy exponentialAlarmStrategy = (ExponentialAlarmStrategy) strategy;
 
         AlarmResult result = new AlarmResult();
+        String mnemonic = generateMnemonic(
+                context.getNamespace(), context.getName(), state.getClass().getSimpleName());
 
         if (!state.isAlarm()) {
-            lastAlarmTimeMap.remove(clientName);
-            nextAlarmIntervalMap.remove(clientName);
+            lastAlarmTimeMap.remove(mnemonic);
+            nextAlarmIntervalMap.remove(mnemonic);
             result.setAlarm(false);
         } else {
 
-            if (!lastAlarmTimeMap.containsKey(clientName)) {
-                lastAlarmTimeMap.put(clientName, clock.getTimestamp());
+            if (!lastAlarmTimeMap.containsKey(mnemonic)) {
+                lastAlarmTimeMap.put(mnemonic, clock.getTimestamp());
                 long minExponentialAlarmIntervalInSecond
                         = exponentialAlarmStrategy.getMinExponentialAlarmIntervalInSecond();
-                nextAlarmIntervalMap.put(clientName, minExponentialAlarmIntervalInSecond);
+                nextAlarmIntervalMap.put(mnemonic, minExponentialAlarmIntervalInSecond);
                 result.setAlarm(true);
             } else {
-                long nextAlarmInterval = nextAlarmIntervalMap.get(clientName);
-                long lastAlarmTime = lastAlarmTimeMap.get(clientName);
+                long nextAlarmInterval = nextAlarmIntervalMap.get(mnemonic);
+                long lastAlarmTime = lastAlarmTimeMap.get(mnemonic);
                 long now = clock.getTimestamp();
                 long duration = now - lastAlarmTime;
 
@@ -59,11 +61,11 @@ public class ExponentialAlarmRegulator extends AbstractPumaLifeCycle implements 
                 if (duration < nextAlarmInterval) {
                     result.setAlarm(false);
                 } else {
-                    lastAlarmTimeMap.put(clientName, clock.getTimestamp());
+                    lastAlarmTimeMap.put(mnemonic, clock.getTimestamp());
                     nextAlarmInterval = nextAlarmInterval << 1;
                     nextAlarmInterval = (nextAlarmInterval > maxExponentialAlarmIntervalInSecond)
                             ? maxExponentialAlarmIntervalInSecond : nextAlarmInterval;
-                    nextAlarmIntervalMap.put(clientName, nextAlarmInterval);
+                    nextAlarmIntervalMap.put(mnemonic, nextAlarmInterval);
                     result.setAlarm(true);
                 }
 

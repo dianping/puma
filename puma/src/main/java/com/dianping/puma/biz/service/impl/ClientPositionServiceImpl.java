@@ -1,8 +1,8 @@
 package com.dianping.puma.biz.service.impl;
 
 import com.dianping.puma.biz.dao.ClientPositionDao;
-import com.dianping.puma.biz.service.ClientPositionService;
 import com.dianping.puma.biz.entity.ClientPositionEntity;
+import com.dianping.puma.biz.service.ClientPositionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -17,8 +17,14 @@
     </bean>
 
     <!-- renderer -->
-    <bean id="pullTimeDelayAlarmRenderer" class="com.dianping.puma.alarm.render.PullTimeDelayAlarmRenderer"/>
-    <bean id="pushTimeDelayAlarmRenderer" class="com.dianping.puma.alarm.render.PushTimeDelayAlarmRenderer"/>
+    <bean id="pullTimeDelayAlarmRenderer" class="com.dianping.puma.alarm.render.PullTimeDelayAlarmRenderer">
+        <property name="titleTemplate" value="${puma.alarm.pulltimedelaytitletemplate}"/>
+        <property name="contentTemplate" value="${puma.alarm.pulltimedelaycontenttemplate}"/>
+    </bean>
+    <bean id="pushTimeDelayAlarmRenderer" class="com.dianping.puma.alarm.render.PushTimeDelayAlarmRenderer">
+        <property name="titleTemplate" value="${puma.alarm.pushtimedelaytitletemplate}"/>
+        <property name="contentTemplate" value="${puma.alarm.pushtimedelaycontenttemplate}"/>
+    </bean>
     <bean id="pumaAlarmRenderer" class="com.dianping.puma.alarm.render.ChainedAlarmRenderer">
         <property name="renderers">
             <list>
@@ -28,12 +34,12 @@
         </property>
     </bean>
 
-    <!-- regulator -->
-    <bean id="noAlarmRegulator" class="com.dianping.puma.alarm.regulate.NoAlarmRegulator"/>
-    <bean id="linearAlarmRegulator" class="com.dianping.puma.alarm.regulate.LinearAlarmRegulator"/>
-    <bean id="exponentialAlarmRegulator" class="com.dianping.puma.alarm.regulate.ExponentialAlarmRegulator"/>
-    <bean id="pumaAlarmRegulator" class="com.dianping.puma.alarm.regulate.ChainedAlarmRegulator">
-        <property name="regulators">
+    <!-- filter -->
+    <bean id="noAlarmRegulator" class="com.dianping.puma.alarm.filter.NoAlarmFilter"/>
+    <bean id="linearAlarmRegulator" class="com.dianping.puma.alarm.filter.LinearAlarmFilter"/>
+    <bean id="exponentialAlarmRegulator" class="com.dianping.puma.alarm.filter.ExponentialAlarmFilter"/>
+    <bean id="pumaAlarmRegulator" class="com.dianping.puma.alarm.filter.ChainedAlarmFilter">
+        <property name="filters">
             <list>
                 <ref bean="noAlarmRegulator"/>
                 <ref bean="linearAlarmRegulator"/>
@@ -67,7 +73,7 @@
         <property name="pumaClientAlarmMetaService" ref="pumaClientAlarmMetaService"/>
         <property name="arbiter" ref="pumaAlarmArbiter"/>
         <property name="renderer" ref="pumaAlarmRenderer"/>
-        <property name="regulator" ref="pumaAlarmRegulator"/>
+        <property name="filter" ref="pumaAlarmRegulator"/>
         <property name="notifier" ref="pumaAlarmNotifier"/>
         <property name="scanIntervalInSecond" value="${puma.alarm.monitorscaninterval}"/>
     </bean>

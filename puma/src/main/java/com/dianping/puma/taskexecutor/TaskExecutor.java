@@ -12,9 +12,9 @@
  */
 package com.dianping.puma.taskexecutor;
 
+import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.common.LifeCycle;
 import com.dianping.puma.common.PumaContext;
-import com.dianping.puma.biz.entity.PumaTaskStateEntity;
 import com.dianping.puma.datahandler.DataHandler;
 import com.dianping.puma.model.TableSet;
 import com.dianping.puma.sender.Sender;

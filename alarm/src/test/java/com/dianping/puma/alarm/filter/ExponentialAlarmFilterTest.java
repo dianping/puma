@@ -1,8 +1,10 @@
-package com.dianping.puma.alarm.regulate;
+package com.dianping.puma.alarm.filter;
 
-import com.dianping.puma.alarm.exception.PumaAlarmRegulateUnsupportedException;
+import com.dianping.puma.alarm.exception.PumaAlarmFilterUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmContext;
 import com.dianping.puma.alarm.model.AlarmResult;
-import com.dianping.puma.alarm.model.AlarmState;
+import com.dianping.puma.alarm.model.state.PullTimeDelayAlarmState;
+import com.dianping.puma.alarm.model.state.PushTimeDelayAlarmState;
 import com.dianping.puma.alarm.model.strategy.ExponentialAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.NoAlarmStrategy;
 import com.dianping.puma.common.utils.Clock;
@@ -19,16 +21,16 @@ import static org.mockito.Mockito.when;
  * Created by xiaotian.li on 16/3/23.
  * Email: lixiaotian07@gmail.com
  */
-public class ExponentialAlarmRegulatorTest {
+public class ExponentialAlarmFilterTest {
 
-    ExponentialAlarmRegulator regulator = new ExponentialAlarmRegulator();
+    ExponentialAlarmFilter filter = new ExponentialAlarmFilter();
 
     Clock clock = mock(Clock.class);
 
     @Before
     public void setUp() throws Exception {
-        regulator.setClock(clock);
-        regulator.start();
+        filter.setClock(clock);
+        filter.start();
     }
 
     /**
@@ -41,8 +43,12 @@ public class ExponentialAlarmRegulatorTest {
      */
     @Test
     public void test0() throws Exception {
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
         AlarmResult result;
+
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
 
         ExponentialAlarmStrategy strategy = new ExponentialAlarmStrategy();
         strategy.setMinExponentialAlarmIntervalInSecond(100);
@@ -50,7 +56,7 @@ public class ExponentialAlarmRegulatorTest {
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
     }
 
@@ -72,32 +78,36 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(10000);
 
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
         AlarmResult result;
+
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(50L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertFalse(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(150L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(300L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertFalse(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(500L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
     }
 
@@ -120,37 +130,41 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(400);
 
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
         AlarmResult result;
+
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(150L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(500L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(1000L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(1500L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(2000L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
     }
 
@@ -170,22 +184,26 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(200);
 
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
         AlarmResult result;
+
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
 
         state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(50L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertFalse(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(60L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
     }
 
@@ -205,22 +223,26 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(200);
 
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
         AlarmResult result;
+
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
 
         state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertFalse(result.isAlarm());
 
         state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(100L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertFalse(result.isAlarm());
 
         state.setAlarm(false);
         when(clock.getTimestamp()).thenReturn(1000L);
-        result = regulator.regulate("test", state, strategy);
+        result = filter.filter(context, state, strategy);
         assertFalse(result.isAlarm());
     }
 
@@ -241,28 +263,100 @@ public class ExponentialAlarmRegulatorTest {
         strategy.setMinExponentialAlarmIntervalInSecond(100);
         strategy.setMaxExponentialAlarmIntervalInSecond(200);
 
-        AlarmState state = new AlarmState();
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
         AlarmResult result;
+
+        AlarmContext context0 = new AlarmContext();
+        context0.setNamespace("client");
+        context0.setName("a");
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(0L);
-        result = regulator.regulate("a", state, strategy);
+        result = filter.filter(context0, state, strategy);
         assertTrue(result.isAlarm());
+
+        AlarmContext context1 = new AlarmContext();
+        context1.setNamespace("client");
+        context1.setName("b");
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(200L);
-        result = regulator.regulate("b", state, strategy);
+        result = filter.filter(context1, state, strategy);
         assertTrue(result.isAlarm());
+
+        AlarmContext context2 = new AlarmContext();
+        context2.setNamespace("client");
+        context2.setName("a");
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(250L);
-        result = regulator.regulate("a", state, strategy);
+        result = filter.filter(context2, state, strategy);
         assertTrue(result.isAlarm());
+
+        AlarmContext context3 = new AlarmContext();
+        context3.setNamespace("client");
+        context3.setName("b");
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(260L);
-        result = regulator.regulate("b", state, strategy);
+        result = filter.filter(context3, state, strategy);
         assertFalse(result.isAlarm());
+    }
+
+    /**
+     * 测试同名不同类型告警数据能否正常告警.
+     * <p/>
+     * 指数告警策略: 0,100,200,200,...
+     * 第一次,类型a,状态异常,时刻0,告警.
+     * 第二次,类型b,状态正常,时刻50,不告警.
+     * 第三次,类型a,状态异常,时刻120,告警.
+     * 第四次,类型b,状态异常,时刻200,告警.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test6() throws Exception {
+        ExponentialAlarmStrategy strategy = new ExponentialAlarmStrategy();
+        strategy.setMinExponentialAlarmIntervalInSecond(100);
+        strategy.setMaxExponentialAlarmIntervalInSecond(200);
+
+        AlarmResult result;
+
+        AlarmContext context0 = new AlarmContext();
+        context0.setNamespace("client");
+        context0.setName("test");
+        PullTimeDelayAlarmState state0 = new PullTimeDelayAlarmState();
+        state0.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(0L);
+        result = filter.filter(context0, state0, strategy);
+        assertTrue(result.isAlarm());
+
+        AlarmContext context1 = new AlarmContext();
+        context1.setNamespace("client");
+        context1.setName("test");
+        PushTimeDelayAlarmState state1 = new PushTimeDelayAlarmState();
+        state1.setAlarm(false);
+        when(clock.getTimestamp()).thenReturn(50L);
+        result = filter.filter(context1, state1, strategy);
+        assertFalse(result.isAlarm());
+
+        AlarmContext context2 = new AlarmContext();
+        context2.setNamespace("client");
+        context2.setName("test");
+        PullTimeDelayAlarmState state2 = new PullTimeDelayAlarmState();
+        state2.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(120L);
+        result = filter.filter(context2, state2, strategy);
+        assertTrue(result.isAlarm());
+
+        AlarmContext context3 = new AlarmContext();
+        context3.setNamespace("client");
+        context3.setName("test");
+        PushTimeDelayAlarmState state3 = new PushTimeDelayAlarmState();
+        state3.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(200L);
+        result = filter.filter(context3, state3, strategy);
+        assertTrue(result.isAlarm());
     }
 
     /**
@@ -270,15 +364,19 @@ public class ExponentialAlarmRegulatorTest {
      *
      * @throws Exception
      */
-    @Test(expected = PumaAlarmRegulateUnsupportedException.class)
+    @Test(expected = PumaAlarmFilterUnsupportedException.class)
     public void testException0() throws Exception {
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
+
         NoAlarmStrategy strategy = new NoAlarmStrategy();
-        AlarmState state = new AlarmState();
-        regulator.regulate("test", state, strategy);
+        PullTimeDelayAlarmState state = new PullTimeDelayAlarmState();
+        filter.filter(context, state, strategy);
     }
 
     @After
     public void tearDown() throws Exception {
-        regulator.stop();
+        filter.stop();
     }
 }

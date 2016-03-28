@@ -2,9 +2,10 @@ package com.dianping.puma.alarm.monitor;
 
 import com.dianping.puma.alarm.arbitrate.PumaAlarmArbiter;
 import com.dianping.puma.alarm.exception.PumaAlarmMonitorException;
+import com.dianping.puma.alarm.filter.PumaAlarmFilter;
+import com.dianping.puma.alarm.model.AlarmContext;
 import com.dianping.puma.alarm.model.AlarmMessage;
 import com.dianping.puma.alarm.model.AlarmResult;
-import com.dianping.puma.alarm.model.AlarmState;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
@@ -12,12 +13,12 @@ import com.dianping.puma.alarm.model.data.AlarmData;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.meta.*;
+import com.dianping.puma.alarm.model.state.AlarmState;
 import com.dianping.puma.alarm.model.strategy.AlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.ExponentialAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
 import com.dianping.puma.alarm.model.strategy.NoAlarmStrategy;
 import com.dianping.puma.alarm.notify.PumaAlarmNotifier;
-import com.dianping.puma.alarm.regulate.PumaAlarmRegulator;
 import com.dianping.puma.alarm.render.PumaAlarmRenderer;
 import com.dianping.puma.alarm.service.PumaClientAlarmBenchmarkService;
 import com.dianping.puma.alarm.service.PumaClientAlarmDataService;
@@ -49,7 +50,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     private PumaAlarmRenderer renderer;
 
-    private PumaAlarmRegulator regulator;
+    private PumaAlarmFilter filter;
 
     private PumaAlarmNotifier notifier;
 
@@ -73,7 +74,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
         super.start();
 
         arbiter.start();
-        regulator.start();
+        filter.start();
         notifier.start();
 
         executor.scheduleAtFixedRate(new Runnable() {
@@ -81,8 +82,8 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
             public void run() {
                 try {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("{}", scanIntervalInSecond);
-                        logger.debug("Start periodically scanning puma alarms...");
+                        logger.debug("Start periodically scanning puma alarms at the rate of {}s...",
+                                scanIntervalInSecond);
                     }
 
                     scan();
@@ -100,7 +101,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
         executor.shutdownNow();
 
         notifier.stop();
-        regulator.stop();
+        filter.stop();
         arbiter.stop();
     }
 
@@ -129,13 +130,17 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
                 map.put(pushTimeDelayAlarmData, pushTimeDelayAlarmBenchmark);
             }
 
+            AlarmContext context = new AlarmContext();
+            context.setNamespace("client");
+            context.setName(clientName);
+
             for (Map.Entry<AlarmData, AlarmBenchmark> entry : map.entrySet()) {
                 AlarmData data = entry.getKey();
                 AlarmBenchmark benchmark = entry.getValue();
 
                 AlarmState state = arbiter.arbitrate(data, benchmark);
-                AlarmMessage message = renderer.render(clientName, data, benchmark);
-                AlarmResult result = regulator.regulate(clientName, state, strategy);
+                AlarmMessage message = renderer.render(context, data, benchmark);
+                AlarmResult result = filter.filter(context, state, strategy);
                 result.setTitle(message.getTitle());
                 result.setContent(message.getContent());
 
@@ -228,8 +233,8 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
         this.renderer = renderer;
     }
 
-    public void setRegulator(PumaAlarmRegulator regulator) {
-        this.regulator = regulator;
+    public void setFilter(PumaAlarmFilter filter) {
+        this.filter = filter;
     }
 
     public void setNotifier(PumaAlarmNotifier notifier) {

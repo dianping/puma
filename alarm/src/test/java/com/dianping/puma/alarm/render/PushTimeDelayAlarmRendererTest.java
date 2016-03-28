@@ -1,8 +1,8 @@
 package com.dianping.puma.alarm.render;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRenderUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmContext;
 import com.dianping.puma.alarm.model.AlarmMessage;
-import com.dianping.puma.alarm.model.AlarmTemplate;
 import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Created by xiaotian.li on 16/3/25.
@@ -23,10 +22,8 @@ public class PushTimeDelayAlarmRendererTest {
 
     @Before
     public void setUp() throws Exception {
-        AlarmTemplate template = new AlarmTemplate();
-        template.setTitleTemplate("%s");
-        template.setContentTemplate("%s%s%s");
-        renderer.setTemplate(template);
+        renderer.setTitleTemplate("%s");
+        renderer.setContentTemplate("%s%s%s");
         renderer.start();
     }
 
@@ -45,22 +42,12 @@ public class PushTimeDelayAlarmRendererTest {
         benchmark.setMinPushTimeDelayInSecond(1000);
         benchmark.setMaxPushTimeDelayInSecond(10000);
 
-        String clientName = "test";
-        AlarmMessage message = renderer.render(clientName, data, benchmark);
-        assertEquals(clientName, message.getTitle());
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
+        AlarmMessage message = renderer.render(context, data, benchmark);
+        assertEquals(context.getName(), message.getTitle());
         assertEquals("100100010000", message.getContent());
-    }
-
-    /**
-     * 测试从本地properties文件中读到标题和内容的模板.
-     *
-     * @throws Exception
-     */
-    @Test
-    public void test1() throws Exception {
-        AlarmTemplate template = renderer.generateAlarmTemplate(renderer.propertiesFilePath);
-        assertNotNull(template.getTitleTemplate());
-        assertNotNull(template.getContentTemplate());
     }
 
     /**
@@ -78,8 +65,10 @@ public class PushTimeDelayAlarmRendererTest {
         benchmark.setMinPushTimeDelayInSecond(1000);
         benchmark.setMaxPushTimeDelayInSecond(10000);
 
-        String clientName = "test";
-        renderer.render(clientName, data, benchmark);
+        AlarmContext context = new AlarmContext();
+        context.setNamespace("client");
+        context.setName("test");
+        renderer.render(context, data, benchmark);
     }
 
     @After

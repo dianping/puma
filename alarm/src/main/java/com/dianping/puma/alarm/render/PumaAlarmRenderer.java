@@ -1,6 +1,7 @@
 package com.dianping.puma.alarm.render;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRenderException;
+import com.dianping.puma.alarm.model.AlarmContext;
 import com.dianping.puma.alarm.model.AlarmMessage;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
@@ -12,6 +13,6 @@ import com.dianping.puma.common.PumaLifeCycle;
  */
 public interface PumaAlarmRenderer extends PumaLifeCycle {
 
-    AlarmMessage render(String clientName, AlarmData data, AlarmBenchmark benchmark)
+    AlarmMessage render(AlarmContext context, AlarmData data, AlarmBenchmark benchmark)
             throws PumaAlarmRenderException;
 }

@@ -15,11 +15,11 @@
         </property>
     </bean>
 
-    <bean id="noAlarmRegulator" class="com.dianping.puma.alarm.regulate.NoAlarmRegulator" />
-    <bean id="linearAlarmRegulator" class="com.dianping.puma.alarm.regulate.LinearAlarmRegulator" />
-    <bean id="exponentialAlarmRegulator" class="com.dianping.puma.alarm.regulate.ExponentialAlarmRegulator" />
-    <bean id="chainedAlarmRegulator" class="com.dianping.puma.alarm.regulate.ChainedAlarmRegulator">
-        <property name="regulators">
+    <bean id="noAlarmRegulator" class="com.dianping.puma.alarm.filter.NoAlarmFilter" />
+    <bean id="linearAlarmRegulator" class="com.dianping.puma.alarm.filter.LinearAlarmFilter" />
+    <bean id="exponentialAlarmRegulator" class="com.dianping.puma.alarm.filter.ExponentialAlarmFilter" />
+    <bean id="chainedAlarmRegulator" class="com.dianping.puma.alarm.filter.ChainedAlarmFilter">
+        <property name="filters">
             <list>
                 <ref bean="noAlarmRegulator" />
                 <ref bean="linearAlarmRegulator" />
@@ -50,7 +50,7 @@
         <property name="pumaClientAlarmStrategyService" ref="pumaClientAlarmStrategyService" />
         <property name="pumaClientAlarmMetaService" ref="pumaClientAlarmMetaService" />
         <property name="arbiter" ref="chainedAlarmArbiter" />
-        <property name="regulator" ref="chainedAlarmRegulator" />
+        <property name="filter" ref="chainedAlarmRegulator" />
         <property name="notifier" ref="chainedAlarmNotifier" />
         <property name="scanIntervalInSecond" value="5" />
     </bean>

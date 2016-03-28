@@ -2,6 +2,7 @@ package com.dianping.puma.alarm.render;
 
 import com.dianping.puma.alarm.exception.PumaAlarmRenderException;
 import com.dianping.puma.alarm.exception.PumaAlarmRenderUnsupportedException;
+import com.dianping.puma.alarm.model.AlarmContext;
 import com.dianping.puma.alarm.model.AlarmMessage;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
@@ -35,11 +36,11 @@ public class ChainedAlarmRenderer extends AbstractPumaAlarmRenderer {
     }
 
     @Override
-    public AlarmMessage render(String clientName, AlarmData data, AlarmBenchmark benchmark)
+    public AlarmMessage render(AlarmContext context, AlarmData data, AlarmBenchmark benchmark)
             throws PumaAlarmRenderException {
         for (PumaAlarmRenderer renderer: renderers) {
             try {
-                return renderer.render(clientName, data, benchmark);
+                return renderer.render(context, data, benchmark);
             } catch (PumaAlarmRenderUnsupportedException ignore) {
             }
         }

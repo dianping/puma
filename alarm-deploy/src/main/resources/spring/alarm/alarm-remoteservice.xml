@@ -40,4 +40,13 @@
         <property name="clientAlarmMetaDao" ref="clientAlarmMetaDao" />
     </bean>
 
+    <bean id="emailService"
+          class="com.dianping.puma.extensions.notify.PaasEmailService"/>
+
+    <bean id="weChatService"
+          class="com.dianping.puma.extensions.notify.PaasWeChatService"/>
+
+    <bean id="smsService"
+          class="com.dianping.puma.extensions.notify.PaasSmsService"/>
+
 </beans>

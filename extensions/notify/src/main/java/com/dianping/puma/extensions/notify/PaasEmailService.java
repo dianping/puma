@@ -20,7 +20,7 @@ import java.util.List;
  * Created by xiaotian.li on 16/3/16.
  * Email: lixiaotian07@gmail.com
  */
-public class DPEmailService implements PumaEmailService {
+public class PaasEmailService implements PumaEmailService {
 
     private String httpPath = "http://web.paas.dp/mail/send";
 

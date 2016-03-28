@@ -1,7 +1,7 @@
-package com.dianping.puma.alarm.arbitrate;
+package com.dianping.puma.alarm.judge;
 
-import com.dianping.puma.alarm.exception.PumaAlarmArbitrateException;
-import com.dianping.puma.alarm.exception.PumaAlarmArbitrateUnsupportedException;
+import com.dianping.puma.alarm.exception.PumaAlarmJudgeException;
+import com.dianping.puma.alarm.exception.PumaAlarmJudgeUnsupportedException;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
@@ -14,16 +14,16 @@ import com.dianping.puma.common.AbstractPumaLifeCycle;
  * Created by xiaotian.li on 16/3/20.
  * Email: lixiaotian07@gmail.com
  */
-public class PushTimeDelayAlarmArbiter extends AbstractPumaLifeCycle implements PumaAlarmArbiter {
+public class PushTimeDelayAlarmJudger extends AbstractPumaLifeCycle implements PumaAlarmJudger {
 
     @Override
-    public AlarmState arbitrate(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmArbitrateException {
+    public AlarmState judge(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmJudgeException {
         if (!(data instanceof PushTimeDelayAlarmData)) {
-            throw new PumaAlarmArbitrateUnsupportedException("unsupported data[%s]", data);
+            throw new PumaAlarmJudgeUnsupportedException("unsupported data[%s]", data);
         }
 
         if (!(benchmark instanceof PushTimeDelayAlarmBenchmark)) {
-            throw new PumaAlarmArbitrateUnsupportedException("unsupported benchmark[%s]", benchmark);
+            throw new PumaAlarmJudgeUnsupportedException("unsupported benchmark[%s]", benchmark);
         }
 
         PushTimeDelayAlarmData pushTimeDelayAlarmData = (PushTimeDelayAlarmData) data;

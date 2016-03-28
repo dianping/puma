@@ -1,6 +1,6 @@
-package com.dianping.puma.alarm.arbitrate;
+package com.dianping.puma.alarm.judge;
 
-import com.dianping.puma.alarm.exception.PumaAlarmArbitrateException;
+import com.dianping.puma.alarm.exception.PumaAlarmJudgeException;
 import com.dianping.puma.alarm.model.benchmark.AlarmBenchmark;
 import com.dianping.puma.alarm.model.data.AlarmData;
 import com.dianping.puma.alarm.model.state.AlarmState;
@@ -10,7 +10,7 @@ import com.dianping.puma.common.PumaLifeCycle;
  * Created by xiaotian.li on 16/3/15.
  * Email: lixiaotian07@gmail.com
  */
-public interface PumaAlarmArbiter extends PumaLifeCycle {
+public interface PumaAlarmJudger extends PumaLifeCycle {
 
-    AlarmState arbitrate(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmArbitrateException;
+    AlarmState judge(AlarmData data, AlarmBenchmark benchmark) throws PumaAlarmJudgeException;
 }

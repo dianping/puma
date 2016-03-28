@@ -1,6 +1,6 @@
 package com.dianping.puma.alarm.monitor;
 
-import com.dianping.puma.alarm.arbitrate.PumaAlarmArbiter;
+import com.dianping.puma.alarm.judge.PumaAlarmJudger;
 import com.dianping.puma.alarm.exception.PumaAlarmMonitorException;
 import com.dianping.puma.alarm.filter.PumaAlarmFilter;
 import com.dianping.puma.alarm.model.AlarmContext;
@@ -46,7 +46,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private PumaAlarmArbiter arbiter;
+    private PumaAlarmJudger arbiter;
 
     private PumaAlarmRenderer renderer;
 
@@ -138,7 +138,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
                 AlarmData data = entry.getKey();
                 AlarmBenchmark benchmark = entry.getValue();
 
-                AlarmState state = arbiter.arbitrate(data, benchmark);
+                AlarmState state = arbiter.judge(data, benchmark);
                 AlarmMessage message = renderer.render(context, data, benchmark);
                 AlarmResult result = filter.filter(context, state, strategy);
                 result.setTitle(message.getTitle());
@@ -225,7 +225,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
         return metas;
     }
 
-    public void setArbiter(PumaAlarmArbiter arbiter) {
+    public void setArbiter(PumaAlarmJudger arbiter) {
         this.arbiter = arbiter;
     }
 

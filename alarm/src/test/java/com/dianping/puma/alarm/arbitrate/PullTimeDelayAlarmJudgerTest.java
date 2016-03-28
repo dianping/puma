@@ -1,6 +1,7 @@
 package com.dianping.puma.alarm.arbitrate;
 
-import com.dianping.puma.alarm.exception.PumaAlarmArbitrateUnsupportedException;
+import com.dianping.puma.alarm.exception.PumaAlarmJudgeUnsupportedException;
+import com.dianping.puma.alarm.judge.PullTimeDelayAlarmJudger;
 import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
@@ -17,9 +18,9 @@ import static org.junit.Assert.assertTrue;
  * Created by xiaotian.li on 16/3/18.
  * Email: lixiaotian07@gmail.com
  */
-public class PullTimeDelayAlarmArbiterTest {
+public class PullTimeDelayAlarmJudgerTest {
 
-    PullTimeDelayAlarmArbiter arbiter = new PullTimeDelayAlarmArbiter();
+    PullTimeDelayAlarmJudger arbiter = new PullTimeDelayAlarmJudger();
 
     @Before
     public void setUp() throws Exception {
@@ -42,7 +43,7 @@ public class PullTimeDelayAlarmArbiterTest {
         benchmark.setMinPullTimeDelayInSecond(10);
         benchmark.setMaxPullTimeDelayInSecond(10000);
 
-        AlarmState state = arbiter.arbitrate(data, benchmark);
+        AlarmState state = arbiter.judge(data, benchmark);
         assertFalse(state.isAlarm());
     }
 
@@ -62,7 +63,7 @@ public class PullTimeDelayAlarmArbiterTest {
         benchmark.setMinPullTimeDelayInSecond(2000);
         benchmark.setMaxPullTimeDelayInSecond(10000);
 
-        AlarmState state = arbiter.arbitrate(data, benchmark);
+        AlarmState state = arbiter.judge(data, benchmark);
         assertTrue(state.isAlarm());
     }
 
@@ -82,7 +83,7 @@ public class PullTimeDelayAlarmArbiterTest {
         benchmark.setMinPullTimeDelayInSecond(10);
         benchmark.setMaxPullTimeDelayInSecond(100);
 
-        AlarmState state = arbiter.arbitrate(data, benchmark);
+        AlarmState state = arbiter.judge(data, benchmark);
         assertTrue(state.isAlarm());
     }
 
@@ -102,7 +103,7 @@ public class PullTimeDelayAlarmArbiterTest {
         benchmark.setMinPullTimeDelayInSecond(10);
         benchmark.setMaxPullTimeDelayInSecond(100);
 
-        AlarmState state = arbiter.arbitrate(data, benchmark);
+        AlarmState state = arbiter.judge(data, benchmark);
         assertFalse(state.isAlarm());
     }
 
@@ -111,13 +112,13 @@ public class PullTimeDelayAlarmArbiterTest {
      *
      * @throws Exception
      */
-    @Test(expected = PumaAlarmArbitrateUnsupportedException.class)
+    @Test(expected = PumaAlarmJudgeUnsupportedException.class)
     public void testException0() throws Exception {
         PushTimeDelayAlarmData data = new PushTimeDelayAlarmData();
 
         PullTimeDelayAlarmBenchmark benchmark = new PullTimeDelayAlarmBenchmark();
 
-        arbiter.arbitrate(data, benchmark);
+        arbiter.judge(data, benchmark);
     }
 
     /**
@@ -125,13 +126,13 @@ public class PullTimeDelayAlarmArbiterTest {
      *
      * @throws Exception
      */
-    @Test(expected = PumaAlarmArbitrateUnsupportedException.class)
+    @Test(expected = PumaAlarmJudgeUnsupportedException.class)
     public void testException1() throws Exception {
         PullTimeDelayAlarmData data = new PullTimeDelayAlarmData();
 
         PushTimeDelayAlarmBenchmark benchmark = new PushTimeDelayAlarmBenchmark();
 
-        arbiter.arbitrate(data, benchmark);
+        arbiter.judge(data, benchmark);
     }
 
     @After

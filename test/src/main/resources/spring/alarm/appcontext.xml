@@ -4,10 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="pullTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.PullTimeDelayAlarmArbiter" />
-    <bean id="pushTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.PushTimeDelayAlarmArbiter" />
-    <bean id="chainedAlarmArbiter" class="com.dianping.puma.alarm.arbitrate.ChainedAlarmArbiter">
-        <property name="arbiters">
+    <bean id="pullTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.judge.PullTimeDelayAlarmJudger" />
+    <bean id="pushTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.judge.PushTimeDelayAlarmJudger" />
+    <bean id="chainedAlarmArbiter" class="com.dianping.puma.alarm.judge.ChainedAlarmJudger">
+        <property name="judgers">
             <list>
                 <ref bean="pullTimeDelayAlarmArbiter" />
                 <ref bean="pushTimeDelayAlarmArbiter" />

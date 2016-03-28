@@ -6,12 +6,12 @@
         <groupId>com.dianping.puma</groupId>
         <artifactId>puma-parent</artifactId>
         <version>2.1.2-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>puma-alarm</artifactId>
+    <artifactId>puma-extensions-config</artifactId>
     <version>2.1.2-SNAPSHOT</version>
-    <name>puma-alarm</name>
+    <name>puma-extensions-config</name>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -25,6 +25,12 @@
             <groupId>com.dianping.puma</groupId>
             <artifactId>puma-common</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <!-- dianping -->
+        <dependency>
+            <groupId>com.dianping.lion</groupId>
+            <artifactId>lion-client</artifactId>
         </dependency>
 
         <!-- http -->
@@ -69,11 +75,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
         </dependency>
 
     </dependencies>

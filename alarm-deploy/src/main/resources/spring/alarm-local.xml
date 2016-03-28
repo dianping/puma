@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean class="com.dianping.puma.common.spring.PropertyPlaceholderConfigurer" lazy-init="false">
+        <property name="ignoreResourceNotFound" value="true" />
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+        <property name="locationNames">
+            <list>
+                <value>classpath:puma-alarm.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <import resource="alarm/alarm-properties.xml"/>
+    <import resource="alarm/alarm-localservice.xml"/>
+
+</beans>

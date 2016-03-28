@@ -14,8 +14,9 @@
         <module>core</module>
         <module>common</module>
         <module>biz</module>
-        <module>extension</module>
+        <module>extensions</module>
         <module>alarm</module>
+        <module>alarm-deploy</module>
         <module>web</module>
         <module>utils</module>
         <module>server</module>

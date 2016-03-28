@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.service.memory;
+package com.dianping.puma.alarm.service.memory;
 
 import com.dianping.puma.alarm.model.meta.EmailAlarmMeta;
 import com.dianping.puma.alarm.model.meta.LogAlarmMeta;

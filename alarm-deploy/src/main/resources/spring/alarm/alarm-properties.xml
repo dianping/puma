@@ -49,9 +49,15 @@
     </bean>
 
     <!-- notifier -->
-    <bean id="emailAlarmNotifier" class="com.dianping.puma.alarm.notify.EmailAlarmNotifier"/>
-    <bean id="weChatAlarmNotifier" class="com.dianping.puma.alarm.notify.WeChatAlarmNotifier"/>
-    <bean id="smsAlarmNotifier" class="com.dianping.puma.alarm.notify.SmsAlarmNotifier"/>
+    <bean id="emailAlarmNotifier" class="com.dianping.puma.alarm.notify.EmailAlarmNotifier">
+        <property name="emailService" ref="emailService"/>
+    </bean>
+    <bean id="weChatAlarmNotifier" class="com.dianping.puma.alarm.notify.WeChatAlarmNotifier">
+        <property name="weChatService" ref="weChatService"/>
+    </bean>
+    <bean id="smsAlarmNotifier" class="com.dianping.puma.alarm.notify.SmsAlarmNotifier">
+        <property name="smsService" ref="smsService"/>
+    </bean>
     <bean id="logAlarmNotifier" class="com.dianping.puma.alarm.notify.LogAlarmNotifier"/>
     <bean id="pumaAlarmNotifier" class="com.dianping.puma.alarm.notify.ChainedAlarmNotifier">
         <property name="notifiers">

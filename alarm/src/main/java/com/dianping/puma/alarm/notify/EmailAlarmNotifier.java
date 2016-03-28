@@ -32,14 +32,18 @@ public class EmailAlarmNotifier extends AbstractPumaLifeCycle implements PumaAla
             return;
         }
 
+        String title = result.getTitle();
+        String content = result.getContent();
+
         EmailAlarmMeta emailAlarmMeta = (EmailAlarmMeta) meta;
-        List<String> emails = emailAlarmMeta.getEmailRecipients();
-        if (emails != null) {
-            for (String email: emails) {
+        List<String> recipients = emailAlarmMeta.getEmailRecipients();
+
+        if (recipients != null) {
+            for (String recipient: recipients) {
                 try {
-                    emailService.send(email, result.getTitle(), result.getContent());
+                    emailService.send(recipient, title, content);
                 } catch (Throwable t) {
-                    logger.error("Failed to send email to destination[{}].", email);
+                    logger.error("Failed to send email to recipient[{}].", recipient, t);
                 }
             }
         }

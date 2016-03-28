@@ -10,15 +10,24 @@
           class="com.dianping.puma.biz.service.memory.MemoryClientService" />
 
     <bean id="pumaClientAlarmDataService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientAlarmDataService" />
+          class="com.dianping.puma.alarm.service.memory.MemoryClientAlarmDataService" />
 
     <bean id="pumaClientAlarmBenchmarkService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientAlarmBenchmarkService" />
+          class="com.dianping.puma.alarm.service.memory.MemoryClientAlarmBenchmarkService" />
 
     <bean id="pumaClientAlarmStrategyService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientAlarmStrategyService" />
+          class="com.dianping.puma.alarm.service.memory.MemoryClientAlarmStrategyService" />
 
     <bean id="pumaClientAlarmMetaService"
-          class="com.dianping.puma.biz.service.memory.MemoryClientAlarmMetaService" />
+          class="com.dianping.puma.alarm.service.memory.MemoryClientAlarmMetaService" />
+
+    <bean id="emailService"
+          class="com.dianping.puma.alarm.service.memory.MemoryEmailService"/>
+
+    <bean id="weChatService"
+          class="com.dianping.puma.alarm.service.memory.MemoryWeChatService"/>
+
+    <bean id="smsService"
+          class="com.dianping.puma.alarm.service.memory.MemorySmsService"/>
 
 </beans>

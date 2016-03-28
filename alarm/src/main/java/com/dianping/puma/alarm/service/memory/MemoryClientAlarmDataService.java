@@ -1,4 +1,4 @@
-package com.dianping.puma.biz.service.memory;
+package com.dianping.puma.alarm.service.memory;
 
 import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;

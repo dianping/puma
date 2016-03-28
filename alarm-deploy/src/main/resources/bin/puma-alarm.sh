@@ -15,20 +15,36 @@
 #需要根据实际环境以及Java程序名称来修改这些参数
 ###################################
 #JDK所在路径
-#JAVA_HOME="/usr/java/jdk"
+JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home"
 
 #执行程序启动所使用的系统用户，考虑到安全，推荐不使用root帐号
-RUNNING_USER=root
+RUNNING_USER=nobody
 
 #Java程序所在的目录（classes的上一级目录）
-APP_HOME=`dirname "$0"`
+case "`uname`" in
+    Linux)
+		BIN_PATH=$(readlink -f $(dirname $0))
+		;;
+	*)
+		BIN_PATH=`cd $(dirname $0); pwd`
+		;;
+esac
 
-#需要启动的Java主程序（main方法类）
-APP_MAINCLASS=com.dianping.puma.alarm.deploy.PumaAlarmMonitorServerLauncher
+#APP路径
+APP_PATH=`cd ${BIN_PATH}/../..; pwd`
+
+#外部依赖
+LIB_PATH=${APP_PATH}/lib
+
+#配置文件
+PROP_PATH=${APP_PATH}/puma-alarm.properties
+
+#Main函数
+APP_MAIN=com.dianping.puma.alarm.deploy.PumaAlarmMonitorServerLauncher
 
 #拼凑完整的classpath参数，包括指定lib目录下所有的jar
-CLASSPATH=$APP_HOME/classes
-for i in "$APP_HOME"/lib/*.jar; do
+CLASSPATH=${APP_PATH}/classes
+for i in "$APP_PATH"/lib/*.jar; do
    CLASSPATH="$CLASSPATH":"$i"
 done
 
@@ -47,7 +63,7 @@ JAVA_OPTS="-ms512m -mx512m -Xmn256m -Djava.awt.headless=true -XX:MaxPermSize=128
 psid=0
 
 checkpid() {
-   javaps=`$JAVA_HOME/bin/jps -l | grep $APP_MAINCLASS`
+   javaps=`$JAVA_HOME/bin/jps -l | grep ${APP_MAIN}`
 
    if [ -n "$javaps" ]; then
       psid=`echo $javaps | awk '{print $1}'`
@@ -76,8 +92,8 @@ start() {
       echo "warn: $APP_MAINCLASS already started! (pid=$psid)"
       echo "================================"
    else
-      echo -n "Starting $APP_MAINCLASS ..."
-      JAVA_CMD="nohup $JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH $APP_MAINCLASS >/dev/null 2>&1 &"
+      echo -n "Starting $APP_MAIN ..."
+      JAVA_CMD="nohup $JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH ${APP_MAIN} >/dev/null 2>&1 &"
       su - $RUNNING_USER -c "$JAVA_CMD"
       checkpid
       if [ $psid -ne 0 ]; then
@@ -105,7 +121,7 @@ stop() {
    checkpid
 
    if [ $psid -ne 0 ]; then
-      echo -n "Stopping $APP_MAINCLASS ...(pid=$psid) "
+      echo -n "Stopping $APP_MAIN ...(pid=$psid) "
       su - $RUNNING_USER -c "kill -9 $psid"
       if [ $? -eq 0 ]; then
          echo "[OK]"
@@ -119,7 +135,7 @@ stop() {
       fi
    else
       echo "================================"
-      echo "warn: $APP_MAINCLASS is not running"
+      echo "warn: $APP_MAIN is not running"
       echo "================================"
    fi
 }
@@ -136,9 +152,9 @@ status() {
    checkpid
 
    if [ $psid -ne 0 ];  then
-      echo "$APP_MAINCLASS is running! (pid=$psid)"
+      echo "$APP_MAIN is running! (pid=$psid)"
    else
-      echo "$APP_MAINCLASS is not running"
+      echo "$APP_MAIN is not running"
    fi
 }
 
@@ -154,8 +170,10 @@ info() {
    echo "JAVA_HOME=$JAVA_HOME"
    echo `$JAVA_HOME/bin/java -version`
    echo
-   echo "APP_HOME=$APP_HOME"
-   echo "APP_MAINCLASS=$APP_MAINCLASS"
+   echo "APP_PATH=$APP_PATH"
+   echo "APP_MAIN=$APP_MAIN"
+   echo "BIN_PATH=$BIN_PATH"
+   echo "LIB_PATH=$LIB_PATH"
    echo "****************************"
 }
 

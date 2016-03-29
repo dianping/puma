@@ -23,8 +23,13 @@ public class MemoryAlarmServerHeartbeatService implements PumaAlarmServerHeartbe
     }
 
     @Override
-    public void update(String host, AlarmServerHeartbeat heartbeat) {
-        alarmServerHeartbeatMap.put(host, heartbeat);
+    public int update(String host, AlarmServerHeartbeat heartbeat) {
+        if (!alarmServerHeartbeatMap.containsKey(host)) {
+            return 0;
+        } else {
+            alarmServerHeartbeatMap.put(host, heartbeat);
+            return 1;
+        }
     }
 
     @Override

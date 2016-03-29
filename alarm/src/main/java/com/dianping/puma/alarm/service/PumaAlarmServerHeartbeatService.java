@@ -10,7 +10,7 @@ public interface PumaAlarmServerHeartbeatService {
 
     void create(String host, AlarmServerHeartbeat heartbeat);
 
-    void update(String host, AlarmServerHeartbeat heartbeat);
+    int update(String host, AlarmServerHeartbeat heartbeat);
 
     void remove(String host);
 }

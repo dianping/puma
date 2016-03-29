@@ -8,17 +8,7 @@ import java.util.Date;
  */
 public class AlarmServerHeartbeat {
 
-    private String host;
-
     private Date heartbeatTime;
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
 
     public Date getHeartbeatTime() {
         return heartbeatTime;

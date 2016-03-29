@@ -24,25 +24,41 @@ public class RemoteClientAlarmMetaService implements PumaClientAlarmMetaService 
     @Override
     public EmailAlarmMeta findEmail(String clientName) {
         ClientAlarmMetaEntity entity = clientAlarmMetaDao.find(clientName);
-        return converter.convert(entity, EmailAlarmMeta.class);
+        if (entity == null || !entity.isAlarmByEmail()) {
+            return null;
+        } else {
+            return converter.convert(entity, EmailAlarmMeta.class);
+        }
     }
 
     @Override
     public WeChatAlarmMeta findWeChat(String clientName) {
         ClientAlarmMetaEntity entity = clientAlarmMetaDao.find(clientName);
-        return converter.convert(entity, WeChatAlarmMeta.class);
+        if (entity == null || !entity.isAlarmByWeChat()) {
+            return null;
+        } else {
+            return converter.convert(entity, WeChatAlarmMeta.class);
+        }
     }
 
     @Override
     public SmsAlarmMeta findSms(String clientName) {
         ClientAlarmMetaEntity entity = clientAlarmMetaDao.find(clientName);
-        return converter.convert(entity, SmsAlarmMeta.class);
+        if (entity == null || !entity.isAlarmBySms()) {
+            return null;
+        } else {
+            return converter.convert(entity, SmsAlarmMeta.class);
+        }
     }
 
     @Override
     public LogAlarmMeta findLog(String clientName) {
         ClientAlarmMetaEntity entity = clientAlarmMetaDao.find(clientName);
-        return converter.convert(entity, LogAlarmMeta.class);
+        if (entity == null || !entity.isAlarmByLog()) {
+            return null;
+        } else {
+            return converter.convert(entity, LogAlarmMeta.class);
+        }
     }
 
     @Override

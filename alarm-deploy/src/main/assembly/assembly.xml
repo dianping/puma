@@ -9,8 +9,15 @@
 	</formats>
     <includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
+        <fileSet>
+            <directory>.</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>README*</include>
+            </includes>
+        </fileSet>
 		<fileSet>
-			<directory>../alarm-deploy/src/main/resources/bin</directory>
+			<directory>./src/main/resources/bin</directory>
 			<outputDirectory>bin</outputDirectory>
             <fileMode>755</fileMode>
 			<includes>
@@ -19,7 +26,7 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>../alarm-deploy/src/main/resources/spring</directory>
+			<directory>./src/main/resources/spring</directory>
 			<outputDirectory>spring</outputDirectory>
 			<includes>
                 <include>*.*</include>
@@ -27,14 +34,14 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>../alarm-deploy/src/main/resources/META-INF</directory>
+			<directory>./src/main/resources/META-INF</directory>
 			<outputDirectory>META-INF</outputDirectory>
 			<includes>
 				<include>*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>../alarm-deploy/src/main/resources/logs</directory>
+			<directory>./src/main/resources/logs</directory>
 			<outputDirectory>logs</outputDirectory>
 			<includes>
 				<include>*</include>

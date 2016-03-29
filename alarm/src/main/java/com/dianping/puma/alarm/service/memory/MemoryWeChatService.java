@@ -13,7 +13,7 @@ public class MemoryWeChatService implements PumaWeChatService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public void send(String recipients, String message) {
-        logger.info("Send weChat message[{}] to recipient[{}].", message, recipients);
+    public void send(String recipient, String message) {
+        logger.info("Send weChat message[{}] to recipient[{}].", message, recipient);
     }
 }

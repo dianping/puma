@@ -6,5 +6,5 @@ package com.dianping.puma.alarm.service;
  */
 public interface PumaWeChatService {
 
-    void send(String recipients, String message);
+    void send(String recipient, String message);
 }

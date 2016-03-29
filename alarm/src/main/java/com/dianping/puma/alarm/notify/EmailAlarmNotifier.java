@@ -41,9 +41,15 @@ public class EmailAlarmNotifier extends AbstractPumaLifeCycle implements PumaAla
         if (recipients != null) {
             for (String recipient: recipients) {
                 try {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Send email with title[{}] and content[{}] " +
+                                "to recipient[{}] .", title, content, recipient);
+                    }
+
                     emailService.send(recipient, title, content);
                 } catch (Throwable t) {
-                    logger.error("Failed to send email to recipient[{}].", recipient, t);
+                    logger.error("Failed to send email with title[{}] and content[{}] " +
+                            "to recipient[{}].", title, content, recipient, t);
                 }
             }
         }

@@ -107,22 +107,14 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}-${env}-${project.version}</finalName>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <finalName>${artifactId}-${env}-${version}</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
+                    <warName>${project.artifactId}-${env}-${project.version}</warName>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attached</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <version>2.6</version>
             </plugin>
         </plugins>
     </build>

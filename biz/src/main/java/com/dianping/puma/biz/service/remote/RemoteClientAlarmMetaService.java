@@ -8,7 +8,10 @@ import com.dianping.puma.alarm.service.PumaClientAlarmMetaService;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAlarmMetaDao;
 import com.dianping.puma.biz.entity.ClientAlarmMetaEntity;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,7 +30,10 @@ public class RemoteClientAlarmMetaService implements PumaClientAlarmMetaService 
         if (entity == null || !entity.isAlarmByEmail()) {
             return null;
         } else {
-            return converter.convert(entity, EmailAlarmMeta.class);
+            List<String> emailRecipients = Lists.newArrayList(StringUtils.split(entity.getEmailRecipients(), ","));
+            EmailAlarmMeta meta = converter.convert(entity, EmailAlarmMeta.class);
+            meta.setEmailRecipients(emailRecipients);
+            return meta;
         }
     }
 
@@ -37,7 +43,10 @@ public class RemoteClientAlarmMetaService implements PumaClientAlarmMetaService 
         if (entity == null || !entity.isAlarmByWeChat()) {
             return null;
         } else {
-            return converter.convert(entity, WeChatAlarmMeta.class);
+            List<String> weChatRecipients = Lists.newArrayList(StringUtils.split(entity.getWeChatRecipients(), ","));
+            WeChatAlarmMeta meta = converter.convert(entity, WeChatAlarmMeta.class);
+            meta.setWeChatRecipients(weChatRecipients);
+            return meta;
         }
     }
 
@@ -47,7 +56,10 @@ public class RemoteClientAlarmMetaService implements PumaClientAlarmMetaService 
         if (entity == null || !entity.isAlarmBySms()) {
             return null;
         } else {
-            return converter.convert(entity, SmsAlarmMeta.class);
+            List<String> smsRecipients = Lists.newArrayList(StringUtils.split(entity.getSmsRecipients(), ","));
+            SmsAlarmMeta meta = converter.convert(entity, SmsAlarmMeta.class);
+            meta.setSmsRecipients(smsRecipients);
+            return meta;
         }
     }
 

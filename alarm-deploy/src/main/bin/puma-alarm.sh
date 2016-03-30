@@ -114,8 +114,10 @@ start() {
       checkpid
       if [ $psid -ne 0 ]; then
          echo "(pid=$psid) [OK]"
+         exit 0
       else
          echo "[Failed]"
+         exit 1
       fi
    fi
 }
@@ -222,6 +224,3 @@ case "$1" in
      ;;
   *)
 esac
-
-echo "Usage: $0 {start|stop|restart|status|info}"
-exit 1

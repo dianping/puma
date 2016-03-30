@@ -52,7 +52,7 @@ APP_MAIN=com.dianping.puma.alarm.deploy.PumaAlarmMonitorServerLauncher
 LOG_REL_PATH=logs/log4j.xml
 
 #标准输出重定向
-STD_OUT="/data/applogs/puma/std.out"
+STD_OUT="/data/applogs/puma/logs/std.out"
 
 #拼凑完整的classpath参数，包括指定lib目录下所有的jar
 for i in ${PUMA_LIB_PATH}/*.jar; do

@@ -3,12 +3,14 @@ package com.dianping.puma.extensions.notify;
 import com.dianping.puma.alarm.exception.PumaAlarmNotifyException;
 import com.dianping.puma.alarm.service.PumaWeChatService;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -28,13 +30,15 @@ public class PaasWeChatService implements PumaWeChatService {
 
     @Override
     public void send(String recipient, String message) {
-        List<NameValuePair> nameValuePairs = Lists.newArrayList();
-        nameValuePairs.add(new BasicNameValuePair("recipients", recipient));
-        nameValuePairs.add(new BasicNameValuePair("content", message));
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("keyword", recipient);
+        jsonObject.addProperty("content", message);
 
-        HttpPost httpPost = new HttpPost(httpPath);
         try {
-            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
+            HttpPost httpPost = new HttpPost(httpPath);
+            httpPost.addHeader("Content-Type", "application/json;charset=utf-8");
+            httpPost.addHeader("Accept", "application/json");
+            httpPost.setEntity(new StringEntity(jsonObject.toString(), "UTF-8"));
             HttpResponse httpResponse = httpClient.execute(httpPost);
 
             if (httpResponse.getStatusLine().getStatusCode() != 200) {
@@ -42,7 +46,7 @@ public class PaasWeChatService implements PumaWeChatService {
             }
 
         } catch (Throwable t) {
-            throw new IllegalArgumentException("Send wechat error.");
+            throw new IllegalArgumentException("Send wechat error.", t);
         }
     }
 }

@@ -39,6 +39,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         String clientName = binlogSubscriptionRequest.getClientName();
         Cat.logEvent("Client.Subscription", String.format("%s %s", clientName, ctx.channel().remoteAddress().toString()));
 
+        /*
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setDatabaseName(binlogSubscriptionRequest.getDatabase());
         clientConfig.setTableRegex(generateTableRegex(binlogSubscriptionRequest.getTables()));
@@ -54,9 +55,11 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         clientConnect.setClientAddress(clientAddress);
         clientConnect.setServerAddress(AddressUtils.getHostIp());
         clientManager.addClientConnect(clientName, clientConnect);
+        */
 
         BinlogInfo binlogInfo = new BinlogInfo();
 
+        /*
         ClientAck clientAck = clientAckService.find(clientName);
         if (clientAck != null) {
             Long serverId = clientAck.getServerId();
@@ -72,7 +75,11 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
             BinlogAck binlogAck = binlogAckService.load(clientName);
             binlogAckService.checkAck(clientName,binlogAck);
             binlogInfo = (binlogAck == null) ? null : binlogAck.getBinlogInfo();
-        }
+        }*/
+
+        BinlogAck binlogAck = binlogAckService.load(clientName);
+        binlogAckService.checkAck(clientName,binlogAck);
+        binlogInfo = (binlogAck == null) ? null : binlogAck.getBinlogInfo();
 
         DefaultAsyncBinlogChannel defaultAsyncBinlogChannel = new DefaultAsyncBinlogChannel(clientName);
         defaultAsyncBinlogChannel.init(

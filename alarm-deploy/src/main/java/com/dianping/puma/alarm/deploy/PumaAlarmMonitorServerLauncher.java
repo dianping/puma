@@ -24,6 +24,7 @@ public class PumaAlarmMonitorServerLauncher {
     public static void main(String[] args) throws IOException {
         String springXml;
 
+
         ConfigManager configManager = ConfigManagerLoader.getConfigManager();
         if (configManager == null) {
             Properties properties = new Properties();

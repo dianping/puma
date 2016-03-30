@@ -12,7 +12,11 @@
     <artifactId>puma-alarm-deploy</artifactId>
     <version>2.1.2-SNAPSHOT</version>
     <name>puma-alarm-deploy</name>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
+
+    <properties>
+        <job-packaging>war</job-packaging>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -120,7 +124,9 @@
 
     </dependencies>
 
-    <build>
+
+
+    <!--build>
         <finalName>${project.artifactId}-${env}-${project.version}</finalName>
         <plugins>
             <plugin>
@@ -133,6 +139,30 @@
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build-->
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <finalName>${artifactId}-${env}-${project.version}</finalName>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

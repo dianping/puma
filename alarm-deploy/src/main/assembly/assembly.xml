@@ -10,26 +10,16 @@
     <includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
         <fileSet>
-            <directory>.</directory>
+            <directory>./src/main/resources</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>README*</include>
+                <include>*.properties</include>
             </includes>
         </fileSet>
-		<fileSet>
-			<directory>./src/main/resources/bin</directory>
-			<outputDirectory>bin</outputDirectory>
-            <fileMode>755</fileMode>
-			<includes>
-				<include>*.*</include>
-				<include>*.sh</include>
-			</includes>
-		</fileSet>
 		<fileSet>
 			<directory>./src/main/resources/spring</directory>
 			<outputDirectory>spring</outputDirectory>
 			<includes>
-                <include>*.*</include>
 				<include>**/*.*</include>
 			</includes>
 		</fileSet>
@@ -47,6 +37,15 @@
 				<include>*</include>
 			</includes>
 		</fileSet>
+        <fileSet>
+            <directory>./src/main/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>755</fileMode>
+            <includes>
+                <include>*.*</include>
+                <include>*.sh</include>
+            </includes>
+        </fileSet>
 	</fileSets>
 	<dependencySets>
 		<dependencySet>
@@ -59,6 +58,7 @@
 				<include>com.dianping.puma:puma-biz</include>
 				<include>com.dianping.puma:puma-extensions-config</include>
                 <include>com.dianping.puma:puma-extensions-notify</include>
+                <include>com.dianping.puma:puma-alarm-deploy</include>
 			</includes>
 		</dependencySet>
 
@@ -85,6 +85,7 @@
                 <exclude>com.dianping.puma:puma-biz</exclude>
                 <exclude>com.dianping.puma:puma-extensions-config</exclude>
                 <exclude>com.dianping.puma:puma-extensions-notify</exclude>
+                <exclude>com.dianping.puma:puma-alarm-deploy</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>

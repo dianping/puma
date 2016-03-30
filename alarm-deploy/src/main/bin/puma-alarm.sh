@@ -15,7 +15,7 @@
 #需要根据实际环境以及Java程序名称来修改这些参数
 ###################################
 #JDK所在路径
-JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home"
+#JAVA_HOME=""
 
 #执行程序启动所使用的系统用户，考虑到安全，推荐不使用root帐号
 RUNNING_USER=nobody
@@ -31,10 +31,16 @@ case "`uname`" in
 esac
 
 #APP路径
-APP_PATH=`cd ${BIN_PATH}/../..; pwd`
+APP_PATH=`cd ${BIN_PATH}/..; pwd`
 
-#外部依赖
-LIB_PATH=${APP_PATH}/lib
+#外部依赖,Puma
+PUMA_LIB_PATH=${APP_PATH}/lib/puma
+
+#外部依赖,Dianping
+DP_LIB_PATH=${APP_PATH}/lib/dianping
+
+#外部依赖,其他
+OTHERS_LIB_PATH=${APP_PATH}/lib/others
 
 #配置文件
 PROP_PATH=${APP_PATH}/puma-alarm.properties
@@ -42,14 +48,25 @@ PROP_PATH=${APP_PATH}/puma-alarm.properties
 #Main函数
 APP_MAIN=com.dianping.puma.alarm.deploy.PumaAlarmMonitorServerLauncher
 
+#LOG配置文件
+LOG_REL_PATH=logs/log4j.xml
+
+#标准输出重定向
+STD_OUT="/data/applogs/puma/std.out"
+
 #拼凑完整的classpath参数，包括指定lib目录下所有的jar
-CLASSPATH=${APP_PATH}/classes
-for i in "$APP_PATH"/lib/*.jar; do
+for i in ${PUMA_LIB_PATH}/*.jar; do
+   CLASSPATH="$CLASSPATH":"$i"
+done
+for i in ${DP_LIB_PATH}/*.jar; do
+   CLASSPATH="$CLASSPATH":"$i"
+done
+for i in ${OTHERS_LIB_PATH}/*.jar; do
    CLASSPATH="$CLASSPATH":"$i"
 done
 
 #java虚拟机启动参数
-JAVA_OPTS="-ms512m -mx512m -Xmn256m -Djava.awt.headless=true -XX:MaxPermSize=128m"
+JAVA_OPTS="-ms512m -mx512m -Xmn256m -Djava.awt.headless=true -XX:MaxPermSize=128m -Dlog4j.configuration=${LOG_REL_PATH}"
 
 ###################################
 #(函数)判断程序是否已启动
@@ -63,7 +80,7 @@ JAVA_OPTS="-ms512m -mx512m -Xmn256m -Djava.awt.headless=true -XX:MaxPermSize=128
 psid=0
 
 checkpid() {
-   javaps=`$JAVA_HOME/bin/jps -l | grep ${APP_MAIN}`
+   javaps=`jps -l | grep ${APP_MAIN}`
 
    if [ -n "$javaps" ]; then
       psid=`echo $javaps | awk '{print $1}'`
@@ -92,9 +109,8 @@ start() {
       echo "warn: $APP_MAINCLASS already started! (pid=$psid)"
       echo "================================"
    else
-      echo -n "Starting $APP_MAIN ..."
-      JAVA_CMD="nohup $JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH ${APP_MAIN} >/dev/null 2>&1 &"
-      su - $RUNNING_USER -c "$JAVA_CMD"
+      echo "Starting $APP_MAIN ..."
+      exec java $JAVA_OPTS -classpath $CLASSPATH ${APP_MAIN} >${STD_OUT} 2>&1 &
       checkpid
       if [ $psid -ne 0 ]; then
          echo "(pid=$psid) [OK]"
@@ -121,14 +137,16 @@ stop() {
    checkpid
 
    if [ $psid -ne 0 ]; then
-      echo -n "Stopping $APP_MAIN ...(pid=$psid) "
-      su - $RUNNING_USER -c "kill -9 $psid"
+      echo "Stopping $APP_MAIN ...(pid=$psid) "
+      kill -15 $psid
       if [ $? -eq 0 ]; then
-         echo "[OK]"
+         echo "Stopping [OK]"
       else
-         echo "[Failed]"
+         echo "Stopping [Failed]"
       fi
 
+      echo "Waiting for $APP_MAIN to stop ..."
+      sleep 3
       checkpid
       if [ $psid -ne 0 ]; then
          stop
@@ -167,13 +185,14 @@ info() {
    echo `head -n 1 /etc/issue`
    echo `uname -a`
    echo
-   echo "JAVA_HOME=$JAVA_HOME"
-   echo `$JAVA_HOME/bin/java -version`
+   echo `java -version`
    echo
    echo "APP_PATH=$APP_PATH"
    echo "APP_MAIN=$APP_MAIN"
    echo "BIN_PATH=$BIN_PATH"
-   echo "LIB_PATH=$LIB_PATH"
+   echo "PUMA_LIB_PATH=$PUMA_LIB_PATH"
+   echo "DP_LIB_PATH=$DP_LIB_PATH"
+   echo "OTHERS_LIB_PATH=$OTHERS_LIB_PATH"
    echo "****************************"
 }
 

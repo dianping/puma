@@ -63,6 +63,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
     protected void doStart() {
         super.doStart();
 
+        /*
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -74,7 +75,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
                     logger.error("Failed to periodically flush puma client info.", t);
                 }
             }
-        }, 0, flushIntervalInSecond, TimeUnit.SECONDS);
+        }, 0, flushIntervalInSecond, TimeUnit.SECONDS);*/
     }
 
     private void flushClientAck(Map<String, ClientAck> clientAckMap) {
@@ -135,10 +136,10 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
     protected void doStop() {
         super.doStop();
 
-        try {
-            executor.shutdownNow();
-        } catch (Throwable ignore) {
-        }
+//        try {
+//            executor.shutdownNow();
+//        } catch (Throwable ignore) {
+//        }
     }
 
     @Override

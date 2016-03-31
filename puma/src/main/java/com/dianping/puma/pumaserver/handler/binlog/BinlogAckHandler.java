@@ -4,7 +4,6 @@ import com.dianping.puma.common.model.ClientAck;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogAckRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogAckResponse;
-import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
@@ -20,8 +19,6 @@ public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckReque
 
     private ClientSessionService clientSessionService;
 
-    private ClientManager clientManager;
-
     @Override
     public void channelRead0(ChannelHandlerContext ctx, BinlogAckRequest binlogAckRequest) {
         ClientSession session = clientSessionService.get(binlogAckRequest.getClientName(), binlogAckRequest.getToken());
@@ -34,8 +31,6 @@ public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckReque
         clientAck.setFilename(binlogAck.getBinlogInfo().getBinlogFile());
         clientAck.setPosition(binlogAck.getBinlogInfo().getBinlogPosition());
         clientAck.setTimestamp(binlogAck.getBinlogInfo().getTimestamp());
-
-        clientManager.addClientAck(clientName, clientAck);
 
         binlogAckService.save(session.getClientName(), binlogAckRequest.getBinlogAck(), false);
 
@@ -51,9 +46,5 @@ public class BinlogAckHandler extends SimpleChannelInboundHandler<BinlogAckReque
 
     public void setClientSessionService(ClientSessionService clientSessionService) {
         this.clientSessionService = clientSessionService;
-    }
-
-    public void setClientManager(ClientManager clientManager) {
-        this.clientManager = clientManager;
     }
 }

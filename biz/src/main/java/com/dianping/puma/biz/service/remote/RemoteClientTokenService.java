@@ -3,8 +3,8 @@ package com.dianping.puma.biz.service.remote;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientTokenDao;
 import com.dianping.puma.biz.entity.ClientTokenEntity;
-import com.dianping.puma.server.model.ClientToken;
-import com.dianping.puma.server.service.PumaClientTokenService;
+import com.dianping.puma.consumer.model.ClientToken;
+import com.dianping.puma.consumer.service.PumaClientTokenService;
 
 /**
  * Created by xiaotian.li on 16/3/31.

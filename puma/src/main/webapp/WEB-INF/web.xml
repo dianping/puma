@@ -6,6 +6,7 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			classpath*:spring/local/appcontext-*.xml,
+			classpath*:spring/consumer/appcontext-*.xml
 		</param-value>
 	</context-param>
 	<filter>

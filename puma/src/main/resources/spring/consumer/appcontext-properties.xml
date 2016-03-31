@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="pumaClientMetaManager"
+          class="com.dianping.puma.consumer.manage.ClientMetaManagerImpl">
+        <property name="pumaClientTokenService" ref="pumaClientTokenService"/>
+        <property name="pumaClientConfigService" ref="pumaClientConfigService"/>
+        <property name="pumaClientConnectService" ref="pumaClientConnectService"/>
+    </bean>
+
+    <bean id="pumaAlarmLogger"
+          class="com.dianping.puma.alarm.log.FlushingPumaAlarmLogger"
+          init-method="start"
+          destroy-method="stop">
+        <property name="pumaClientAlarmDataService" ref="clientAlarmDataService" />
+        <property name="flushIntervalInSecond" value="5" />
+    </bean>
+
+    <bean id="pullTimeDelayAlarmInterceptor"
+          class="com.dianping.puma.consumer.intercept.PullTimeDelayAlarmInterceptor">
+        <property name="pumaAlarmLogger" ref="pumaAlarmLogger" />
+    </bean>
+
+    <bean id="pushTimeDelayAlarmInterceptor"
+          class="com.dianping.puma.consumer.intercept.PushTimeDelayAlarmInterceptor">
+        <property name="pumaAlarmLogger" ref="pumaAlarmLogger" />
+    </bean>
+
+    <bean id="pumaEventServerInterceptor"
+          class="com.dianping.puma.consumer.intercept.PumaEventServerInterceptor">
+        <property name="interceptors">
+            <list>
+                <ref bean="pullTimeDelayAlarmInterceptor" />
+                <ref bean="pushTimeDelayAlarmInterceptor" />
+            </list>
+        </property>
+    </bean>
+
+</beans>

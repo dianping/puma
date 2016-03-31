@@ -19,7 +19,7 @@
         <module>alarm-deploy</module>
         <module>web</module>
         <module>utils</module>
-        <module>server</module>
+        <module>consumer</module>
         <module>test</module>
     </modules>
 

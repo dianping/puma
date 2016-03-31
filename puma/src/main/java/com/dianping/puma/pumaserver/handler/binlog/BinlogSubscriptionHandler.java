@@ -1,21 +1,19 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.common.service.PumaClientAckService;
 import com.dianping.puma.common.utils.AddressUtils;
+import com.dianping.puma.consumer.manage.PumaClientMetaManager;
+import com.dianping.puma.consumer.model.ClientConfig;
+import com.dianping.puma.consumer.model.ClientConnect;
+import com.dianping.puma.consumer.model.ClientToken;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.pumaserver.channel.impl.DefaultAsyncBinlogChannel;
-import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
-import com.dianping.puma.server.manage.PumaClientMetaManager;
-import com.dianping.puma.server.model.ClientConfig;
-import com.dianping.puma.server.model.ClientConnect;
-import com.dianping.puma.server.model.ClientToken;
 import com.dianping.puma.status.SystemStatusManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;

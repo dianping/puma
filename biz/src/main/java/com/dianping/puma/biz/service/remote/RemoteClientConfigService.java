@@ -3,8 +3,8 @@ package com.dianping.puma.biz.service.remote;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientConfigDao;
 import com.dianping.puma.biz.entity.ClientConfigEntity;
-import com.dianping.puma.server.model.ClientConfig;
-import com.dianping.puma.server.service.PumaClientConfigService;
+import com.dianping.puma.consumer.model.ClientConfig;
+import com.dianping.puma.consumer.service.PumaClientConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,5 +26,13 @@ public class RemoteClientConfigService implements PumaClientConfigService {
         ClientConfigEntity entity = converter.convert(clientConfig, ClientConfigEntity.class);
         entity.setClientName(clientName);
         return clientConfigDao.update(entity);
+    }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public void setClientConfigDao(ClientConfigDao clientConfigDao) {
+        this.clientConfigDao = clientConfigDao;
     }
 }

@@ -3,8 +3,8 @@ package com.dianping.puma.biz.service.remote;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientConnectDao;
 import com.dianping.puma.biz.entity.ClientConnectEntity;
-import com.dianping.puma.server.model.ClientConnect;
-import com.dianping.puma.server.service.PumaClientConnectService;
+import com.dianping.puma.consumer.model.ClientConnect;
+import com.dianping.puma.consumer.service.PumaClientConnectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +26,14 @@ public class RemoteClientConnectService implements PumaClientConnectService {
         ClientConnectEntity entity = converter.convert(clientConnect, ClientConnectEntity.class);
         entity.setClientName(clientName);
         return clientConnectDao.update(entity);
+    }
+
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public void setClientConnectDao(ClientConnectDao clientConnectDao) {
+        this.clientConnectDao = clientConnectDao;
     }
 }
 

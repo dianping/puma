@@ -1,11 +1,11 @@
 package com.dianping.puma.pumaserver.client;
 
 import com.dianping.puma.common.model.ClientAck;
-import com.dianping.puma.common.model.ClientConfig;
-import com.dianping.puma.common.model.ClientConnect;
+import com.dianping.puma.server.model.ClientConfig;
+import com.dianping.puma.server.model.ClientConnect;
 import com.dianping.puma.common.service.PumaClientAckService;
-import com.dianping.puma.common.service.PumaClientConfigService;
-import com.dianping.puma.common.service.PumaClientConnectService;
+import com.dianping.puma.server.service.PumaClientConfigService;
+import com.dianping.puma.server.service.PumaClientConnectService;
 import com.dianping.puma.pumaserver.client.exception.PumaClientManageException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +40,7 @@ public class RemoteClientManager extends AbstractClientManager {
     public void addClientConfig(String clientName, ClientConfig clientConfig)
             throws PumaClientManageException {
         try {
-            clientConfigService.update(clientName, clientConfig);
+            //clientConfigService.update(clientName, clientConfig);
         } catch (Throwable t) {
             throw new PumaClientManageException(
                     "Failed to add puma client[%s] config[%s]", clientName, clientConfig, t);
@@ -51,7 +51,7 @@ public class RemoteClientManager extends AbstractClientManager {
     public void addClientConnect(String clientName, ClientConnect clientConnect)
             throws PumaClientManageException {
         try {
-            clientConnectService.update(clientName, clientConnect);
+            //clientConnectService.update(clientName, clientConnect);
         } catch (Throwable t) {
             throw new PumaClientManageException(
                     "Failed to add puma client[%s] connect[%s]", clientName, clientConnect, t);

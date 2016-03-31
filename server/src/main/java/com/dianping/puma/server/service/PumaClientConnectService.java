@@ -1,6 +1,6 @@
-package com.dianping.puma.common.service;
+package com.dianping.puma.server.service;
 
-import com.dianping.puma.common.model.ClientConnect;
+import com.dianping.puma.server.model.ClientConnect;
 
 /**
  * Created by xiaotian.li on 16/3/2.

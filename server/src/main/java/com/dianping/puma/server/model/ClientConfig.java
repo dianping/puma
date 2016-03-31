@@ -1,4 +1,4 @@
-package com.dianping.puma.common.model;
+package com.dianping.puma.server.model;
 
 import lombok.ToString;
 

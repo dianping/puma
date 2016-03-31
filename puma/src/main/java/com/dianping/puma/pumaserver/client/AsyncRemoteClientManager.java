@@ -3,11 +3,11 @@ package com.dianping.puma.pumaserver.client;
 import com.dianping.puma.biz.service.ClientPositionService;
 import com.dianping.puma.common.model.Client;
 import com.dianping.puma.common.model.ClientAck;
-import com.dianping.puma.common.model.ClientConfig;
-import com.dianping.puma.common.model.ClientConnect;
+import com.dianping.puma.server.model.ClientConfig;
+import com.dianping.puma.server.model.ClientConnect;
 import com.dianping.puma.common.service.PumaClientAckService;
-import com.dianping.puma.common.service.PumaClientConfigService;
-import com.dianping.puma.common.service.PumaClientConnectService;
+import com.dianping.puma.server.service.PumaClientConfigService;
+import com.dianping.puma.server.service.PumaClientConnectService;
 import com.dianping.puma.common.service.PumaClientService;
 import com.dianping.puma.common.utils.NamedThreadFactory;
 import com.dianping.puma.pumaserver.client.exception.PumaClientManageException;
@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by xiaotian.li on 16/3/2.
@@ -105,7 +104,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             try {
                 Client client = clientService.findByClientName(clientName);
                 if (client != null) {
-                    clientConfigService.update(clientName, clientConfig);
+                    //clientConfigService.update(clientName, clientConfig);
                 }
                 it.remove();
             } catch (Throwable t) {
@@ -123,7 +122,7 @@ public class AsyncRemoteClientManager extends AbstractClientManager {
             try {
                 Client client = clientService.findByClientName(clientName);
                 if (client != null) {
-                    clientConnectService.update(clientName, clientConnect);
+                    //clientConnectService.update(clientName, clientConnect);
                 }
                 it.remove();
             } catch (Throwable t) {

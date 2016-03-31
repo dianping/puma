@@ -33,6 +33,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.dianping.puma</groupId>
+            <artifactId>puma-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- DP -->
         <dependency>
             <groupId>com.dianping.zebra</groupId>

@@ -1,11 +1,7 @@
 package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.common.model.ClientAck;
-import com.dianping.puma.common.model.ClientConfig;
-import com.dianping.puma.common.model.ClientConnect;
 import com.dianping.puma.common.service.PumaClientAckService;
-import com.dianping.puma.common.utils.AddressUtils;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;

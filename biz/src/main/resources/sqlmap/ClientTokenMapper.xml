@@ -9,7 +9,7 @@
         ClientToken
         (
         ClientName,
-        Token,
+        Token
         )
         VALUES
         (

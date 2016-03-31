@@ -280,6 +280,12 @@
                 <version>1.2.2</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>1.6.12</version>
+            </dependency>
+
             <!-- tomcat jdbc -->
             <dependency>
                 <groupId>org.apache.tomcat</groupId>

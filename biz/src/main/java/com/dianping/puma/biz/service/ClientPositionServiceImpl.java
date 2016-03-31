@@ -5,6 +5,8 @@ import com.dianping.puma.biz.dao.ClientPositionDao;
 import com.dianping.puma.biz.entity.ClientPositionEntity;
 import com.dianping.puma.common.model.ClientPosition;
 import com.dianping.puma.common.service.ClientPositionService;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,6 +35,18 @@ public class ClientPositionServiceImpl implements ClientPositionService {
     public ClientPosition find(String clientName) {
         ClientPositionEntity entity = clientPositionDao.findByClientName(clientName);
         return converter.convert(entity, ClientPosition.class);
+    }
+
+    @Override
+    public List<ClientPosition> findAll() {
+        List<ClientPositionEntity> entities = clientPositionDao.findAll();
+        return FluentIterable.from(entities)
+                .transform(new Function<ClientPositionEntity, ClientPosition>() {
+                    @Override
+                    public ClientPosition apply(ClientPositionEntity entity) {
+                        return converter.convert(entity, ClientPosition.class);
+                    }
+                }).toList();
     }
 
     @Override

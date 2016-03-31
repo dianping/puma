@@ -37,6 +37,8 @@ public class RemoteClientService implements PumaClientService {
 
     private ClientAlarmMetaDao clientAlarmMetaDao;
 
+    private ClientTokenDao clientTokenDao;
+
     @Override
     @Transactional(value = "pumaTransactionManager", rollbackFor = Throwable.class)
     public Client findByClientName(String clientName) {
@@ -109,6 +111,10 @@ public class RemoteClientService implements PumaClientService {
         ClientAlarmMetaEntity clientAlarmMetaEntity
                 = converter.convert(client, ClientAlarmMetaEntity.class);
         clientAlarmMetaDao.insert(clientAlarmMetaEntity);
+
+        ClientTokenEntity clientTokenEntity
+                = converter.convert(client, ClientTokenEntity.class);
+        clientTokenDao.insert(clientTokenEntity);
     }
 
     @Override
@@ -206,5 +212,9 @@ public class RemoteClientService implements PumaClientService {
 
     public void setClientAlarmMetaDao(ClientAlarmMetaDao clientAlarmMetaDao) {
         this.clientAlarmMetaDao = clientAlarmMetaDao;
+    }
+
+    public void setClientTokenDao(ClientTokenDao clientTokenDao) {
+        this.clientTokenDao = clientTokenDao;
     }
 }

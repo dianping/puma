@@ -1,7 +1,5 @@
 package com.dianping.puma.pumaserver;
 
-import com.dianping.puma.common.service.PumaClientAckService;
-import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
 import com.dianping.puma.pumaserver.handler.binlog.*;
@@ -11,6 +9,7 @@ import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
 import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
 import com.dianping.puma.server.intercept.PumaEventServerInterceptor;
+import com.dianping.puma.server.manage.PumaClientMetaManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpContentDecompressor;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,11 +36,8 @@ public class PumaServerManager {
     @Autowired
     protected DbBinlogAckService binlogAckService;
 
-    @Resource(name = "asyncRemoteClientManager")
-    ClientManager clientManager;
-
     @Autowired
-    PumaClientAckService clientAckService;
+    PumaClientMetaManager pumaClientMetaManager;
 
     @Autowired
     private PumaEventServerInterceptor pumaEventServerInterceptor;
@@ -54,7 +49,7 @@ public class PumaServerManager {
     @PostConstruct
     public synchronized void init() {
         clientSessionService.init();
-        clientManager.start();
+        pumaClientMetaManager.start();
 
         ServerConfig consoleConfig = new ServerConfig();
         consoleConfig.setPort(4040);
@@ -71,7 +66,6 @@ public class PumaServerManager {
         final BinlogAckHandler binlogAckHandler = new BinlogAckHandler();
         binlogAckHandler.setBinlogAckService(binlogAckService);
         binlogAckHandler.setClientSessionService(clientSessionService);
-        binlogAckHandler.setClientManager(clientManager);
 
         final BinlogGetHandler binlogGetHandler = new BinlogGetHandler();
         binlogGetHandler.setClientSessionService(clientSessionService);
@@ -79,8 +73,7 @@ public class PumaServerManager {
         final BinlogSubscriptionHandler binlogSubscriptionHandler = new BinlogSubscriptionHandler();
         binlogSubscriptionHandler.setBinlogAckService(binlogAckService);
         binlogSubscriptionHandler.setClientSessionService(clientSessionService);
-        binlogSubscriptionHandler.setClientManager(clientManager);
-        binlogSubscriptionHandler.setClientAckService(clientAckService);
+        binlogSubscriptionHandler.setPumaClientMetaManager(pumaClientMetaManager);
 
         final BinlogUnsubscriptionHandler binlogUnsubscriptionHandler = new BinlogUnsubscriptionHandler();
         binlogUnsubscriptionHandler.setClientSessionService(clientSessionService);
@@ -115,7 +108,7 @@ public class PumaServerManager {
     public synchronized void close() {
         if (server != null) {
             server.close();
-            clientManager.stop();
+            pumaClientMetaManager.stop();
             pumaEventServerInterceptor.stop();
         }
     }
@@ -124,11 +117,7 @@ public class PumaServerManager {
         this.binlogAckService = binlogAckService;
     }
 
-    public void setClientManager(ClientManager clientManager) {
-        this.clientManager = clientManager;
-    }
-
-    public void setClientAckService(PumaClientAckService clientAckService) {
-        this.clientAckService = clientAckService;
+    public void setPumaClientMetaManager(PumaClientMetaManager pumaClientMetaManager) {
+        this.pumaClientMetaManager = pumaClientMetaManager;
     }
 }

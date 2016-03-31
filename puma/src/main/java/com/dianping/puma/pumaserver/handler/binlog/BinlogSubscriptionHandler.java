@@ -31,11 +31,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     private ClientSessionService clientSessionService;
 
-    private ClientManager clientManager;
-
     private PumaClientMetaManager pumaClientMetaManager;
-
-    private PumaClientAckService clientAckService;
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, BinlogSubscriptionRequest binlogSubscriptionRequest) {
@@ -109,11 +105,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         this.clientSessionService = clientSessionService;
     }
 
-    public void setClientAckService(PumaClientAckService clientAckService) {
-        this.clientAckService = clientAckService;
-    }
-
-    public void setClientManager(ClientManager clientManager) {
-        this.clientManager = clientManager;
+    public void setPumaClientMetaManager(PumaClientMetaManager pumaClientMetaManager) {
+        this.pumaClientMetaManager = pumaClientMetaManager;
     }
 }

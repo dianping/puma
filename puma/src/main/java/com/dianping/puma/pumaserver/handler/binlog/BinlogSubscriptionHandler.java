@@ -2,6 +2,7 @@ package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.common.service.PumaClientAckService;
+import com.dianping.puma.common.utils.AddressUtils;
 import com.dianping.puma.core.dto.BinlogAck;
 import com.dianping.puma.core.dto.binlog.request.BinlogSubscriptionRequest;
 import com.dianping.puma.core.dto.binlog.response.BinlogSubscriptionResponse;
@@ -11,6 +12,10 @@ import com.dianping.puma.pumaserver.client.ClientManager;
 import com.dianping.puma.pumaserver.client.ClientSession;
 import com.dianping.puma.pumaserver.service.BinlogAckService;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
+import com.dianping.puma.server.manage.PumaClientMetaManager;
+import com.dianping.puma.server.model.ClientConfig;
+import com.dianping.puma.server.model.ClientConnect;
+import com.dianping.puma.server.model.ClientToken;
 import com.dianping.puma.status.SystemStatusManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -28,6 +33,8 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     private ClientManager clientManager;
 
+    private PumaClientMetaManager pumaClientMetaManager;
+
     private PumaClientAckService clientAckService;
 
     @Override
@@ -35,44 +42,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
         String clientName = binlogSubscriptionRequest.getClientName();
         Cat.logEvent("Client.Subscription", String.format("%s %s", clientName, ctx.channel().remoteAddress().toString()));
 
-        /*
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setDatabaseName(binlogSubscriptionRequest.getDatabase());
-        clientConfig.setTableRegex(generateTableRegex(binlogSubscriptionRequest.getTables()));
-        clientConfig.setDml(binlogSubscriptionRequest.isDml());
-        clientConfig.setDdl(binlogSubscriptionRequest.isDdl());
-        clientManager.addClientConfig(clientName, clientConfig);
-
-        ClientConnect clientConnect = new ClientConnect();
-        String clientAddress = ctx.channel().remoteAddress().toString();
-        if (StringUtils.startsWith(clientAddress, "/")) {
-            clientAddress = StringUtils.substring(clientAddress, 1);
-        }
-        clientConnect.setClientAddress(clientAddress);
-        clientConnect.setServerAddress(AddressUtils.getHostIp());
-        clientManager.addClientConnect(clientName, clientConnect);
-        */
-
-        BinlogInfo binlogInfo = new BinlogInfo();
-
-        /*
-        ClientAck clientAck = clientAckService.find(clientName);
-        if (clientAck != null) {
-            Long serverId = clientAck.getServerId();
-            binlogInfo.setServerId(serverId == null ? 0 : serverId);
-
-            binlogInfo.setBinlogFile(clientAck.getFilename());
-
-            Long position = clientAck.getPosition();
-            binlogInfo.setBinlogPosition(position == null ? 0 : position);
-
-            binlogInfo.setTimestamp(clientAck.getTimestamp());
-        } else {
-            BinlogAck binlogAck = binlogAckService.load(clientName);
-            binlogAckService.checkAck(clientName,binlogAck);
-            binlogInfo = (binlogAck == null) ? null : binlogAck.getBinlogInfo();
-        }*/
-
+        BinlogInfo binlogInfo;
         BinlogAck binlogAck = binlogAckService.load(clientName);
         binlogAckService.checkAck(clientName,binlogAck);
         binlogInfo = (binlogAck == null) ? null : binlogAck.getBinlogInfo();
@@ -92,6 +62,27 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         BinlogSubscriptionResponse binlogSubscriptionResponse = new BinlogSubscriptionResponse();
         binlogSubscriptionResponse.setToken(session.getToken());
+
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setDatabaseName(binlogSubscriptionRequest.getDatabase());
+        clientConfig.setTableRegex(generateTableRegex(binlogSubscriptionRequest.getTables()));
+        clientConfig.setDml(binlogSubscriptionRequest.isDml());
+        clientConfig.setDdl(binlogSubscriptionRequest.isDdl());
+        pumaClientMetaManager.registerClientConfig(clientName, clientConfig);
+
+        ClientConnect clientConnect = new ClientConnect();
+        String clientAddress = ctx.channel().remoteAddress().toString();
+        if (StringUtils.startsWith(clientAddress, "/")) {
+            clientAddress = StringUtils.substring(clientAddress, 1);
+        }
+        clientConnect.setClientAddress(clientAddress);
+        clientConnect.setServerAddress(AddressUtils.getHostIp());
+        pumaClientMetaManager.registerClientConnect(clientName, clientConnect);
+
+        ClientToken clientToken = new ClientToken();
+        clientToken.setToken(session.getToken());
+        pumaClientMetaManager.registerClientToken(clientName, clientToken);
+
         ctx.channel().writeAndFlush(binlogSubscriptionResponse);
 
         SystemStatusManager.addClient(

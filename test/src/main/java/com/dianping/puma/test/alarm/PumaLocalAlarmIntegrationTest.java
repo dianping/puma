@@ -9,7 +9,7 @@ import com.dianping.puma.alarm.service.memory.MemoryClientAlarmBenchmarkService;
 import com.dianping.puma.alarm.service.memory.MemoryClientAlarmDataService;
 import com.dianping.puma.alarm.service.memory.MemoryClientAlarmMetaService;
 import com.dianping.puma.alarm.service.memory.MemoryClientAlarmStrategyService;
-import com.dianping.puma.biz.service.memory.*;
+import com.dianping.puma.biz.service.memory.MemoryClientService;
 import com.dianping.puma.common.model.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

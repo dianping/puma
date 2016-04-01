@@ -8,6 +8,8 @@ import com.dianping.puma.biz.entity.ClientTokenEntity;
  */
 public interface ClientTokenDao {
 
+    ClientTokenEntity find(String clientName);
+
     void insert(ClientTokenEntity entity);
 
     int update(ClientTokenEntity entity);

@@ -8,5 +8,7 @@ import com.dianping.puma.consumer.model.ClientToken;
  */
 public interface PumaClientTokenService {
 
+    ClientToken find(String clientName);
+
     int update(String clientName, ClientToken clientToken);
 }

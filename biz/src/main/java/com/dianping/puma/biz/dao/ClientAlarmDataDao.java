@@ -12,7 +12,7 @@ public interface ClientAlarmDataDao {
 
     void insert(ClientAlarmDataEntity entity);
 
-    void update(ClientAlarmDataEntity entity);
+    int update(ClientAlarmDataEntity entity);
 
     int updatePullTimeDelay(ClientAlarmDataEntity entity);
 

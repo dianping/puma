@@ -17,6 +17,12 @@ public class RemoteClientTokenService implements PumaClientTokenService {
     private ClientTokenDao clientTokenDao;
 
     @Override
+    public ClientToken find(String clientName) {
+        ClientTokenEntity entity = clientTokenDao.find(clientName);
+        return converter.convert(entity, ClientToken.class);
+    }
+
+    @Override
     public int update(String clientName, ClientToken clientToken) {
         ClientTokenEntity entity = converter.convert(clientToken, ClientTokenEntity.class);
         entity.setClientName(clientName);

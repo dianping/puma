@@ -19,6 +19,10 @@ public interface PumaClientAlarmDataService {
 
     Map<String, PushTimeDelayAlarmData> findPushTimeDelayAll();
 
+    int updatePullTimeDelay(String clientName, PullTimeDelayAlarmData data);
+
+    int updatePushTimeDelay(String clientName, PushTimeDelayAlarmData data);
+
     void replacePullTimeDelay(String clientName, PullTimeDelayAlarmData data);
 
     void replacePushTimeDelay(String clientName, PushTimeDelayAlarmData data);

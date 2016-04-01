@@ -1,9 +1,9 @@
 package com.dianping.puma.consumer.manage;
 
 import com.dianping.puma.common.AbstractPumaLifeCycle;
+import com.dianping.puma.consumer.exception.PumaClientMetaManageException;
 import com.dianping.puma.consumer.model.ClientConfig;
 import com.dianping.puma.consumer.model.ClientConnect;
-import com.dianping.puma.consumer.exception.PumaClientMetaManageException;
 import com.dianping.puma.consumer.model.ClientToken;
 import com.dianping.puma.consumer.service.PumaClientConfigService;
 import com.dianping.puma.consumer.service.PumaClientConnectService;
@@ -79,7 +79,7 @@ public class ClientMetaManagerImpl extends AbstractPumaLifeCycle implements Puma
     }
 
     @Override
-    public void lost(String clientName) throws PumaClientMetaManageException {
+    public void clean(String clientName) {
         clientTokenMap.remove(clientName);
         clientConfigMap.remove(clientName);
         clientConnectMap.remove(clientName);

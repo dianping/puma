@@ -42,6 +42,20 @@ public class RemoteClientAlarmDataService implements PumaClientAlarmDataService 
     }
 
     @Override
+    public int updatePullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
+        ClientAlarmDataEntity entity = converter.convert(data, ClientAlarmDataEntity.class);
+        entity.setClientName(clientName);
+        return clientAlarmDataDao.updatePullTimeDelay(entity);
+    }
+
+    @Override
+    public int updatePushTimeDelay(String clientName, PushTimeDelayAlarmData data) {
+        ClientAlarmDataEntity entity = converter.convert(data, ClientAlarmDataEntity.class);
+        entity.setClientName(clientName);
+        return clientAlarmDataDao.updatePushTimeDelay(entity);
+    }
+
+    @Override
     public void replacePullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
         ClientAlarmDataEntity entity = converter.convert(data, ClientAlarmDataEntity.class);
         entity.setClientName(clientName);

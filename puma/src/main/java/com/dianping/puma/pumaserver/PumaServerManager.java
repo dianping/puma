@@ -1,5 +1,7 @@
 package com.dianping.puma.pumaserver;
 
+import com.dianping.puma.consumer.intercept.ChainedMessageInterceptor;
+import com.dianping.puma.consumer.manage.PumaClientMetaManager;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
 import com.dianping.puma.pumaserver.handler.*;
 import com.dianping.puma.pumaserver.handler.binlog.*;
@@ -8,8 +10,6 @@ import com.dianping.puma.pumaserver.server.TcpServer;
 import com.dianping.puma.pumaserver.service.ClientSessionService;
 import com.dianping.puma.pumaserver.service.impl.DbBinlogAckService;
 import com.dianping.puma.pumaserver.service.impl.DefaultClientSessionService;
-import com.dianping.puma.consumer.intercept.PumaEventServerInterceptor;
-import com.dianping.puma.consumer.manage.PumaClientMetaManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpContentDecompressor;
@@ -40,7 +40,7 @@ public class PumaServerManager {
     PumaClientMetaManager pumaClientMetaManager;
 
     @Autowired
-    private PumaEventServerInterceptor pumaEventServerInterceptor;
+    private ChainedMessageInterceptor pumaEventServerInterceptor;
 
     protected final ClientSessionService clientSessionService = new DefaultClientSessionService();
 

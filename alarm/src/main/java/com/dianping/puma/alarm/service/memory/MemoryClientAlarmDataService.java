@@ -42,6 +42,16 @@ public class MemoryClientAlarmDataService implements PumaClientAlarmDataService 
     }
 
     @Override
+    public int updatePullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
+        return 0;
+    }
+
+    @Override
+    public int updatePushTimeDelay(String clientName, PushTimeDelayAlarmData data) {
+        return 0;
+    }
+
+    @Override
     public void replacePullTimeDelay(String clientName, PullTimeDelayAlarmData data) {
         pullTimeDelayAlarmDataMap.put(clientName, data);
     }

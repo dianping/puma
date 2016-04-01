@@ -4,6 +4,15 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.ClientTokenDao">
 
+    <select id="find" resultType="ClientTokenEntity">
+        SELECT
+        *
+        FROM
+        ClientToken
+        WHERE
+        ClientName = #{clientName}
+    </select>
+
     <insert id="insert" parameterType="ClientTokenEntity" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         ClientToken

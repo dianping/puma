@@ -4,6 +4,18 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
+    <bean id="pumaClientCleaner"
+          class="com.dianping.puma.consumer.ha.ScanningPumaClientCleaner">
+        <property name="pumaClientTokenService" ref="pumaClientTokenService"/>
+        <property name="scanIntervalInSecond" value="5"/>
+        <property name="cleanables">
+            <list>
+                <ref bean="pumaMessageInterceptor"/>
+                <ref bean="pumaClientMetaManager"/>
+            </list>
+        </property>
+    </bean>
+
     <bean id="pumaClientMetaManager"
           class="com.dianping.puma.consumer.manage.ClientMetaManagerImpl">
         <property name="pumaClientTokenService" ref="pumaClientTokenService"/>
@@ -16,7 +28,6 @@
           init-method="start"
           destroy-method="stop">
         <property name="pumaClientAlarmDataService" ref="clientAlarmDataService" />
-        <property name="flushIntervalInSecond" value="5" />
     </bean>
 
     <bean id="pullTimeDelayAlarmInterceptor"
@@ -29,8 +40,8 @@
         <property name="pumaAlarmLogger" ref="pumaAlarmLogger" />
     </bean>
 
-    <bean id="pumaEventServerInterceptor"
-          class="com.dianping.puma.consumer.intercept.PumaEventServerInterceptor">
+    <bean id="pumaMessageInterceptor"
+          class="com.dianping.puma.consumer.intercept.ChainedMessageInterceptor">
         <property name="interceptors">
             <list>
                 <ref bean="pullTimeDelayAlarmInterceptor" />

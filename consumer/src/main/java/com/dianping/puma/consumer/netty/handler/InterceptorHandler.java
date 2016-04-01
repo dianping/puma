@@ -1,7 +1,7 @@
 package com.dianping.puma.consumer.netty.handler;
 
+import com.dianping.puma.consumer.intercept.ChainedMessageInterceptor;
 import com.dianping.puma.core.dto.BinlogHttpMessage;
-import com.dianping.puma.consumer.intercept.PumaEventServerInterceptor;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -16,7 +16,7 @@ public class InterceptorHandler extends ChannelDuplexHandler {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private PumaEventServerInterceptor interceptor;
+    private ChainedMessageInterceptor interceptor;
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
@@ -46,7 +46,7 @@ public class InterceptorHandler extends ChannelDuplexHandler {
         ctx.fireChannelRead(msg);
     }
 
-    public void setInterceptor(PumaEventServerInterceptor interceptor) {
+    public void setInterceptor(ChainedMessageInterceptor interceptor) {
         this.interceptor = interceptor;
     }
 }

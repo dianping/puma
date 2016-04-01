@@ -1,6 +1,5 @@
 package com.dianping.puma.consumer.netty;
 
-import com.dianping.puma.consumer.netty.NettyEventServer;
 import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.util.concurrent.TimeUnit;

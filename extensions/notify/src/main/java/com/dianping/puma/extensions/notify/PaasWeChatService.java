@@ -72,6 +72,10 @@ public class PaasWeChatService implements PumaWeChatService {
 
     @Override
     public void send(String recipient, String message) {
+        if (httpClient == null) {
+            createHttpClient();
+        }
+
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("keyword", recipient);
         jsonObject.addProperty("content", message);

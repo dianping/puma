@@ -112,6 +112,10 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
             AlarmStrategy strategy = monitorStrategy(clientName);
             List<AlarmMeta> metas = monitorMetas(clientName);
 
+            if (strategy == null) {
+                continue;
+            }
+
             Map<AlarmData, AlarmBenchmark> map = Maps.newHashMap();
 
             PullTimeDelayAlarmData pullTimeDelayAlarmData

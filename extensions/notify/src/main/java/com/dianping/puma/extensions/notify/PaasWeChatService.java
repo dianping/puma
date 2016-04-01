@@ -24,6 +24,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.apache.http.util.VersionInfo;
 
 /**
@@ -90,6 +91,8 @@ public class PaasWeChatService implements PumaWeChatService {
             if (httpResponse.getStatusLine().getStatusCode() != 200) {
                 throw new PumaAlarmNotifyException();
             }
+
+            EntityUtils.consumeQuietly(httpResponse.getEntity());
 
         } catch (Throwable t) {
             throw new IllegalArgumentException("Send wechat error.", t);

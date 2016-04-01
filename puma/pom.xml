@@ -17,7 +17,19 @@
     <dependencies>
         <dependency>
             <groupId>com.dianping.puma</groupId>
-            <artifactId>puma-alarm</artifactId>
+            <artifactId>puma-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dianping.puma</groupId>
+            <artifactId>puma-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dianping.puma</groupId>
+            <artifactId>puma-biz</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -34,22 +46,6 @@
         <dependency>
             <groupId>com.dianping.zebra</groupId>
             <artifactId>zebra-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.dianping.puma</groupId>
-            <artifactId>puma-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.dianping.puma</groupId>
-            <artifactId>puma-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.dianping.puma</groupId>
-            <artifactId>puma-biz</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -158,11 +154,6 @@
         <dependency>
             <groupId>c3p0</groupId>
             <artifactId>c3p0</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.dianping.puma</groupId>
-            <artifactId>puma-alarm</artifactId>
-            <version>2.1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

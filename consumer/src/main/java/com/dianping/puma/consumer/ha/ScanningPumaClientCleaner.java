@@ -84,6 +84,8 @@ public class ScanningPumaClientCleaner extends AbstractPumaLifeCycle implements 
         for (PumaClientCleanable cleanable: cleanables) {
             cleanable.clean(clientName);
         }
+
+        clientTokenMap.remove(clientName);
     }
 
     public void setPumaClientTokenService(PumaClientTokenService pumaClientTokenService) {

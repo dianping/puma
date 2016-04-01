@@ -39,8 +39,6 @@ public class SimplePumaClientDebug {
             } catch (Throwable t) {
                 t.printStackTrace();
             }
-
-            Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
         }
     }
 }

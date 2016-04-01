@@ -5,6 +5,7 @@ import com.dianping.puma.alarm.service.PumaWeChatService;
 import com.google.gson.JsonObject;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
@@ -17,7 +18,12 @@ public class PaasWeChatService implements PumaWeChatService {
 
     private String httpPath = "http://web.paas.dp/wechat/sendByRequestBody";
 
-    private HttpClient httpClient = HttpClients.createDefault();
+    private HttpClient httpClient = HttpClients.custom()
+            .setDefaultRequestConfig(
+                    RequestConfig.custom()
+                            .setConnectTimeout(10 * 1000)
+                            .setSocketTimeout(10 * 60 * 1000)
+                            .build()).build();
 
     @Override
     public void send(String recipient, String message) {

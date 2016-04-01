@@ -44,7 +44,14 @@ public class WeChatAlarmNotifier extends AbstractPumaLifeCycle implements PumaAl
                     logger.debug("Send wechat with message[{}] to recipient[{}].",
                             title + content, recipient);
                 }
+
                 weChatService.send(recipient, title + content);
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Success to send wechat with message[{}] to recipient[{}].",
+                            title + content, recipient);
+                }
+
             } catch (Throwable t) {
                 logger.error("Failed to send wechat with message[{}] to recipient[{}].",
                         title + content, recipient, t);

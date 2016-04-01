@@ -1,5 +1,6 @@
 package com.dianping.puma.pumaserver;
 
+import com.dianping.puma.consumer.ha.PumaClientCleaner;
 import com.dianping.puma.consumer.intercept.ChainedMessageInterceptor;
 import com.dianping.puma.consumer.manage.PumaClientMetaManager;
 import com.dianping.puma.pumaserver.client.PumaClientsHolder;
@@ -40,6 +41,9 @@ public class PumaServerManager {
     PumaClientMetaManager pumaClientMetaManager;
 
     @Autowired
+    PumaClientCleaner pumaClientCleaner;
+
+    @Autowired
     private ChainedMessageInterceptor pumaEventServerInterceptor;
 
     protected final ClientSessionService clientSessionService = new DefaultClientSessionService();
@@ -49,6 +53,7 @@ public class PumaServerManager {
     @PostConstruct
     public synchronized void init() {
         clientSessionService.init();
+        pumaClientCleaner.start();
         pumaClientMetaManager.start();
 
         ServerConfig consoleConfig = new ServerConfig();
@@ -73,6 +78,7 @@ public class PumaServerManager {
         final BinlogSubscriptionHandler binlogSubscriptionHandler = new BinlogSubscriptionHandler();
         binlogSubscriptionHandler.setBinlogAckService(binlogAckService);
         binlogSubscriptionHandler.setClientSessionService(clientSessionService);
+        binlogSubscriptionHandler.setPumaClientCleaner(pumaClientCleaner);
         binlogSubscriptionHandler.setPumaClientMetaManager(pumaClientMetaManager);
 
         final BinlogUnsubscriptionHandler binlogUnsubscriptionHandler = new BinlogUnsubscriptionHandler();
@@ -108,16 +114,9 @@ public class PumaServerManager {
     public synchronized void close() {
         if (server != null) {
             server.close();
+            pumaClientCleaner.stop();
             pumaClientMetaManager.stop();
             pumaEventServerInterceptor.stop();
         }
-    }
-
-    public void setBinlogAckService(DbBinlogAckService binlogAckService) {
-        this.binlogAckService = binlogAckService;
-    }
-
-    public void setPumaClientMetaManager(PumaClientMetaManager pumaClientMetaManager) {
-        this.pumaClientMetaManager = pumaClientMetaManager;
     }
 }

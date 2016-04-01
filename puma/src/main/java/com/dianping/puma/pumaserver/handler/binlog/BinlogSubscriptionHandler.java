@@ -2,6 +2,7 @@ package com.dianping.puma.pumaserver.handler.binlog;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.common.utils.AddressUtils;
+import com.dianping.puma.consumer.ha.PumaClientCleaner;
 import com.dianping.puma.consumer.manage.PumaClientMetaManager;
 import com.dianping.puma.consumer.model.ClientConfig;
 import com.dianping.puma.consumer.model.ClientConnect;
@@ -28,6 +29,8 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
     private BinlogAckService binlogAckService;
 
     private ClientSessionService clientSessionService;
+
+    private PumaClientCleaner pumaClientCleaner;
 
     private PumaClientMetaManager pumaClientMetaManager;
 
@@ -75,7 +78,7 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
         ClientToken clientToken = new ClientToken();
         clientToken.setToken(session.getToken());
-        pumaClientMetaManager.registerClientToken(clientName, clientToken);
+        pumaClientCleaner.registerClientToken(clientName, clientToken);
 
         ctx.channel().writeAndFlush(binlogSubscriptionResponse);
 
@@ -101,6 +104,10 @@ public class BinlogSubscriptionHandler extends SimpleChannelInboundHandler<Binlo
 
     public void setClientSessionService(ClientSessionService clientSessionService) {
         this.clientSessionService = clientSessionService;
+    }
+
+    public void setPumaClientCleaner(PumaClientCleaner pumaClientCleaner) {
+        this.pumaClientCleaner = pumaClientCleaner;
     }
 
     public void setPumaClientMetaManager(PumaClientMetaManager pumaClientMetaManager) {

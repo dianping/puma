@@ -9,6 +9,8 @@ import com.dianping.puma.common.exception.PumaServiceException;
  */
 public interface PumaAlarmServerLeaderService {
 
+    AlarmServerLeader findLeader() throws PumaServiceException;
+
     void takeLeader(AlarmServerLeader leader) throws PumaServiceException;
 
     void releaseLeader(AlarmServerLeader leader) throws PumaServiceException;

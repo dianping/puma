@@ -11,6 +11,11 @@ import com.dianping.puma.common.exception.PumaServiceException;
 public class MemoryAlarmServerLeaderService implements PumaAlarmServerLeaderService {
 
     @Override
+    public AlarmServerLeader findLeader() throws PumaServiceException {
+        return null;
+    }
+
+    @Override
     public void takeLeader(AlarmServerLeader leader) throws PumaServiceException {
 
     }

@@ -9,5 +9,7 @@ import com.dianping.puma.common.exception.PumaServiceException;
  */
 public interface PumaAlarmServerHeartbeatService {
 
+    AlarmServerHeartbeat findHeartbeat(String host) throws PumaServiceException;
+
     void heartbeat(AlarmServerHeartbeat heartbeat) throws PumaServiceException;
 }

@@ -12,6 +12,11 @@ import com.dianping.puma.common.exception.PumaServiceException;
 public class MemoryAlarmServerHeartbeatService implements PumaAlarmServerHeartbeatService {
 
     @Override
+    public AlarmServerHeartbeat findHeartbeat(String host) throws PumaServiceException {
+        return null;
+    }
+
+    @Override
     public void heartbeat(AlarmServerHeartbeat heartbeat) throws PumaServiceException {
 
     }

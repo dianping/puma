@@ -4,6 +4,25 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
+    <!-- clock -->
+    <bean id="clock" class="com.dianping.puma.common.utils.Clock"/>
+
+    <!-- heartbeat manager -->
+    <bean id="pumaAlarmServerHeartbeatManager"
+          class="com.dianping.puma.alarm.deploy.ha.FlushingAlarmServerHeartbeatManager">
+        <property name="pumaAlarmServerHeartbeatService" ref="pumaAlarmServerHeartbeatService"/>
+        <property name="clock" ref="clock"/>
+        <property name="flushIntervalInSecond" ref="${puma.alarm.heartbeatflushinginterval}"/>
+    </bean>
+
+    <!-- leader manager -->
+    <bean id="pumaAlarmServerLeaderManager"
+          class="com.dianping.puma.alarm.deploy.ha.ScanningAlarmServerLeaderManager">
+        <property name="pumaAlarmServerHeartbeatService" ref="pumaAlarmServerHeartbeatService"/>
+        <property name="pumaAlarmServerLeaderService" ref="pumaAlarmServerLeaderService"/>
+        <property name="scanIntervalInSecond" ref="${puma.alarm.leaderscanninginterval}"/>
+    </bean>
+
     <!-- judger -->
     <bean id="pullTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.judge.PullTimeDelayAlarmJudger"/>
     <bean id="pushTimeDelayAlarmArbiter" class="com.dianping.puma.alarm.judge.PushTimeDelayAlarmJudger"/>
@@ -85,9 +104,7 @@
     </bean>
 
     <!-- server -->
-    <bean id="pumaAlarmMonitorServer" class="com.dianping.puma.alarm.PumaAlarmServer"
-          init-method="start"
-          destroy-method="stop">
+    <bean id="pumaAlarmMonitorServer" class="com.dianping.puma.alarm.PumaAlarmServer">
         <property name="monitor" ref="pumaAlarmMonitor"/>
     </bean>
 

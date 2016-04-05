@@ -6,6 +6,12 @@
 
     <bean id="converter" class="com.dianping.puma.biz.convert.ModelMapperConverter" />
 
+    <bean id="pumaAlarmServerHeartbeatService"
+          class="com.dianping.puma.alarm.deploy.ha.service.memory.MemoryAlarmServerHeartbeatService"/>
+
+    <bean id="pumaAlarmServerLeaderService"
+          class="com.dianping.puma.alarm.deploy.ha.service.memory.MemoryAlarmServerLeaderService"/>
+
     <bean id="pumaClientService"
           class="com.dianping.puma.biz.service.memory.MemoryClientService" />
 

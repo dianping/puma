@@ -15,7 +15,7 @@ public class AlarmServerHeartbeat {
 
     private Date heartbeatTime;
 
-    private float load;
+    private double loadAverage;
 
     public String getHost() {
         return host;
@@ -33,11 +33,11 @@ public class AlarmServerHeartbeat {
         this.heartbeatTime = heartbeatTime;
     }
 
-    public float getLoad() {
-        return load;
+    public double getLoadAverage() {
+        return loadAverage;
     }
 
-    public void setLoad(float load) {
-        this.load = load;
+    public void setLoadAverage(double loadAverage) {
+        this.loadAverage = loadAverage;
     }
 }

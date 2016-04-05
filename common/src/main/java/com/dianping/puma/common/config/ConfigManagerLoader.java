@@ -8,9 +8,28 @@ import com.dianping.puma.common.extension.ExtensionLoader;
  */
 public class ConfigManagerLoader {
 
-    private static final ConfigManager configManager = ExtensionLoader.getExtension(ConfigManager.class);
+    private static PropertiesConfigManager propertiesConfigManager;
 
-    public static ConfigManager getConfigManager() {
-        return configManager;
+    private static ConfigManager extensionConfigManager;
+
+    public static ConfigManager getConfigManager(String propertiesFilePath) {
+        ConfigManager configManager = getExtensionConfigManager();
+        return configManager == null ? getPropertiesConfigManager(propertiesFilePath) : configManager;
+    }
+
+    public static ConfigManager getPropertiesConfigManager(String propertiesFilePath) {
+        if (propertiesConfigManager == null) {
+            propertiesConfigManager = new PropertiesConfigManager();
+            propertiesConfigManager.setPropertiesFilePath(propertiesFilePath);
+            propertiesConfigManager.init();
+        }
+        return propertiesConfigManager;
+    }
+
+    public static ConfigManager getExtensionConfigManager() {
+        if (extensionConfigManager == null) {
+            extensionConfigManager = ExtensionLoader.getExtension(ConfigManager.class);
+        }
+        return extensionConfigManager;
     }
 }

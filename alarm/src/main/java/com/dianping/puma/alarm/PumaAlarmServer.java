@@ -8,7 +8,7 @@ import com.dianping.puma.common.server.PumaServer;
  * Created by xiaotian.li on 16/3/25.
  * Email: lixiaotian07@gmail.com
  */
-public class PumaAlarmMonitorServer extends AbstractPumaLifeCycle implements PumaServer {
+public class PumaAlarmServer extends AbstractPumaLifeCycle implements PumaServer {
 
     private PumaAlarmMonitor monitor;
 

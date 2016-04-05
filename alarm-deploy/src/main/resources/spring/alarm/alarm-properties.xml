@@ -85,7 +85,7 @@
     </bean>
 
     <!-- server -->
-    <bean id="pumaAlarmMonitorServer" class="com.dianping.puma.alarm.PumaAlarmMonitorServer"
+    <bean id="pumaAlarmMonitorServer" class="com.dianping.puma.alarm.PumaAlarmServer"
           init-method="start"
           destroy-method="stop">
         <property name="monitor" ref="pumaAlarmMonitor"/>

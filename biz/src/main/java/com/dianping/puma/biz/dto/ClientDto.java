@@ -6,39 +6,27 @@ package com.dianping.puma.biz.dto;
  */
 public class ClientDto {
 
-    // client.
-
+    /** client. */
     private String clientName;
 
+    /** client addition. */
     private String groupName;
 
-    // client config.
-
-    private Boolean cloud;
-
+    /** client config. */
     private String databaseName;
-
     private String tableRegex;
+    private boolean dml;
+    private boolean ddl;
 
-    private Boolean dml;
-
-    private Boolean ddl;
-
-    // client connect.
-
+    /** client connect. */
     private String clientAddress;
-
     private String serverAddress;
 
-    // client ack.
-
-    private Long serverId;
-
+    /** client ack. */
+    private long serverId;
     private String filename;
-
-    private Long position;
-
-    private Long timestamp;
+    private long position;
+    private long timestamp;
 
     public String getClientName() {
         return clientName;
@@ -54,14 +42,6 @@ public class ClientDto {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
-    }
-
-    public Boolean getCloud() {
-        return cloud;
-    }
-
-    public void setCloud(Boolean cloud) {
-        this.cloud = cloud;
     }
 
     public String getDatabaseName() {

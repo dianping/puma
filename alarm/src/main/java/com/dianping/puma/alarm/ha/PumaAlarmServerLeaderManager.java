@@ -1,14 +1,19 @@
 package com.dianping.puma.alarm.ha;
 
+import com.dianping.puma.alarm.exception.PumaAlarmServerLeaderManageException;
+import com.dianping.puma.common.PumaLifeCycle;
+
 /**
  * Created by xiaotian.li on 16/4/5.
  * Email: lixiaotian07@gmail.com
  */
-public interface PumaAlarmServerLeaderManager {
+public interface PumaAlarmServerLeaderManager extends PumaLifeCycle {
 
-    void start();
+    String findLeader() throws PumaAlarmServerLeaderManageException;
 
-    void stop();
+    boolean tryTakeLeader() throws PumaAlarmServerLeaderManageException;
+
+    void releaseLeader() throws PumaAlarmServerLeaderManageException;
 
     void addLeaderChangeListener(LeaderChangeListener listener);
 }

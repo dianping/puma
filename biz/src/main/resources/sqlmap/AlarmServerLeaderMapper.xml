@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.AlarmServerLeaderDao">
+
+    <select id="find" resultType="AlarmServerLeaderEntity">
+        SELECT
+        *
+        FROM
+        AlarmServerLeader
+    </select>
+
+    <insert id="insert" parameterType="AlarmServerLeaderEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        AlarmServerLeader
+        (
+        Host,
+        Version
+        )
+        VALUES
+        (
+        #{host},
+        #{version}
+        )
+    </insert>
+
+    <update id="update" parameterType="AlarmServerLeaderEntity">
+        UPDATE
+        AlarmServerLeader
+        SET
+        Host = #{host},
+        Version = #{version}
+        WHERE
+        Version = #{oriVersion}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        AlarmServerLeader
+        WHERE
+        Host = #{host}
+    </delete>
+
+</mapper>

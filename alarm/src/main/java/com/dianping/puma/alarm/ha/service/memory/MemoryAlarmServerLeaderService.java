@@ -16,12 +16,12 @@ public class MemoryAlarmServerLeaderService implements PumaAlarmServerLeaderServ
     }
 
     @Override
-    public void takeLeader(AlarmServerLeader leader) throws PumaServiceException {
-
+    public boolean takeLeader(AlarmServerLeader leader) throws PumaServiceException {
+        return false;
     }
 
     @Override
-    public void releaseLeader(AlarmServerLeader leader) throws PumaServiceException {
+    public void releaseLeader(String host) throws PumaServiceException {
 
     }
 }

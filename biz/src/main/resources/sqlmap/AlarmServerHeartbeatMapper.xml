@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.AlarmServerHeartbeatDao">
+
+    <select id="find" resultType="AlarmServerHeartbeatEntity">
+        SELECT
+        *
+        FROM
+        AlarmServerHeartbeat
+        WHERE
+        Host = #{host}
+    </select>
+
+    <insert id="insert" parameterType="AlarmServerHeartbeatEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        AlarmServerHeartbeat
+        (
+        Host,
+        LoadAverage,
+        HeartbeatTime
+        )
+        VALUES
+        (
+        #{host},
+        #{loadAverage},
+        #{heartbeatTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="AlarmServerHeartbeatEntity">
+        UPDATE
+        AlarmServerHeartbeat
+        SET
+        LoadAverage = #{loadAverage},
+        HeartbeatTime = #{heartbeatTime}
+        WHERE
+        Host = #{host}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        AlarmServerHeartbeat
+        WHERE
+        Host = #{host}
+    </delete>
+
+</mapper>

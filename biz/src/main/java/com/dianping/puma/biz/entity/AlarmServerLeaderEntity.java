@@ -9,7 +9,7 @@ public class AlarmServerLeaderEntity extends BaseEntity {
 
     private String host;
 
-    private boolean leader;
+    private long version;
 
     public String getHost() {
         return host;
@@ -19,11 +19,11 @@ public class AlarmServerLeaderEntity extends BaseEntity {
         this.host = host;
     }
 
-    public boolean isLeader() {
-        return leader;
+    public long getVersion() {
+        return version;
     }
 
-    public void setLeader(boolean leader) {
-        this.leader = leader;
+    public void setVersion(long version) {
+        this.version = version;
     }
 }

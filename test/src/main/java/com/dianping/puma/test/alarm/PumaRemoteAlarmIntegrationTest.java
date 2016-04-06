@@ -1,6 +1,6 @@
 package com.dianping.puma.test.alarm;
 
-import com.dianping.puma.alarm.monitor.PumaAlarmMonitor;
+import com.dianping.puma.alarm.core.monitor.PumaAlarmMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;

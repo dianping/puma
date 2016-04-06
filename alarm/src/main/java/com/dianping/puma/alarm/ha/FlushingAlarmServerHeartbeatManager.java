@@ -30,7 +30,7 @@ public class FlushingAlarmServerHeartbeatManager implements PumaAlarmServerHeart
     private long flushIntervalInSecond = 5;
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(
-            1, new NamedThreadFactory("flushing-alarm-server-heartbeat-manager"));
+            1, new NamedThreadFactory("flushing-alarm-server-heartbeat-manager", false));
 
     @Override
     public void start() {
@@ -38,6 +38,10 @@ public class FlushingAlarmServerHeartbeatManager implements PumaAlarmServerHeart
             @Override
             public void run() {
                 try {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Flushing alarm server heartbeat at the rate of {}s...", flushIntervalInSecond);
+                    }
+
                     flush();
                 } catch (Throwable t) {
                     logger.error("Failed to periodically flush alarm server heartbeat.", t);

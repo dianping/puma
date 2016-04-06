@@ -8,11 +8,11 @@ import com.dianping.puma.biz.entity.AlarmServerLeaderEntity;
  */
 public interface AlarmServerLeaderDao {
 
-    AlarmServerLeaderEntity find(boolean leader);
+    AlarmServerLeaderEntity find();
 
     void insert(AlarmServerLeaderEntity entity);
 
-    int update(AlarmServerLeaderEntity entity);
+    int update(long oriVersion, AlarmServerLeaderEntity entity);
 
-    int delete(AlarmServerLeaderEntity entity);
+    int delete(String host);
 }

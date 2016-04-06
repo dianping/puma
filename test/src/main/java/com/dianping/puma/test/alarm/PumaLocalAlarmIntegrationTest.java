@@ -1,14 +1,14 @@
 package com.dianping.puma.test.alarm;
 
-import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
-import com.dianping.puma.alarm.model.data.PullTimeDelayAlarmData;
-import com.dianping.puma.alarm.model.meta.LogAlarmMeta;
-import com.dianping.puma.alarm.model.strategy.LinearAlarmStrategy;
-import com.dianping.puma.alarm.monitor.PumaAlarmMonitor;
-import com.dianping.puma.alarm.service.memory.MemoryClientAlarmBenchmarkService;
-import com.dianping.puma.alarm.service.memory.MemoryClientAlarmDataService;
-import com.dianping.puma.alarm.service.memory.MemoryClientAlarmMetaService;
-import com.dianping.puma.alarm.service.memory.MemoryClientAlarmStrategyService;
+import com.dianping.puma.alarm.core.model.benchmark.PullTimeDelayAlarmBenchmark;
+import com.dianping.puma.alarm.core.model.data.PullTimeDelayAlarmData;
+import com.dianping.puma.alarm.core.model.meta.LogAlarmMeta;
+import com.dianping.puma.alarm.core.model.strategy.LinearAlarmStrategy;
+import com.dianping.puma.alarm.core.monitor.PumaAlarmMonitor;
+import com.dianping.puma.alarm.core.service.memory.MemoryClientAlarmBenchmarkService;
+import com.dianping.puma.alarm.core.service.memory.MemoryClientAlarmDataService;
+import com.dianping.puma.alarm.core.service.memory.MemoryClientAlarmMetaService;
+import com.dianping.puma.alarm.core.service.memory.MemoryClientAlarmStrategyService;
 import com.dianping.puma.biz.service.memory.MemoryClientService;
 import com.dianping.puma.common.model.Client;
 import org.slf4j.Logger;

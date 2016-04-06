@@ -1,6 +1,6 @@
 package com.dianping.puma.extensions.notify;
 
-import com.dianping.puma.alarm.service.PumaSmsService;
+import com.dianping.puma.alarm.core.monitor.notify.service.PumaSmsService;
 
 /**
  * Created by xiaotian.li on 16/3/28.

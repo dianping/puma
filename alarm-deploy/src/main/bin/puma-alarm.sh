@@ -46,7 +46,7 @@ OTHERS_LIB_PATH=${APP_PATH}/lib/others
 PROP_PATH=${APP_PATH}/puma-alarm.properties
 
 #Main函数
-APP_MAIN=com.dianping.puma.alarm.deploy.PumaAlarmMonitorServerLauncher
+APP_MAIN=com.dianping.puma.alarm.deploy.PumaAlarmServerLauncher
 
 #LOG配置文件
 LOG_REL_PATH=logs/log4j.xml

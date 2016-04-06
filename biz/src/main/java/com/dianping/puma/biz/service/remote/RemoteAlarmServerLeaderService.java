@@ -19,30 +19,34 @@ public class RemoteAlarmServerLeaderService implements PumaAlarmServerLeaderServ
 
     @Override
     public AlarmServerLeader findLeader() throws PumaServiceException {
-        AlarmServerLeaderEntity entity = alarmServerLeaderDao.find(true);
+        AlarmServerLeaderEntity entity = alarmServerLeaderDao.find();
         return converter.convert(entity, AlarmServerLeader.class);
     }
 
     @Override
-    public void takeLeader(AlarmServerLeader leader) throws PumaServiceException {
+    public boolean takeLeader(AlarmServerLeader leader) throws PumaServiceException {
+        AlarmServerLeaderEntity oriEntity = alarmServerLeaderDao.find();
         AlarmServerLeaderEntity entity = converter.convert(leader, AlarmServerLeaderEntity.class);
-        entity.setLeader(true);
 
-        int result = alarmServerLeaderDao.update(entity);
-        if (result == 0) {
+        if (oriEntity == null) {
+            entity.setVersion(0);
             try {
                 alarmServerLeaderDao.insert(entity);
-            } catch (Throwable t) {
-                alarmServerLeaderDao.update(entity);
+                return true;
+            } catch (Throwable ignore) {
+                return false;
             }
+        } else {
+            long oriVersion = oriEntity.getVersion();
+            entity.setVersion(oriVersion + 1);
+            int result = alarmServerLeaderDao.update(oriVersion, entity);
+            return result == 1;
         }
     }
 
     @Override
-    public void releaseLeader(AlarmServerLeader leader) throws PumaServiceException {
-        AlarmServerLeaderEntity entity = converter.convert(leader, AlarmServerLeaderEntity.class);
-        entity.setLeader(true);
-        alarmServerLeaderDao.delete(entity);
+    public void releaseLeader(String host) throws PumaServiceException {
+        alarmServerLeaderDao.delete(host);
     }
 
     public void setConverter(Converter converter) {

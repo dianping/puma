@@ -1,6 +1,6 @@
 package com.dianping.puma.alarm;
 
-import com.dianping.puma.alarm.monitor.PumaAlarmMonitor;
+import com.dianping.puma.alarm.core.monitor.PumaAlarmMonitor;
 import com.dianping.puma.common.server.AbstractPumaServer;
 import com.dianping.puma.common.server.PumaServer;
 

@@ -1,9 +1,9 @@
 package com.dianping.puma.utils.shell;
 
-import com.dianping.puma.alarm.service.PumaClientAlarmBenchmarkService;
-import com.dianping.puma.alarm.service.PumaClientAlarmDataService;
-import com.dianping.puma.alarm.service.PumaClientAlarmMetaService;
-import com.dianping.puma.alarm.service.PumaClientAlarmStrategyService;
+import com.dianping.puma.alarm.core.service.PumaClientAlarmBenchmarkService;
+import com.dianping.puma.alarm.core.service.PumaClientAlarmDataService;
+import com.dianping.puma.alarm.core.service.PumaClientAlarmMetaService;
+import com.dianping.puma.alarm.core.service.PumaClientAlarmStrategyService;
 import com.dianping.puma.biz.dao.ClientAlarmBenchmarkDao;
 import com.dianping.puma.biz.dao.ClientAlarmDataDao;
 import com.dianping.puma.biz.dao.ClientAlarmMetaDao;

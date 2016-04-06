@@ -11,7 +11,7 @@ public interface PumaAlarmServerLeaderService {
 
     AlarmServerLeader findLeader() throws PumaServiceException;
 
-    void takeLeader(AlarmServerLeader leader) throws PumaServiceException;
+    boolean takeLeader(AlarmServerLeader leader) throws PumaServiceException;
 
-    void releaseLeader(AlarmServerLeader leader) throws PumaServiceException;
+    void  releaseLeader(String host) throws PumaServiceException;
 }

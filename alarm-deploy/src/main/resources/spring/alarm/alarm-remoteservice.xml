@@ -6,6 +6,18 @@
 
     <bean id="converter" class="com.dianping.puma.biz.convert.ModelMapperConverter" />
 
+    <bean id="pumaAlarmServerHeartbeatService"
+          class="com.dianping.puma.biz.service.remote.RemoteAlarmServerHeartbeatService">
+        <property name="converter" ref="converter"/>
+        <property name="alarmServerHeartbeatDao" ref="alarmServerHeartbeatDao"/>
+    </bean>
+
+    <bean id="pumaAlarmServerLeaderService"
+          class="com.dianping.puma.biz.service.remote.RemoteAlarmServerLeaderService">
+        <property name="converter" ref="converter"/>
+        <property name="alarmServerLeaderDao" ref="alarmServerLeaderDao"/>
+    </bean>
+
     <bean id="pumaClientService"
           class="com.dianping.puma.biz.service.remote.RemoteClientService">
         <property name="converter" ref="converter" />

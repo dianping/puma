@@ -1,8 +1,8 @@
 package com.dianping.puma.biz.service.remote;
 
-import com.dianping.puma.alarm.model.benchmark.PullTimeDelayAlarmBenchmark;
-import com.dianping.puma.alarm.model.benchmark.PushTimeDelayAlarmBenchmark;
-import com.dianping.puma.alarm.service.PumaClientAlarmBenchmarkService;
+import com.dianping.puma.alarm.core.model.benchmark.PullTimeDelayAlarmBenchmark;
+import com.dianping.puma.alarm.core.model.benchmark.PushTimeDelayAlarmBenchmark;
+import com.dianping.puma.alarm.core.service.PumaClientAlarmBenchmarkService;
 import com.dianping.puma.biz.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAlarmBenchmarkDao;
 import com.dianping.puma.biz.entity.ClientAlarmBenchmarkEntity;

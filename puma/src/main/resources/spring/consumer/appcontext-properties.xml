@@ -24,7 +24,7 @@
     </bean>
 
     <bean id="pumaAlarmLogger"
-          class="com.dianping.puma.alarm.log.FlushingPumaAlarmLogger"
+          class="com.dianping.puma.alarm.core.log.FlushingPumaAlarmLogger"
           init-method="start"
           destroy-method="stop">
         <property name="pumaClientAlarmDataService" ref="clientAlarmDataService" />

@@ -1,7 +1,7 @@
 package com.dianping.puma.consumer.intercept;
 
-import com.dianping.puma.alarm.log.PumaAlarmLogger;
-import com.dianping.puma.alarm.model.data.PushTimeDelayAlarmData;
+import com.dianping.puma.alarm.core.log.PumaAlarmLogger;
+import com.dianping.puma.alarm.core.model.data.PushTimeDelayAlarmData;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.intercept.exception.PumaInterceptException;
 import com.dianping.puma.common.utils.Clock;

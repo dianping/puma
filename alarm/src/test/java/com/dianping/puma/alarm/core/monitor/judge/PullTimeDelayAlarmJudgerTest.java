@@ -1,11 +1,10 @@
-package com.dianping.puma.alarm.arbitrate;
+package com.dianping.puma.alarm.core.monitor.judge;
 
 import com.dianping.puma.alarm.core.model.benchmark.PullTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.core.model.benchmark.PushTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.core.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.core.model.data.PushTimeDelayAlarmData;
 import com.dianping.puma.alarm.core.model.state.AlarmState;
-import com.dianping.puma.alarm.core.monitor.judge.PullTimeDelayAlarmJudger;
 import com.dianping.puma.alarm.exception.PumaAlarmJudgeUnsupportedException;
 import org.junit.After;
 import org.junit.Before;

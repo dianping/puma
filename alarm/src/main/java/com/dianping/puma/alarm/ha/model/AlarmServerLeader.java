@@ -1,4 +1,4 @@
-package com.dianping.puma.alarm.deploy.ha.model;
+package com.dianping.puma.alarm.ha.model;
 
 /**
  * Created by xiaotian.li on 16/4/5.

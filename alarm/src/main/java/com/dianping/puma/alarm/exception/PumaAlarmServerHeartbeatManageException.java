@@ -1,10 +1,10 @@
-package com.dianping.puma.alarm.deploy.exception;
+package com.dianping.puma.alarm.exception;
 
 /**
  * Created by xiaotian.li on 16/4/5.
  * Email: lixiaotian07@gmail.com
  */
-public class PumaAlarmServerHeartbeatManageException extends PumaAlarmServerDeployException {
+public class PumaAlarmServerHeartbeatManageException extends PumaAlarmException {
 
     public PumaAlarmServerHeartbeatManageException() {
     }

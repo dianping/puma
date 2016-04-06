@@ -1,7 +1,7 @@
-package com.dianping.puma.alarm.deploy.ha.service.memory;
+package com.dianping.puma.alarm.ha.service.memory;
 
-import com.dianping.puma.alarm.deploy.ha.model.AlarmServerLeader;
-import com.dianping.puma.alarm.deploy.ha.service.PumaAlarmServerLeaderService;
+import com.dianping.puma.alarm.ha.model.AlarmServerLeader;
+import com.dianping.puma.alarm.ha.service.PumaAlarmServerLeaderService;
 import com.dianping.puma.common.exception.PumaServiceException;
 
 /**

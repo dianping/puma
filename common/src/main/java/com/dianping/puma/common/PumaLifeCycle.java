@@ -9,4 +9,6 @@ public interface PumaLifeCycle {
     void start();
 
     void stop();
+
+    boolean isStart();
 }

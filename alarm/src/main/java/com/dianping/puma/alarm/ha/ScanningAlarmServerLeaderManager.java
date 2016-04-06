@@ -1,9 +1,9 @@
-package com.dianping.puma.alarm.deploy.ha;
+package com.dianping.puma.alarm.ha;
 
-import com.dianping.puma.alarm.deploy.ha.model.AlarmServerHeartbeat;
-import com.dianping.puma.alarm.deploy.ha.model.AlarmServerLeader;
-import com.dianping.puma.alarm.deploy.ha.service.PumaAlarmServerHeartbeatService;
-import com.dianping.puma.alarm.deploy.ha.service.PumaAlarmServerLeaderService;
+import com.dianping.puma.alarm.ha.model.AlarmServerHeartbeat;
+import com.dianping.puma.alarm.ha.model.AlarmServerLeader;
+import com.dianping.puma.alarm.ha.service.PumaAlarmServerHeartbeatService;
+import com.dianping.puma.alarm.ha.service.PumaAlarmServerLeaderService;
 import com.dianping.puma.common.utils.AddressUtils;
 import com.dianping.puma.common.utils.Clock;
 import com.dianping.puma.common.utils.NamedThreadFactory;

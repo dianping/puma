@@ -1,4 +1,4 @@
-package com.dianping.puma.alarm.deploy.ha.model;
+package com.dianping.puma.biz.entity;
 
 import lombok.ToString;
 
@@ -8,14 +8,14 @@ import java.util.Date;
  * Created by xiaotian.li on 16/4/5.
  * Email: lixiaotian07@gmail.com
  */
-@ToString
-public class AlarmServerHeartbeat {
+@ToString(callSuper = true)
+public class AlarmServerHeartbeatEntity extends BaseEntity {
 
     private String host;
 
-    private Date heartbeatTime;
-
     private double loadAverage;
+
+    private Date heartbeatTime;
 
     public String getHost() {
         return host;
@@ -25,19 +25,19 @@ public class AlarmServerHeartbeat {
         this.host = host;
     }
 
-    public Date getHeartbeatTime() {
-        return heartbeatTime;
-    }
-
-    public void setHeartbeatTime(Date heartbeatTime) {
-        this.heartbeatTime = heartbeatTime;
-    }
-
     public double getLoadAverage() {
         return loadAverage;
     }
 
     public void setLoadAverage(double loadAverage) {
         this.loadAverage = loadAverage;
+    }
+
+    public Date getHeartbeatTime() {
+        return heartbeatTime;
+    }
+
+    public void setHeartbeatTime(Date heartbeatTime) {
+        this.heartbeatTime = heartbeatTime;
     }
 }

@@ -9,7 +9,7 @@
 
     <!-- heartbeat manager -->
     <bean id="pumaAlarmServerHeartbeatManager"
-          class="com.dianping.puma.alarm.deploy.ha.FlushingAlarmServerHeartbeatManager">
+          class="com.dianping.puma.alarm.ha.FlushingAlarmServerHeartbeatManager">
         <property name="pumaAlarmServerHeartbeatService" ref="pumaAlarmServerHeartbeatService"/>
         <property name="clock" ref="clock"/>
         <property name="flushIntervalInSecond" ref="${puma.alarm.heartbeatflushinginterval}"/>
@@ -17,7 +17,7 @@
 
     <!-- leader manager -->
     <bean id="pumaAlarmServerLeaderManager"
-          class="com.dianping.puma.alarm.deploy.ha.ScanningAlarmServerLeaderManager">
+          class="com.dianping.puma.alarm.ha.ScanningAlarmServerLeaderManager">
         <property name="pumaAlarmServerHeartbeatService" ref="pumaAlarmServerHeartbeatService"/>
         <property name="pumaAlarmServerLeaderService" ref="pumaAlarmServerLeaderService"/>
         <property name="scanIntervalInSecond" ref="${puma.alarm.leaderscanninginterval}"/>
@@ -104,7 +104,7 @@
     </bean>
 
     <!-- server -->
-    <bean id="pumaAlarmMonitorServer" class="com.dianping.puma.alarm.PumaAlarmServer">
+    <bean id="pumaAlarmMonitorServer" class="com.dianping.puma.alarm.StandaloneAlarmServer">
         <property name="monitor" ref="pumaAlarmMonitor"/>
     </bean>
 

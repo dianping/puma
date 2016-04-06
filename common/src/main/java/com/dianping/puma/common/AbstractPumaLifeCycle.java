@@ -27,4 +27,9 @@ public abstract class AbstractPumaLifeCycle implements PumaLifeCycle {
 
         running = false;
     }
+
+    @Override
+    public boolean isStart() {
+        return running;
+    }
 }

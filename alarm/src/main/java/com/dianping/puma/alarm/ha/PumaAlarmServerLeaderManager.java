@@ -1,4 +1,4 @@
-package com.dianping.puma.alarm.deploy.ha;
+package com.dianping.puma.alarm.ha;
 
 /**
  * Created by xiaotian.li on 16/4/5.

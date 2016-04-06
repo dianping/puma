@@ -1,6 +1,6 @@
-package com.dianping.puma.alarm.deploy.ha;
+package com.dianping.puma.alarm.ha;
 
-import com.dianping.puma.alarm.deploy.exception.PumaAlarmServerHeartbeatManageException;
+import com.dianping.puma.alarm.exception.PumaAlarmServerHeartbeatManageException;
 
 /**
  * Created by xiaotian.li on 16/4/5.

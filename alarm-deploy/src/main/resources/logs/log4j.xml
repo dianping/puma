@@ -15,7 +15,7 @@
     </appender>
 
     <logger name="com.dianping.puma.alarm" additivity="false">
-        <level value ="DEBUG"/>
+        <level value ="INFO"/>
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="appAppender" />
     </logger>

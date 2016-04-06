@@ -43,6 +43,8 @@ public class ScanningAlarmServerLeaderManager extends AbstractPumaLifeCycle impl
 
     @Override
     public void start() {
+        logger.info("Starting puma scanning alarm server leader manager...");
+
         super.start();
 
         executor.scheduleAtFixedRate(new Runnable() {
@@ -62,11 +64,16 @@ public class ScanningAlarmServerLeaderManager extends AbstractPumaLifeCycle impl
 
     @Override
     public void stop() {
+        logger.info("Stopping puma scanning alarm server leader manager...");
+
         super.stop();
 
         // Release the leader first.
-        releaseLeader();
-        leader = false;
+        if (leader) {
+            releaseLeader();
+            onLeaderReleased();
+            leader = false;
+        }
         executor.shutdownNow();
     }
 
@@ -106,9 +113,8 @@ public class ScanningAlarmServerLeaderManager extends AbstractPumaLifeCycle impl
     }
 
     private void scan() {
-        String leaderHost = findLeader();
-
         if (leader) {
+            String leaderHost = findLeader();
             String localhost = AddressUtils.getHostIp();
             if (!leaderHost.equals(localhost)) {
                 onLeaderReleased();

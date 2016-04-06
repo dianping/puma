@@ -5,12 +5,16 @@ import com.dianping.puma.alarm.ha.PumaAlarmServerHeartbeatManager;
 import com.dianping.puma.alarm.ha.PumaAlarmServerLeaderManager;
 import com.dianping.puma.common.server.AbstractPumaServer;
 import com.dianping.puma.common.server.PumaServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by xiaotian.li on 16/4/6.
  * Email: lixiaotian07@gmail.com
  */
 public class HotHAAlarmServer extends AbstractPumaServer implements PumaServer {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private PumaAlarmServerHeartbeatManager pumaAlarmServerHeartbeatManager;
 
@@ -20,6 +24,8 @@ public class HotHAAlarmServer extends AbstractPumaServer implements PumaServer {
 
     @Override
     public void start() {
+        logger.info("Starting puma hot ha alarm server...");
+
         super.start();
 
         pumaAlarmServerHeartbeatManager.start();
@@ -27,11 +33,15 @@ public class HotHAAlarmServer extends AbstractPumaServer implements PumaServer {
         pumaAlarmServerLeaderManager.addLeaderChangeListener(new LeaderChangeListener() {
             @Override
             public void onLeaderTaken() {
+                logger.info("Starting puma standalone alarm server when leader taken...");
+
                 standaloneAlarmServer.start();
             }
 
             @Override
             public void onLeaderReleased() {
+                logger.info("Stopping puma standalone alarm server when leader released...");
+
                 standaloneAlarmServer.stop();
             }
         });
@@ -40,13 +50,12 @@ public class HotHAAlarmServer extends AbstractPumaServer implements PumaServer {
 
     @Override
     public void stop() {
+        logger.info("Stopping puma hot ha alarm server...");
+
         super.stop();
 
         pumaAlarmServerHeartbeatManager.stop();
         pumaAlarmServerLeaderManager.stop();
-        if (standaloneAlarmServer.isStart()) {
-            standaloneAlarmServer.stop();
-        }
     }
 
     public void setPumaAlarmServerHeartbeatManager(PumaAlarmServerHeartbeatManager pumaAlarmServerHeartbeatManager) {

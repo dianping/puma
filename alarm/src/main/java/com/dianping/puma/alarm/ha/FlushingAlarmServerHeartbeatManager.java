@@ -3,6 +3,7 @@ package com.dianping.puma.alarm.ha;
 import com.dianping.puma.alarm.exception.PumaAlarmServerHeartbeatManageException;
 import com.dianping.puma.alarm.ha.model.AlarmServerHeartbeat;
 import com.dianping.puma.alarm.ha.service.PumaAlarmServerHeartbeatService;
+import com.dianping.puma.common.AbstractPumaLifeCycle;
 import com.dianping.puma.common.utils.AddressUtils;
 import com.dianping.puma.common.utils.Clock;
 import com.dianping.puma.common.utils.NamedThreadFactory;
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * Created by xiaotian.li on 16/4/5.
  * Email: lixiaotian07@gmail.com
  */
-public class FlushingAlarmServerHeartbeatManager implements PumaAlarmServerHeartbeatManager {
+public class FlushingAlarmServerHeartbeatManager extends AbstractPumaLifeCycle implements PumaAlarmServerHeartbeatManager {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -34,6 +35,10 @@ public class FlushingAlarmServerHeartbeatManager implements PumaAlarmServerHeart
 
     @Override
     public void start() {
+        logger.info("Starting puma flushing alarm server heartbeat manager...");
+
+        super.start();
+
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -52,6 +57,10 @@ public class FlushingAlarmServerHeartbeatManager implements PumaAlarmServerHeart
 
     @Override
     public void stop() {
+        logger.info("Stopping puma flushing alarm server heartbeat manager...");
+
+        super.stop();
+
         executor.shutdownNow();
     }
 

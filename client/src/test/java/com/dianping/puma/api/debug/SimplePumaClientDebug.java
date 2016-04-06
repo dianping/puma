@@ -5,7 +5,6 @@ import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Uninterruptibles;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;

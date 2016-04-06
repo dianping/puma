@@ -1,11 +1,11 @@
 package com.dianping.puma.alarm.core.monitor.render;
 
-import com.dianping.puma.alarm.exception.PumaAlarmRenderUnsupportedException;
 import com.dianping.puma.alarm.core.model.AlarmContext;
 import com.dianping.puma.alarm.core.model.AlarmMessage;
 import com.dianping.puma.alarm.core.model.benchmark.PushTimeDelayAlarmBenchmark;
 import com.dianping.puma.alarm.core.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.core.model.data.PushTimeDelayAlarmData;
+import com.dianping.puma.alarm.exception.PumaAlarmRenderUnsupportedException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

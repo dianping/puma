@@ -1,6 +1,7 @@
 package com.dianping.puma.biz.dao;
 
 import com.dianping.puma.biz.entity.AlarmServerLeaderEntity;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * Created by xiaotian.li on 16/4/5.
@@ -12,7 +13,7 @@ public interface AlarmServerLeaderDao {
 
     void insert(AlarmServerLeaderEntity entity);
 
-    int update(long oriVersion, AlarmServerLeaderEntity entity);
+    int update(@Param("oriVersion") long oriVersion, @Param("entity") AlarmServerLeaderEntity entity);
 
     int delete(String host);
 }

@@ -18,6 +18,7 @@
     <!-- leader manager -->
     <bean id="pumaAlarmServerLeaderManager"
           class="com.dianping.puma.alarm.ha.ScanningAlarmServerLeaderManager">
+        <property name="clock" ref="clock"/>
         <property name="pumaAlarmServerHeartbeatService" ref="pumaAlarmServerHeartbeatService"/>
         <property name="pumaAlarmServerLeaderService" ref="pumaAlarmServerLeaderService"/>
         <property name="scanIntervalInSecond" value="${puma.alarm.leaderscanninginterval}"/>

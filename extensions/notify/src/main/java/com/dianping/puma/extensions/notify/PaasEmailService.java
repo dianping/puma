@@ -1,7 +1,7 @@
 package com.dianping.puma.extensions.notify;
 
-import com.dianping.puma.alarm.exception.PumaAlarmNotifyException;
 import com.dianping.puma.alarm.core.monitor.notify.service.PumaEmailService;
+import com.dianping.puma.alarm.exception.PumaAlarmNotifyException;
 import com.google.common.collect.Lists;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;

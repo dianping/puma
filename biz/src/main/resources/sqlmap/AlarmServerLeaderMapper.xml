@@ -29,8 +29,8 @@
         UPDATE
         AlarmServerLeader
         SET
-        Host = #{host},
-        Version = #{version}
+        Host = #{entity.host},
+        Version = #{entity.version}
         WHERE
         Version = #{oriVersion}
     </update>

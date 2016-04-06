@@ -1,9 +1,5 @@
 package com.dianping.puma.alarm.deploy;
 
-import com.dianping.puma.alarm.StandaloneAlarmServer;
-import com.dianping.puma.alarm.ha.LeaderChangeListener;
-import com.dianping.puma.alarm.ha.PumaAlarmServerHeartbeatManager;
-import com.dianping.puma.alarm.ha.PumaAlarmServerLeaderManager;
 import com.dianping.puma.common.config.ConfigManager;
 import com.dianping.puma.common.config.ConfigManagerLoader;
 import org.slf4j.Logger;
@@ -24,7 +20,7 @@ public class PumaAlarmServerLauncher {
     private static final String PROPERTIES_FILE_PATH = "puma-alarm.properties";
 
     public static void main(String[] args) throws IOException {
-        ConfigManager configManager = ConfigManagerLoader.getConfigManager(PROPERTIES_FILE_PATH);
+        final ConfigManager configManager = ConfigManagerLoader.getConfigManager(PROPERTIES_FILE_PATH);
 
         String springXml = configManager.getConfig(PumaAlarmServerConstant.PUMA_ALARM_SPRING_XML);
         final ConfigurableApplicationContext context
@@ -35,7 +31,7 @@ public class PumaAlarmServerLauncher {
             public void run() {
                 try {
                     logger.info("Shutting down puma alarm server launcher...");
-                    context.stop();
+                    context.close();
 
                 } catch (Throwable t) {
                     logger.warn("Something went wrong when shutting down puma alarm server launcher.");

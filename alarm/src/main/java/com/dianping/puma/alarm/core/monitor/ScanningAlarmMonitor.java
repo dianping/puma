@@ -71,6 +71,8 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     @Override
     public void start() {
+        logger.info("Starting puma scanning alarm monitor...");
+
         super.start();
 
         arbiter.start();
@@ -95,6 +97,8 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
 
     @Override
     public void stop() {
+        logger.info("Stopping puma scanning alarm monitor...");
+
         super.stop();
 
         executor.shutdownNow();

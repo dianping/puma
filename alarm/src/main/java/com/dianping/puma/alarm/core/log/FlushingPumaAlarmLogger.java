@@ -1,9 +1,9 @@
 package com.dianping.puma.alarm.core.log;
 
-import com.dianping.puma.alarm.exception.PumaAlarmLogException;
 import com.dianping.puma.alarm.core.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.core.model.data.PushTimeDelayAlarmData;
 import com.dianping.puma.alarm.core.service.PumaClientAlarmDataService;
+import com.dianping.puma.alarm.exception.PumaAlarmLogException;
 import com.dianping.puma.common.AbstractPumaLifeCycle;
 
 /**

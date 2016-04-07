@@ -40,6 +40,24 @@
             <version>${project.version}</version>
 		</dependency>
 
+        <dependency>
+            <groupId>com.dianping.puma</groupId>
+            <artifactId>puma-portal</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dianping.puma</groupId>
+            <artifactId>puma-extensions-rds</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dianping.puma</groupId>
+            <artifactId>puma-extensions-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 		<!-- zebra -->
 		<dependency>
 			<groupId>com.dianping.zebra</groupId>

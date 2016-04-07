@@ -5,7 +5,7 @@ import com.dianping.puma.alarm.core.model.meta.LogAlarmMeta;
 import com.dianping.puma.alarm.core.model.meta.SmsAlarmMeta;
 import com.dianping.puma.alarm.core.model.meta.WeChatAlarmMeta;
 import com.dianping.puma.alarm.core.service.PumaClientAlarmMetaService;
-import com.dianping.puma.biz.convert.Converter;
+import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAlarmMetaDao;
 import com.dianping.puma.biz.entity.ClientAlarmMetaEntity;
 import com.google.common.collect.Lists;

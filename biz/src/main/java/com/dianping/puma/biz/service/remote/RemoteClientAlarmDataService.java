@@ -3,7 +3,7 @@ package com.dianping.puma.biz.service.remote;
 import com.dianping.puma.alarm.core.model.data.PullTimeDelayAlarmData;
 import com.dianping.puma.alarm.core.model.data.PushTimeDelayAlarmData;
 import com.dianping.puma.alarm.core.service.PumaClientAlarmDataService;
-import com.dianping.puma.biz.convert.Converter;
+import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAlarmDataDao;
 import com.dianping.puma.biz.entity.ClientAlarmDataEntity;
 

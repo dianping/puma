@@ -17,6 +17,7 @@
         <module>extensions</module>
         <module>alarm</module>
         <module>alarm-deploy</module>
+        <module>portal</module>
         <module>web</module>
         <module>utils</module>
         <module>consumer</module>

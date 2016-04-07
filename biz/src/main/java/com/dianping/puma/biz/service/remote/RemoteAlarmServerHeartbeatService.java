@@ -2,7 +2,7 @@ package com.dianping.puma.biz.service.remote;
 
 import com.dianping.puma.alarm.ha.model.AlarmServerHeartbeat;
 import com.dianping.puma.alarm.ha.service.PumaAlarmServerHeartbeatService;
-import com.dianping.puma.biz.convert.Converter;
+import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.biz.dao.AlarmServerHeartbeatDao;
 import com.dianping.puma.biz.entity.AlarmServerHeartbeatEntity;
 import com.dianping.puma.common.exception.PumaServiceException;

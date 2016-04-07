@@ -17,5 +17,7 @@
     <modules>
         <module>notify</module>
         <module>config</module>
+        <module>device</module>
+        <module>rds</module>
     </modules>
 </project>

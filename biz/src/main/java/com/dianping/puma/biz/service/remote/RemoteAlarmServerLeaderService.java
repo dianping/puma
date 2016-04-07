@@ -2,7 +2,7 @@ package com.dianping.puma.biz.service.remote;
 
 import com.dianping.puma.alarm.ha.model.AlarmServerLeader;
 import com.dianping.puma.alarm.ha.service.PumaAlarmServerLeaderService;
-import com.dianping.puma.biz.convert.Converter;
+import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.biz.dao.AlarmServerLeaderDao;
 import com.dianping.puma.biz.entity.AlarmServerLeaderEntity;
 import com.dianping.puma.common.exception.PumaServiceException;

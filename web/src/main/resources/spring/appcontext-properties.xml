@@ -9,7 +9,14 @@
         <property name="propertiesPath" value="puma-admin-config.properties" />
     </bean>
 
-    <bean id="config" class="com.dianping.puma.web.config.Config">
+    <bean id="config" class="com.dianping.puma.portal.config.Config">
         <property name="errorCodeHandler" value="${puma.admin.errorCodeHandler}" />
     </bean>
+
+    <bean id="configManager" class="com.dianping.puma.extensions.config.LionConfigManager"/>
+
+    <bean id="instanceManager" class="com.dianping.puma.extensions.rds.ZebraInstanceManager">
+        <property name="configManager" ref="configManager"/>
+    </bean>
+
 </beans>

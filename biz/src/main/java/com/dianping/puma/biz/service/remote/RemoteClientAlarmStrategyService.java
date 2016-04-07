@@ -4,7 +4,7 @@ import com.dianping.puma.alarm.core.model.strategy.ExponentialAlarmStrategy;
 import com.dianping.puma.alarm.core.model.strategy.LinearAlarmStrategy;
 import com.dianping.puma.alarm.core.model.strategy.NoAlarmStrategy;
 import com.dianping.puma.alarm.core.service.PumaClientAlarmStrategyService;
-import com.dianping.puma.biz.convert.Converter;
+import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.biz.dao.ClientAlarmStrategyDao;
 import com.dianping.puma.biz.entity.ClientAlarmStrategyEntity;
 

@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service;
 
-import com.dianping.puma.biz.convert.Converter;
+import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.biz.dao.ClientPositionDao;
 import com.dianping.puma.biz.entity.ClientPositionEntity;
 import com.dianping.puma.common.model.ClientPosition;

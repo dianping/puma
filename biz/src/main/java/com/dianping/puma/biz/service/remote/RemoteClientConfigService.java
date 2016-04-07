@@ -1,6 +1,6 @@
 package com.dianping.puma.biz.service.remote;
 
-import com.dianping.puma.biz.convert.Converter;
+import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.biz.dao.ClientConfigDao;
 import com.dianping.puma.biz.entity.ClientConfigEntity;
 import com.dianping.puma.consumer.model.ClientConfig;

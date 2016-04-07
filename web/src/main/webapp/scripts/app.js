@@ -325,6 +325,41 @@ angular
                 }
             })
 
+            .state('dashboard.server-alarm', {
+                url: '/server/alarm',
+                templateUrl: 'views/server/alarm.html',
+                controller: "serverAlarmController",
+                resolve: {
+                    loadNgTable: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'ngTable',
+                            files: [
+                                'bower_components/ng-table/dist/ng-table.min.css',
+                                'bower_components/ng-table/dist/ng-table.min.js'
+                            ]
+                        })
+                    }],
+
+                    loadService: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'puma',
+                            files: [
+                                'scripts/service/server.js',
+                            ]
+                        })
+                    }],
+
+                    loadController: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'puma',
+                            files: [
+                                'scripts/controller/server/alarm.js',
+                            ]
+                        })
+                    }],
+                }
+            })
+
     }]);
 
 angular.module('puma')

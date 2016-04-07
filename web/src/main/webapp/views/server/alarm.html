@@ -26,12 +26,22 @@
                                 {{server.host}}
                             </td>
 
-                            <td title="'机器负载'" class="col-lg-2">
+                            <td title="'服务器负载'" class="col-lg-2">
                                 {{server.loadAverage}}
                             </td>
 
                             <td title="'服务器状态'" class="col-lg-2">
-                                {{server.serverStatus}}
+                                <span ng-if="server.serverStatus === 'ONLINE'" class="label label-success">
+                                    ONLINE
+                                </span>
+
+                                <span ng-if="server.serverStatus === 'OFFLINE'" class="label label-warning">
+                                    OFFLINE
+                                </span>
+
+                                <span ng-if="server.serverStatus === 'STANDBY'" class="label label-info">
+                                    STANDBY
+                                </span>
                             </td>
 
                         </tr>

@@ -94,85 +94,95 @@
 
                             <hr/>
 
-                            <!--div class="form-group">
-                                <label class="col-lg-3 control-label" for="databaseName">监听库名</label>
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label">告警途径</label>
 
                                 <div class="col-lg-6">
-                                    <input id="databaseName" type="text" class="form-control" placeholder=""
-                                           ng-model="client.databaseName">
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" id="alarmByEmail" ng-model="client.alarmByEmail"> 邮件告警
+                                    </label>
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" id="alarmBySms" ng-model="client.alarmBySms"> 短信告警
+                                    </label>
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" id="alarmByWeChat" ng-model="client.alarmByWeChat"> 微信告警
+                                    </label>
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label class="col-lg-3 control-label" for="tableRegex">监听表名</label>
+                                <label class="col-lg-3 control-label" for="emails">告警人员</label>
 
                                 <div class="col-lg-6">
-                                   <textarea id="tableRegex" class="form-control" rows="3"
-                                             placeholder="/正则表达式/g" ng-model="client.tableRegex"></textarea>
+                                    <textarea id="emails" class="form-control" rows="3"
+                                              placeholder="输入公司内部邮箱,多个收件人以逗号隔开" ng-model="client.recipients"></textarea>
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label class="col-lg-3 control-label" for="dml">监听DML</label>
+                                <label class="col-lg-3 control-label">告警策略</label>
 
                                 <div class="col-lg-6">
-                                    <select id="dml" class="form-control" ng-model="client.dml">
-                                        <option>true</option>
-                                        <option>false</option>
+                                    <select class="form-control" ng-model="client.alarmStrategy">
+                                        <option value="no">无告警</option>
+                                        <option value="linear">线性告警</option>
+                                        <option value="exponential">指数告警</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label class="col-lg-3 control-label" for="ddl">监听DDL</label>
+                            <div ng-if="client.alarmStrategy === 'linear'" class="form-group">
+                                <label class="col-lg-3 control-label">告警间隔</label>
 
                                 <div class="col-lg-6">
-                                    <select id="ddl" class="form-control" ng-model="client.ddl">
-                                        <option>true</option>
-                                        <option>false</option>
-                                    </select>
+                                    <input type="number" class="form-control"
+                                           placeholder="线性间隔,单位秒,默认为600" ng-model="client.linearAlarmIntervalInSecond">
+                                </div>
+                            </div>
+
+                            <div ng-if="client.alarmStrategy === 'exponential'" class="form-group">
+                                <label class="col-lg-3 control-label">告警间隔</label>
+
+                                <div class="col-lg-3">
+                                    <input type="number" class="form-control"
+                                           placeholder="最小间隔,单位秒,默认60" ng-model="client.minExponentialAlarmIntervalInSecond">
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <input type="number" class="form-control"
+                                           placeholder="最大间隔,单位秒,默认3600" ng-model="client.maxExponentialAlarmIntervalInSecond">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label">失联阈值</label>
+
+                                <div class="col-lg-1">
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" ng-model="client.pullTimeDelayAlarm"> 告警
+                                    </label>
+                                </div>
+                                <div class="col-lg-5">
+                                    <input type="text" class="form-control" ng-readonly="!client.pullTimeDelayAlarm"
+                                           placeholder="单位为秒" ng-model="client.maxPullTimeDelayInSecond">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label">延时阈值</label>
+
+                                <div class="col-lg-1">
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" ng-model="client.pushTimeDelayAlarm"> 告警
+                                    </label>
+                                </div>
+                                <div class="col-lg-5">
+                                    <input type="text" class="form-control" ng-readonly="!client.pushTimeDelayAlarm"
+                                           placeholder="单位为秒" ng-model="client.maxPushTimeDelayInSecond">
                                 </div>
                             </div>
 
                             <hr/>
-
-                            <div class="form-group">
-                                <label class="col-lg-3 control-label" for="emails">告警邮件</label>
-
-                                <div class="col-lg-6">
-                                    <textarea id="emails" class="form-control" rows="3"
-                                              placeholder="多个邮件地址以逗号隔开" ng-model="client.emails"></textarea>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-lg-3 control-label" for="alarmIntervalInSecond">告警间隔</label>
-
-                                <div class="col-lg-6">
-                                    <input id="alarmIntervalInSecond" type="number" class="form-control"
-                                           placeholder="单位为秒" ng-model="client.alarmIntervalInSecond">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-lg-3 control-label" for="sendDelayThresholdInSecond">延时阈值</label>
-
-                                <div class="col-lg-6">
-                                    <input id="sendDelayThresholdInSecond" type="text" class="form-control"
-                                           placeholder="单位为秒" ng-model="client.sendDelayThresholdInSecond">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-lg-3 control-label" for="getDelayThresholdInSecond">失联阈值</label>
-
-                                <div class="col-lg-6">
-                                    <input id="getDelayThresholdInSecond" type="text" class="form-control"
-                                           placeholder="单位为秒" ng-model="client.getDelayThresholdInSecond">
-                                </div>
-                            </div>
-
-                            <hr/-->
 
                             <div class="col-lg-offset-7 col-lg-2">
                                 <div class="col-lg-6">

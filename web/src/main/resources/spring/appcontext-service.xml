@@ -26,6 +26,7 @@
         <property name="clientAlarmBenchmarkDao" ref="clientAlarmBenchmarkDao" />
         <property name="clientAlarmStrategyDao" ref="clientAlarmStrategyDao" />
         <property name="clientAlarmMetaDao" ref="clientAlarmMetaDao" />
+        <property name="clientTokenDao" ref="clientTokenDao" />
     </bean>
 
     <bean id="pumaServerService" class="com.dianping.puma.biz.service.PumaServerServiceImpl">

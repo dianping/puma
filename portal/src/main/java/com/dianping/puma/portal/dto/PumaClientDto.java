@@ -1,42 +1,32 @@
-package com.dianping.puma.common.model;
+package com.dianping.puma.portal.dto;
 
 /**
- * Created by xiaotian.li on 16/3/3.
+ * Created by xiaotian.li on 16/2/22.
  * Email: lixiaotian07@gmail.com
  */
-public class Client {
+public class PumaClientDto {
 
-    // client.
-
+    /** Name. */
     private String clientName;
 
+    /** Additional information. */
     private String groupName;
 
-    // client config.
-
+    /** Configuration. */
     private String databaseName;
-
     private String tableRegex;
+    private boolean dml;
+    private boolean ddl;
 
-    private Boolean dml;
-
-    private Boolean ddl;
-
-    // client connect.
-
+    /** Connect information. */
     private String clientAddress;
-
     private String serverAddress;
 
-    // client ack.
-
-    private Long serverId;
-
+    /** Acknowledge position. */
+    private long serverId;
     private String filename;
-
-    private Long position;
-
-    private Long timestamp;
+    private long position;
+    private long timestamp;
 
     /** Alarm benchmark */
     private boolean pullTimeDelayAlarm;
@@ -49,11 +39,9 @@ public class Client {
     /** Alarm strategy. */
     private boolean alarmByLog;
     private boolean alarmByEmail;
-    private String emailRecipients;
     private boolean alarmBySms;
-    private String smsRecipients;
     private boolean alarmByWeChat;
-    private String weChatRecipients;
+    private String recipients;
 
     /** Alarm meta. */
     private boolean noAlarm;
@@ -159,6 +147,34 @@ public class Client {
         this.timestamp = timestamp;
     }
 
+    public boolean isDml() {
+        return dml;
+    }
+
+    public void setDml(boolean dml) {
+        this.dml = dml;
+    }
+
+    public boolean isDdl() {
+        return ddl;
+    }
+
+    public void setDdl(boolean ddl) {
+        this.ddl = ddl;
+    }
+
+    public void setServerId(long serverId) {
+        this.serverId = serverId;
+    }
+
+    public void setPosition(long position) {
+        this.position = position;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public boolean isPullTimeDelayAlarm() {
         return pullTimeDelayAlarm;
     }
@@ -223,28 +239,12 @@ public class Client {
         this.alarmByEmail = alarmByEmail;
     }
 
-    public String getEmailRecipients() {
-        return emailRecipients;
-    }
-
-    public void setEmailRecipients(String emailRecipients) {
-        this.emailRecipients = emailRecipients;
-    }
-
     public boolean isAlarmBySms() {
         return alarmBySms;
     }
 
     public void setAlarmBySms(boolean alarmBySms) {
         this.alarmBySms = alarmBySms;
-    }
-
-    public String getSmsRecipients() {
-        return smsRecipients;
-    }
-
-    public void setSmsRecipients(String smsRecipients) {
-        this.smsRecipients = smsRecipients;
     }
 
     public boolean isAlarmByWeChat() {
@@ -255,12 +255,12 @@ public class Client {
         this.alarmByWeChat = alarmByWeChat;
     }
 
-    public String getWeChatRecipients() {
-        return weChatRecipients;
+    public String getRecipients() {
+        return recipients;
     }
 
-    public void setWeChatRecipients(String weChatRecipients) {
-        this.weChatRecipients = weChatRecipients;
+    public void setRecipients(String recipients) {
+        this.recipients = recipients;
     }
 
     public boolean isNoAlarm() {

@@ -68,6 +68,30 @@
                 </ul>
             </li>
 
+            <li ng-class="{active: collapseVar==4}">{{dropDown}}
+                <a href="" ng-click="check(4)">
+                    <i class="fa fa-anchor fa-fw"></i> Puma 服务器
+                    <span class="fa arrow"></span>
+                </a>
+                <ul class="nav nav-second-level" uib-collapse="collapseVar!=4">
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.producer-server">
+                            <i class="fa fa-th-list fa-fw"></i> Puma 生产服务器
+                        </a>
+                    </li>
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.consumer-server">
+                            <i class="fa fa-th-list fa-fw"></i> Puma 消费服务器
+                        </a>
+                    </li>
+                    <li ui-sref-active="active">
+                        <a ui-sref="dashboard.alarm-server">
+                            <i class="fa fa-th-list fa-fw"></i> Puma 告警服务器
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
         </ul>
     </div>
     <!-- /.sidebar-collapse -->

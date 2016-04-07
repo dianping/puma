@@ -34,7 +34,7 @@ public class PumaAlarmServerLauncher {
                     context.close();
 
                 } catch (Throwable t) {
-                    logger.warn("Something went wrong when shutting down puma alarm server launcher.");
+                    logger.warn("Something went wrong when shutting down puma alarm server launcher.", t);
                 } finally {
                     logger.info("Puma alarm server launcher is down.");
                 }

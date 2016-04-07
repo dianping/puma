@@ -1,0 +1,45 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header">Puma告警服务器</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Puma告警服务器列表
+            </div>
+
+            <div class="panel-body">
+                <div class="dataTable_wrapper">
+                    <table ng-table="tableParams"
+                           class="table table-striped table-bordered table-hover">
+
+                        <tr ng-repeat="server in $data">
+                            <td title="'服务器名称'" class="col-lg-4">
+                                {{server.name}}
+                            </td>
+
+                            <td title="'服务器地址'" class="col-lg-4">
+                                {{server.host}}
+                            </td>
+
+                            <td title="'机器负载'" class="col-lg-2">
+                                {{server.loadAverage}}
+                            </td>
+
+                            <td title="'服务器状态'" class="col-lg-2">
+                                {{server.status}}
+                            </td>
+
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

@@ -115,12 +115,15 @@ public class ExponentialAlarmFilterTest {
      * 测试告警在指数告警策略达到最大值是能否正常告警.
      * <p/>
      * 指数告警策略:100,200,400,400,...
-     * 第一次,状态异常,0时刻,告警.
-     * 第二次,状态异常,150时刻,告警.
-     * 第三次,状态异常,500时刻,告警.
-     * 第四次,状态异常,1000时刻,告警.
-     * 第五次,状态异常,1500时刻,告警.
-     * 第六次,状态异常,2000时刻,告警.
+     * 第1次,状态异常,0时刻,告警.
+     * 第2次,状态异常,150时刻,告警.
+     * 第3次,状态异常,500时刻,告警.
+     * 第4次,状态异常,1000时刻,告警.
+     * 第5次,状态异常,1500时刻,告警.
+     * 第6次,状态异常,1501时刻,不告警.
+     * 第7次,状态异常,1502时刻,不告警.
+     * 第8次,状态异常,1503时刻,不告警.
+     * 第9次,状态异常,2000时刻,告警.
      *
      * @throws Exception
      */
@@ -161,6 +164,21 @@ public class ExponentialAlarmFilterTest {
         when(clock.getTimestamp()).thenReturn(1500L);
         result = filter.filter(context, state, strategy);
         assertTrue(result.isAlarm());
+
+        state.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(1501L);
+        result = filter.filter(context, state, strategy);
+        assertFalse(result.isAlarm());
+
+        state.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(1502L);
+        result = filter.filter(context, state, strategy);
+        assertFalse(result.isAlarm());
+
+        state.setAlarm(true);
+        when(clock.getTimestamp()).thenReturn(1503L);
+        result = filter.filter(context, state, strategy);
+        assertFalse(result.isAlarm());
 
         state.setAlarm(true);
         when(clock.getTimestamp()).thenReturn(2000L);

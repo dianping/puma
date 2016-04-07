@@ -68,8 +68,6 @@ public class ExponentialAlarmFilter extends AbstractPumaAlarmFilter {
                     nextAlarmIntervalMap.put(mnemonic, nextAlarmInterval);
                     result.setAlarm(true);
                 }
-
-                return result;
             }
         }
 

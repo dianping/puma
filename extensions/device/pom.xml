@@ -23,7 +23,7 @@
 
         <dependency>
             <groupId>com.dianping.puma</groupId>
-            <artifactId>puma-alarm</artifactId>
+            <artifactId>puma-portal</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -7,7 +7,7 @@ import lombok.ToString;
  * Email: lixiaotian07@gmail.com
  */
 @ToString
-public class Device {
+public class PumaDevice {
 
     private String hostname;
 

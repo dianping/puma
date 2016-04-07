@@ -6,6 +6,9 @@ import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.biz.dao.AlarmServerHeartbeatDao;
 import com.dianping.puma.biz.entity.AlarmServerHeartbeatEntity;
 import com.dianping.puma.common.exception.PumaServiceException;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.List;
 
 /**
  * Created by xiaotian.li on 16/4/5.
@@ -16,6 +19,12 @@ public class RemoteAlarmServerHeartbeatService implements PumaAlarmServerHeartbe
     private Converter converter;
 
     private AlarmServerHeartbeatDao alarmServerHeartbeatDao;
+
+    @Override
+    public List<AlarmServerHeartbeat> findAll() throws PumaServiceException {
+        List<AlarmServerHeartbeatEntity> entities = alarmServerHeartbeatDao.findAll();
+        return converter.convert(entities, new TypeToken<List<AlarmServerHeartbeat>>(){}.getType());
+    }
 
     @Override
     public AlarmServerHeartbeat findHeartbeat(String host) throws PumaServiceException {

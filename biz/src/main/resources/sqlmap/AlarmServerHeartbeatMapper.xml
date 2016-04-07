@@ -4,6 +4,13 @@
 
 <mapper namespace="com.dianping.puma.biz.dao.AlarmServerHeartbeatDao">
 
+    <select id="findAll" resultType="AlarmServerHeartbeatEntity">
+        SELECT
+        *
+        FROM
+        AlarmServerHeartbeat
+    </select>
+
     <select id="find" resultType="AlarmServerHeartbeatEntity">
         SELECT
         *

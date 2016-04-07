@@ -8,9 +8,9 @@ import lombok.ToString;
  * Email: lixiaotian07@gmail.com
  */
 @ToString
-public class PumaAlarmServerDto {
+public class PumaServerDto {
 
-    private String name;
+    private String hostname;
 
     private String host;
 
@@ -18,12 +18,12 @@ public class PumaAlarmServerDto {
 
     private ServerStatus serverStatus;
 
-    public String getName() {
-        return name;
+    public String getHostname() {
+        return hostname;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 
     public String getHost() {

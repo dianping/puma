@@ -6,7 +6,7 @@
   {% code %}
   <input type="{$ doc.inputType $}"
     {%- for param in doc.params %}
-         {$ directiveParam(param.alias or param.name, param.type, '="', '"') $}
+         {$ directiveParam(param.alias or param.hostname, param.type, '="', '"') $}
     {%- endfor %}>
   {% endcode %}
 {% endblock %}

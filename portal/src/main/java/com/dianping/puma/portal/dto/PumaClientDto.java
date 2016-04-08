@@ -28,6 +28,10 @@ public class PumaClientDto {
     private long position;
     private long timestamp;
 
+    /** Alarm data. */
+    private long pullTimeDelayInSecond;
+    private long pushTimeDelayInSecond;
+
     /** Alarm benchmark */
     private boolean pullTimeDelayAlarm;
     private long minPullTimeDelayInSecond;
@@ -173,6 +177,22 @@ public class PumaClientDto {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public long getPullTimeDelayInSecond() {
+        return pullTimeDelayInSecond;
+    }
+
+    public void setPullTimeDelayInSecond(long pullTimeDelayInSecond) {
+        this.pullTimeDelayInSecond = pullTimeDelayInSecond;
+    }
+
+    public long getPushTimeDelayInSecond() {
+        return pushTimeDelayInSecond;
+    }
+
+    public void setPushTimeDelayInSecond(long pushTimeDelayInSecond) {
+        this.pushTimeDelayInSecond = pushTimeDelayInSecond;
     }
 
     public boolean isPullTimeDelayAlarm() {

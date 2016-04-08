@@ -38,6 +38,10 @@ public class Client {
 
     private Long timestamp;
 
+    /** Alarm data */
+    private long pullTimeDelayInSecond;
+    private long pushTimeDelayInSecond;
+
     /** Alarm benchmark */
     private boolean pullTimeDelayAlarm;
     private long minPullTimeDelayInSecond;
@@ -157,6 +161,22 @@ public class Client {
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public long getPullTimeDelayInSecond() {
+        return pullTimeDelayInSecond;
+    }
+
+    public void setPullTimeDelayInSecond(long pullTimeDelayInSecond) {
+        this.pullTimeDelayInSecond = pullTimeDelayInSecond;
+    }
+
+    public long getPushTimeDelayInSecond() {
+        return pushTimeDelayInSecond;
+    }
+
+    public void setPushTimeDelayInSecond(long pushTimeDelayInSecond) {
+        this.pushTimeDelayInSecond = pushTimeDelayInSecond;
     }
 
     public boolean isPullTimeDelayAlarm() {

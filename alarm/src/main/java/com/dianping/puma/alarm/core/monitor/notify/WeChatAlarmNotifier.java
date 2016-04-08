@@ -33,7 +33,7 @@ public class WeChatAlarmNotifier extends AbstractPumaLifeCycle implements PumaAl
         }
 
         String title = result.getTitle();
-        String content = result.getContent();
+        String content = result.getMessage();
 
         WeChatAlarmMeta weChatAlarmMeta = (WeChatAlarmMeta) meta;
         List<String> recipients = weChatAlarmMeta.getWeChatRecipients();

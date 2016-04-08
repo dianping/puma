@@ -149,7 +149,7 @@ public class ScanningAlarmMonitor extends AbstractPumaLifeCycle implements PumaA
                 AlarmMessage message = renderer.render(context, data, benchmark);
                 AlarmResult result = filter.filter(context, state, strategy);
                 result.setTitle(message.getTitle());
-                result.setContent(message.getContent());
+                result.setMessage(message.getContent());
 
                 for (AlarmMeta meta : metas) {
                     notifier.notify(result, meta);

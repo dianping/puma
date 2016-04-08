@@ -33,7 +33,7 @@ public class EmailAlarmNotifier extends AbstractPumaLifeCycle implements PumaAla
         }
 
         String title = result.getTitle();
-        String content = result.getContent();
+        String content = result.getMessage();
 
         EmailAlarmMeta emailAlarmMeta = (EmailAlarmMeta) meta;
         List<String> recipients = emailAlarmMeta.getEmailRecipients();

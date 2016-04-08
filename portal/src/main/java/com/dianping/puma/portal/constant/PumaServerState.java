@@ -4,7 +4,7 @@ package com.dianping.puma.portal.constant;
  * Created by xiaotian.li on 16/4/6.
  * Email: lixiaotian07@gmail.com
  */
-public enum ServerStatus {
+public enum PumaServerState {
 
     /** 在线 */
     ONLINE,
@@ -14,14 +14,14 @@ public enum ServerStatus {
     STANDBY;
 
     public boolean isOnline() {
-        return this.equals(ServerStatus.ONLINE);
+        return this.equals(PumaServerState.ONLINE);
     }
 
     public boolean isOffline() {
-        return this.equals(ServerStatus.OFFLINE);
+        return this.equals(PumaServerState.OFFLINE);
     }
 
     public boolean isStandby() {
-        return this.equals(ServerStatus.STANDBY);
+        return this.equals(PumaServerState.STANDBY);
     }
 }

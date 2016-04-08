@@ -33,7 +33,7 @@ public class SmsAlarmNotifier extends AbstractPumaLifeCycle implements PumaAlarm
         }
 
         String title = result.getTitle();
-        String content = result.getContent();
+        String content = result.getMessage();
 
         SmsAlarmMeta smsAlarmMeta = (SmsAlarmMeta) meta;
         List<String> recipients = smsAlarmMeta.getSmsRecipients();

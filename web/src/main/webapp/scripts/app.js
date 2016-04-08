@@ -213,7 +213,7 @@ angular
                 templateUrl: 'views/client/main.html',
                 controller: 'clientListController',
                 resolve: {
-                    loadModules: function ($ocLazyLoad) {
+                    loadNgTable: ['$ocLazyLoad', function ($ocLazyLoad) {
                         return $ocLazyLoad.load({
                             name: 'ngTable',
                             files: [
@@ -221,7 +221,7 @@ angular
                                 'bower_components/ng-table/dist/ng-table.min.js'
                             ]
                         })
-                    },
+                    }],
 
                     loadFilters: ['$ocLazyLoad', function ($ocLazyLoad) {
                         return $ocLazyLoad.load({
@@ -233,12 +233,20 @@ angular
                         })
                     }],
 
+                    loadServices: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'puma',
+                            files: [
+                                'scripts/service/client.js',
+                            ]
+                        })
+                    }],
+
                     loadControl: ['$ocLazyLoad', function ($ocLazyLoad) {
                         return $ocLazyLoad.load({
                             name: 'puma',
                             files: [
                                 'scripts/controller/client/main.js',
-                                'scripts/service/client.js'
                             ]
                         });
                     }],

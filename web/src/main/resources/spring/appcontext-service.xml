@@ -65,4 +65,10 @@
         <property name="alarmServerLeaderDao" ref="alarmServerLeaderDao"/>
     </bean>
 
+    <bean id="pumaClientAlarmResultService"
+          class="com.dianping.puma.biz.service.remote.RemoteClientAlarmResultService">
+        <property name="converter" ref="converter"/>
+        <property name="clientAlarmResultDao" ref="clientAlarmResultDao"/>
+    </bean>
+
 </beans>

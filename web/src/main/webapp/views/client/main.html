@@ -45,7 +45,13 @@
                             </td>
 
                             <td title="'状态'" class="col-lg-1">
+                                <div ng-if="client.state === 'RUNNING'">
+                                    <span class="label label-success">STABLE</span>
+                                </div>
 
+                                <div ng-if="client.state === 'EXCEPTION'" uib-tooltip="{{client.message}}">
+                                    <span class="label label-danger">ERROR</span>
+                                </div>
                             </td>
 
                             <td title="'操作'" class="col-lg-2">

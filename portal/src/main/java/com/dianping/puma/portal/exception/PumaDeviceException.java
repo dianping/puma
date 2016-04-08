@@ -4,7 +4,7 @@ package com.dianping.puma.portal.exception;
  * Created by xiaotian.li on 16/4/7.
  * Email: lixiaotian07@gmail.com
  */
-public class PumaDeviceException extends PumaWebException {
+public class PumaDeviceException extends PumaPortalException {
 
     public PumaDeviceException() {
     }

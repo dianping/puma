@@ -1,9 +1,14 @@
 package com.dianping.puma.portal.web;
 
+import com.dianping.puma.alarm.core.model.AlarmResult;
+import com.dianping.puma.alarm.core.service.PumaClientAlarmResultService;
 import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.common.model.Client;
 import com.dianping.puma.common.service.PumaClientService;
+import com.dianping.puma.portal.constant.PumaClientState;
 import com.dianping.puma.portal.dto.PumaClientDto;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,13 +27,14 @@ public class PumaClientController extends BasicController {
     @Autowired
     PumaClientService pumaClientService;
 
+    @Autowired
+    PumaClientAlarmResultService pumaClientAlarmResultService;
+
     @RequestMapping(value = "/{clientName}", method = RequestMethod.GET)
     @ResponseBody
     public PumaClientDto readByParam(@PathVariable("clientName") String clientName) {
         Client client = pumaClientService.findByClientName(clientName);
-        PumaClientDto pumaClientDto = converter.convert(client, PumaClientDto.class);
-        pumaClientDto.setRecipients(client.getEmailRecipients());
-        return pumaClientDto;
+        return convert(client);
     }
 
     @RequestMapping(value = "/{clientName}", method = RequestMethod.POST)
@@ -53,8 +59,31 @@ public class PumaClientController extends BasicController {
     @ResponseBody
     public List<PumaClientDto> read() {
         List<Client> clients = pumaClientService.findAll();
-        return converter.convert(clients, new TypeToken<List<PumaClientDto>>() {
-        }.getType());
+        return FluentIterable
+                .from(clients)
+                .transform(new Function<Client, PumaClientDto>() {
+                    @Override
+                    public PumaClientDto apply(Client client) {
+                        return convert(client);
+                    }
+                }).toList();
+    }
+
+    private PumaClientDto convert(Client client) {
+        PumaClientDto pumaClientDto = converter.convert(client, PumaClientDto.class);
+        pumaClientDto.setRecipients(client.getEmailRecipients());
+
+        String clientName = client.getClientName();
+        AlarmResult alarmResult = pumaClientAlarmResultService.find(clientName);
+        if (alarmResult == null || !alarmResult.isAlarm()) {
+            pumaClientDto.setState(PumaClientState.RUNNING);
+            pumaClientDto.setMessage(null);
+        } else {
+            pumaClientDto.setState(PumaClientState.EXCEPTION);
+            pumaClientDto.setMessage(alarmResult.getMessage());
+        }
+
+        return pumaClientDto;
     }
 
     @RequestMapping(method = RequestMethod.POST)

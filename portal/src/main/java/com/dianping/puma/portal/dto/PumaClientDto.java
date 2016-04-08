@@ -1,5 +1,7 @@
 package com.dianping.puma.portal.dto;
 
+import com.dianping.puma.portal.constant.PumaClientState;
+
 /**
  * Created by xiaotian.li on 16/2/22.
  * Email: lixiaotian07@gmail.com
@@ -27,6 +29,10 @@ public class PumaClientDto {
     private String filename;
     private long position;
     private long timestamp;
+
+    /** Status and message. */
+    private PumaClientState state;
+    private String message;
 
     /** Alarm data. */
     private long pullTimeDelayInSecond;
@@ -177,6 +183,22 @@ public class PumaClientDto {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public PumaClientState getState() {
+        return state;
+    }
+
+    public void setState(PumaClientState state) {
+        this.state = state;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public long getPullTimeDelayInSecond() {

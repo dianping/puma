@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.puma.biz.dao.ClientAlarmResultDao">
+
+    <select id="find" resultType="ClientAlarmResultEntity">
+        SELECT
+        *
+        FROM
+        ClientAlarmResult
+        WHERE
+        ClientName = #{clientName}
+    </select>
+
+    <insert id="insert" parameterType="ClientAlarmResultEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        ClientAlarmResult
+        (
+        ClientName,
+        Alarm,
+        Message
+        )
+        VALUES
+        (
+        #{clientName},
+        #{alarm},
+        #{message}
+        )
+    </insert>
+
+    <update id="update" parameterType="ClientAlarmResultEntity">
+        UPDATE
+        ClientAlarmResult
+        SET
+        Alarm = #{alarm},
+        Message = #{message}
+        WHERE
+        ClientName = #{clientName}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM
+        ClientAlarmResult
+        WHERE
+        ClientName = #{clientName}
+    </delete>
+
+</mapper>

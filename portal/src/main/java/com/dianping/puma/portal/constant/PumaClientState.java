@@ -4,7 +4,7 @@ package com.dianping.puma.portal.constant;
  * Created by xiaotian.li on 16/4/8.
  * Email: lixiaotian07@gmail.com
  */
-public enum ClientStatus {
+public enum PumaClientState {
 
     /** 正常运行 */
     RUNNING,
@@ -13,10 +13,10 @@ public enum ClientStatus {
     EXCEPTION;
 
     public boolean isRunning() {
-        return this.equals(ClientStatus.RUNNING);
+        return this.equals(PumaClientState.RUNNING);
     }
 
     public boolean isException() {
-        return this.equals(ClientStatus.EXCEPTION);
+        return this.equals(PumaClientState.EXCEPTION);
     }
 }

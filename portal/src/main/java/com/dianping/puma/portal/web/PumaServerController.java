@@ -6,7 +6,7 @@ import com.dianping.puma.alarm.ha.service.PumaAlarmServerHeartbeatService;
 import com.dianping.puma.alarm.ha.service.PumaAlarmServerLeaderService;
 import com.dianping.puma.common.convert.Converter;
 import com.dianping.puma.common.utils.Clock;
-import com.dianping.puma.portal.constant.ServerStatus;
+import com.dianping.puma.portal.constant.PumaServerState;
 import com.dianping.puma.portal.device.PumaDevice;
 import com.dianping.puma.portal.device.PumaDeviceManager;
 import com.dianping.puma.portal.dto.PumaServerDto;
@@ -76,14 +76,14 @@ public class PumaServerController {
                             long heartbeatTimestamp = heartbeat.getHeartbeatTime().getTime() / 1000;
                             long now = clock.getTimestamp();
                             if (now - heartbeatTimestamp > heartbeatExpiredInSecond) {
-                                dto.setServerStatus(ServerStatus.OFFLINE);
+                                dto.setServerStatus(PumaServerState.OFFLINE);
                             } else {
                                 dto.setLoadAverage(heartbeat.getLoadAverage());
 
                                 if (leader == null || !leader.getHost().equals(host)) {
-                                    dto.setServerStatus(ServerStatus.STANDBY);
+                                    dto.setServerStatus(PumaServerState.STANDBY);
                                 } else {
-                                    dto.setServerStatus(ServerStatus.ONLINE);
+                                    dto.setServerStatus(PumaServerState.ONLINE);
                                 }
                             }
                         }

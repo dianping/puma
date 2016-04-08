@@ -13,7 +13,7 @@ public class AlarmResult {
 
     private String title;
 
-    private String content;
+    private String message;
 
     public boolean isAlarm() {
         return alarm;
@@ -31,11 +31,11 @@ public class AlarmResult {
         this.title = title;
     }
 
-    public String getContent() {
-        return content;
+    public String getMessage() {
+        return message;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

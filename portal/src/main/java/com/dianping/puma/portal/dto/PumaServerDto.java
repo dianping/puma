@@ -1,6 +1,6 @@
 package com.dianping.puma.portal.dto;
 
-import com.dianping.puma.portal.constant.ServerStatus;
+import com.dianping.puma.portal.constant.PumaServerState;
 import lombok.ToString;
 
 /**
@@ -16,7 +16,7 @@ public class PumaServerDto {
 
     private double loadAverage;
 
-    private ServerStatus serverStatus;
+    private PumaServerState serverStatus;
 
     public String getHostname() {
         return hostname;
@@ -42,11 +42,11 @@ public class PumaServerDto {
         this.loadAverage = loadAverage;
     }
 
-    public ServerStatus getServerStatus() {
+    public PumaServerState getServerStatus() {
         return serverStatus;
     }
 
-    public void setServerStatus(ServerStatus serverStatus) {
+    public void setServerStatus(PumaServerState serverStatus) {
         this.serverStatus = serverStatus;
     }
 }

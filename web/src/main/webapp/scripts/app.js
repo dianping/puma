@@ -223,7 +223,17 @@ angular
                         })
                     },
 
-                    clientListController: function ($ocLazyLoad) {
+                    loadFilters: ['$ocLazyLoad', function ($ocLazyLoad) {
+                        return $ocLazyLoad.load({
+                            name: 'puma',
+                            files: [
+                                'scripts/filter/common.js',
+                                'scripts/filter/client.js'
+                            ]
+                        })
+                    }],
+
+                    loadControl: ['$ocLazyLoad', function ($ocLazyLoad) {
                         return $ocLazyLoad.load({
                             name: 'puma',
                             files: [
@@ -231,7 +241,7 @@ angular
                                 'scripts/service/client.js'
                             ]
                         });
-                    },
+                    }],
                 }
             })
 

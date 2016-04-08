@@ -35,6 +35,7 @@
     "isteven-angular-multiselect": "~4.0.0",
     "showdown": "~1.3.0",
     "ng-showdown": "~1.1.0",
-    "Chart.js": "~1.0.2"
+    "Chart.js": "~1.0.2",
+    "string": "~3.3.1"
   }
 }

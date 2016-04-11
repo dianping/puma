@@ -17,6 +17,10 @@ public class AlarmServerHeartbeat {
 
     private double loadAverage;
 
+    private double memoryUsage;
+
+    private double spaceUsage;
+
     public String getHost() {
         return host;
     }
@@ -39,5 +43,21 @@ public class AlarmServerHeartbeat {
 
     public void setLoadAverage(double loadAverage) {
         this.loadAverage = loadAverage;
+    }
+
+    public double getMemoryUsage() {
+        return memoryUsage;
+    }
+
+    public void setMemoryUsage(double memoryUsage) {
+        this.memoryUsage = memoryUsage;
+    }
+
+    public double getSpaceUsage() {
+        return spaceUsage;
+    }
+
+    public void setSpaceUsage(double spaceUsage) {
+        this.spaceUsage = spaceUsage;
     }
 }

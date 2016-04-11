@@ -78,8 +78,14 @@ public class FlushingAlarmServerHeartbeatManager extends AbstractPumaLifeCycle i
         Date now = clock.getTime();
         heartbeat.setHeartbeatTime(now);
 
-        double load = SystemUtils.getNormalizedLoadAverage();
-        heartbeat.setLoadAverage(load);
+        double loadAverage = SystemUtils.getNormalizedLoadAverage();
+        heartbeat.setLoadAverage(loadAverage);
+
+        double memoryUsage = SystemUtils.getMemoryUsage();
+        heartbeat.setMemoryUsage(memoryUsage);
+
+        double spaceUsage = SystemUtils.getSpaceUsage();
+        heartbeat.setSpaceUsage(spaceUsage);
 
         pumaAlarmServerHeartbeatService.heartbeat(heartbeat);
     }

@@ -26,12 +26,16 @@
         (
         Host,
         LoadAverage,
+        MemoryUsage,
+        SpaceUsage,
         HeartbeatTime
         )
         VALUES
         (
         #{host},
         #{loadAverage},
+        #{memoryUsage},
+        #{spaceUsage},
         #{heartbeatTime}
         )
     </insert>
@@ -41,6 +45,8 @@
         AlarmServerHeartbeat
         SET
         LoadAverage = #{loadAverage},
+        MemoryUsage = #{memoryUsage},
+        SpaceUsage = #{spaceUsage},
         HeartbeatTime = #{heartbeatTime}
         WHERE
         Host = #{host}
